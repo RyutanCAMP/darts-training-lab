@@ -123,15 +123,6 @@ function board200sInput(e){
 }
 
 
-let board200sSeen=0;
-function board200sDebug(e){
- const el=$('board200sDebug');if(!el)return;
- board200sSeen++;
- const k=keyName(e);
- el.textContent='受信 '+board200sSeen+'回 / '+k+' / 判定: '+(e.code==='Tab'?'START':e.code==='Enter'?'CHANGE':board200sMap[k]||'未登録')+' / 画面: '+($('play').classList.contains('active')?'PLAY':'その他');
-}
-document.addEventListener('keydown',board200sDebug,true);
-
 function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(board200sInput(e))return;if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{store.roundDelay=Number(b.dataset.delay);persist();render()});$('soundToggle').onclick=()=>{store.soundEnabled=store.soundEnabled===false;persist();render();if(store.soundEnabled)playSound('bull')};$('soundTest').onclick=()=>{if(store.soundEnabled===false){$('soundStatus').textContent='効果音をONにしてください';return}$('soundStatus').textContent='テスト音を再生中…';playSound('hat');setTimeout(()=>{if(audioCtx&&audioCtx.state==='running')$('soundStatus').textContent='再生処理は正常です。聞こえない場合は端末の音量とSafariを確認してください'},550)};$('skipRoundBreak').onclick=finishRoundBreak;$('backFromSettings').onclick=()=>changeTab('play');$('againFromHistory').onclick=()=>changeTab('play');$('analyseFromHistory').onclick=()=>changeTab('analysis');
 const select=$('targetselect');['OB','IB','MISS',...nums.flatMap(n=>['S'+n,'D'+n,'T'+n])].forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=label(s);select.appendChild(o)});
@@ -144,5 +135,5 @@ function editCalibrationAt(i){if(i<0||i>=calibrationTargets.length)return;const 
 $('calibrationBack').onclick=()=>editCalibrationAt(calibrationLastIndex);
 $('calibrationEdit').onclick=()=>{const input=prompt('修正する登録番号（1〜82）を入力してください。1=S20外側、2=S20内側、3=T20、4=D20。');if(input===null)return;const i=Number(input)-1;if(!Number.isInteger(i)||i<0||i>=calibrationTargets.length){alert('1〜82の番号を入力してください');return}if(!confirm(calibrationName(calibrationTargets[i])+' を修正しますか？'))return;editCalibrationAt(i)};
 $('calibrationExport').onclick=()=>download(JSON.stringify({format:'dtl-200s-calibration-v1',completedAt:store.calibrationCompletedAt||null,calibrationKeys:calibrationKeys(),bindings:store.bindings},null,2),'200s-keymap-backup.json','application/json');
-$('board200sFocus').onclick=()=>{document.activeElement?.blur?.();$('board200sFocus').blur();board200sStatus('入力待機中：200S本体を押してください')};$('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};drawBoard();render();renderCalibration();rawRender();specialRender();
+$('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};drawBoard();render();renderCalibration();rawRender();specialRender();
 })();
