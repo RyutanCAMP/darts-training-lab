@@ -218,7 +218,7 @@ function aimPoint(d){
  const n=Number(d.segment.slice(1)),idx=aimOrder.indexOf(n);
  if(idx<0)return null;
  const a=(-90+idx*18)*Math.PI/180;
- const r=d.segment[0]==='T'?.62:d.segment[0]==='D'?.96:d.zone?.endsWith('I')?.43:.79;
+ const r=d.segment[0]==='T'?.62:d.segment[0]==='D'?.96:d.zone?.endsWith('I')?.35:.79;
  return {x:Math.cos(a)*r,y:Math.sin(a)*r};
 }
 function renderAim(){
@@ -230,17 +230,20 @@ function renderAim(){
  const median=vals=>{const a=vals.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y)),percent=f=>pts.length?Math.round(100*pts.filter(f).length/pts.length):0;
  const direction=pts.length?((Math.abs(my)<.08?'':my>0?'下':'上')+(Math.abs(mx)<.08?'':mx>0?'右':'左')||'中央'):'記録なし';
+
+ const ringOf=d=>{if(d.segment==='IB')return 'IB';if(d.segment==='OB')return 'OB';if(d.segment==='MISS')return null;if(d.segment[0]==='T'||d.segment[0]==='D')return d.segment[0];if(d.segment[0]==='S')return d.zone?.endsWith('I')?'SI':d.zone?.endsWith('O')?'SO':'S';return null};
  const counts=new Map();
- for(const d of darts){if(d.segment==='MISS')continue;const key=isBull(d)?'BULL':String(Number(d.segment.slice(1)));if(key==='NaN')continue;counts.set(key,(counts.get(key)||0)+1)}
+ for(const d of darts){const ring=ringOf(d);if(!ring)continue;const number=Number(d.segment.slice(1));const key=ring==='IB'||ring==='OB'?ring:(Number.isInteger(number)&&aimOrder.includes(number)?ring+number:null);if(key)counts.set(key,(counts.get(key)||0)+1)}
  const total=pts.length,maxCount=Math.max(1,...counts.values());
- const polar=(r,angle)=>[130+r*Math.cos(angle),130+r*Math.sin(angle)];
- const sector=(idx)=>{const start=(-99+idx*18)*Math.PI/180,end=(start+18*Math.PI/180),outerA=polar(102,start),outerB=polar(102,end),innerB=polar(24,end),innerA=polar(24,start);return 'M'+outerA.join(' ')+' A102 102 0 0 1 '+outerB.join(' ')+' L'+innerB.join(' ')+' A24 24 0 0 0 '+innerA.join(' ')+' Z'};
- const cells=aimOrder.map((number,idx)=>{const count=counts.get(String(number))||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<path d="'+sector(idx)+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#254758" stroke-width=".8"><title>'+number+'：'+share.toFixed(1)+'% ('+count+'投)</title></path>'}).join('');
- const bullCount=counts.get('BULL')||0,bullShare=total?bullCount/total*100:0,bullOpacity=bullCount?(.15+.8*bullCount/maxCount):0;
- const svg='<svg viewBox="0 0 260 260" role="img" aria-label="命中割合で濃淡を変えた着弾ヒートマップ">'+cells+'<circle cx="130" cy="130" r="23" fill="#67e9e5" fill-opacity="'+bullOpacity.toFixed(3)+'" stroke="#456477"><title>BULL：'+bullShare.toFixed(1)+'% ('+bullCount+'投)</title></circle>'+(pts.length?'<circle cx="'+(130+mx*102).toFixed(1)+'" cy="'+(130+my*102).toFixed(1)+'" r="7" fill="#e7fb67" stroke="#091622" stroke-width="2"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
+ const polar=(r,a)=>[130+r*Math.cos(a),130+r*Math.sin(a)];
+ const sector=(idx,r0,r1)=>{const a=(-99+idx*18)*Math.PI/180,b=a+Math.PI/10,p1=polar(r1,a),p2=polar(r1,b),p3=polar(r0,b),p4=polar(r0,a);return 'M'+p1.join(' ')+' A'+r1+' '+r1+' 0 0 1 '+p2.join(' ')+' L'+p3.join(' ')+' A'+r0+' '+r0+' 0 0 0 '+p4.join(' ')+' Z'};
+ const rings=[['SI',18,50,'INNER S'],['T',50,60,'TRIPLE'],['SO',60,91,'OUTER S'],['D',91,102,'DOUBLE']];
+ const cells=rings.map(([ring,r0,r1,name])=>aimOrder.map((number,idx)=>{const count=counts.get(ring+number)||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<path d="'+sector(idx,r0,r1)+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#254758" stroke-width=".7"><title>'+name+' '+number+'：'+share.toFixed(1)+'% ('+count+'投)</title></path>'}).join('')).join('');
+ const bulls=[['OB',9,18],['IB',0,9]].map(([ring,r0,r1])=>{const count=counts.get(ring)||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<circle cx="130" cy="130" r="'+r1+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#456477"><title>'+ring+'：'+share.toFixed(1)+'% ('+count+'投)</title></circle>'}).join('');
+ const svg='<svg viewBox="0 0 260 260" role="img" aria-label="内外シングル・トリプル・ダブル別ヒートマップ">'+cells+bulls+(pts.length?'<circle cx="'+(130+mx*102).toFixed(1)+'" cy="'+(130+my*102).toFixed(1)+'" r="7" fill="#e7fb67" stroke="#091622" stroke-width="2"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
  const choices=[['1','1R'],['10','10R'],['20','20R'],['all','ALL']].map(([key,label])=>'<button type="button" data-aim-period="'+key+'" class="'+(aimPeriod===key?'selected':'')+'">'+label+'</button>').join('');
  const stat=(label,num)=>'<div class="aim-stat"><span>'+label+'</span><strong>'+num+'%</strong></div>';
- root.innerHTML='<div class="aim-periods">'+choices+'</div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='記録なし'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは各エリアの命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
+ root.innerHTML='<div class="aim-periods">'+choices+'</div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='記録なし'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAim()}});
 function achievementTotals(){
