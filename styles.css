@@ -60,3 +60,56 @@ body{background:radial-gradient(ellipse at 72% -14%,#21394b 0,transparent 42%),l
 .chartbar{background:linear-gradient(180deg,#8fdaea,#32758c)}
 .pill{border-color:#537280;color:#d2e9ef}
 @media(max-width:560px){#play .bigscore{font-size:clamp(90px,25vw,140px)}.top{gap:9px}.tabs{gap:3px}.tabs button{padding:9px 10px;font-size:12px}}
+
+/* v0.2.4 — unified application-wide design system */
+:root{--surface-0:#080e15;--surface-1:#111d28;--surface-2:#1a2c39;--stroke:#344b59;--ink:#f4f8fb;--subtle:#a3bac8;--focus:#7fd9ec;--success:#46c7a0;--danger:#ef6574;--reward:#ffca70}
+body{color:var(--ink)}
+.top,.footer{border-color:var(--stroke)}
+.page .section-title{color:var(--ink);font-weight:850}
+.page .lead{color:var(--subtle)}
+.page .panel{background:linear-gradient(145deg,#1b2c39,#101b26);border:1px solid var(--stroke)}
+.page .panel h3{color:#f1f8fc;font-weight:750;letter-spacing:.015em}
+.page .panel h3 .pill{font-weight:600}
+.page .muted,.page .tiny.muted{color:var(--subtle)}
+.page .eyebrow{color:var(--focus)}
+.page .metric .label{color:#a8c0cd}
+.page .metric .value{color:#f7fbff}
+.page .metric:nth-child(2) .value{color:#8fdfed}
+.page .metric:nth-child(4) .value{color:var(--reward)}
+.page .metric .detail{color:#a2c5d0}
+.page .note{background:#152a38;color:#e0eef3;border:1px solid #365365;border-left:3px solid var(--focus)}
+.page .barrow{color:#d5e8ef}
+.page .track{background:#293d4b}
+.page .fill{background:linear-gradient(90deg,#448aa3,#83dbea)}
+.page .chart{border-bottom-color:#476271}
+.page .chartbar{background:linear-gradient(180deg,#9ae8f2,#3e8aa5)}
+.page .chartvalue{color:#f4f8fb;font-weight:800}
+.page .chartlabel{color:#a6bdca}
+.page .empty{color:#a8becb}
+.page table th{color:#a9c1cf;background:#172a36}
+.page table td{color:#e6f0f4}
+.page table tr{border-color:#2b4352}
+.page table tbody tr:hover{background:#1c3442}
+.page table button{padding:7px 13px;border-color:#587c8c;color:#bfe9f0;background:#1b3543}
+.page table button:hover{background:#285066}
+.page button:not(.primary):not(.warn){background:#1a303f;border:1px solid #496675;color:#e0f0f6}
+.page button:not(.primary):not(.warn):hover{background:#244759;border-color:#77c6d7}
+.page button.primary{background:linear-gradient(115deg,#79dce9,#4db7d0);color:#091b25;border:1px solid #8fe5ee;font-weight:850}
+.page button.primary:hover{background:linear-gradient(115deg,#a1edf5,#6bd1e3)}
+.page button.warn{background:#2a232d;border:1px solid #76535e;color:#efb9c3}
+.page button.warn:hover{background:#3b2835;border-color:#bb7889}
+.page input,.page select{background:#0d1b27;border:1px solid #4d6c7c;color:#edf7fa}
+.page input:focus-visible,.page select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.page details{border-top:1px solid var(--stroke);margin-top:16px;padding-top:12px}
+.page summary{color:#b9e2ec;cursor:pointer}
+.page .log{background:#0c1721;border:1px solid #2f4856;color:#c6dbe5}
+.page .pill{color:#c9e9f0;border-color:#527784;background:#203846}
+.page .accent{color:var(--focus)}
+#history #sessiondetail .pill{border-color:#4c9d89;color:#a7ebd8;background:#173c35}
+#analysis .panel:first-child .barrow span:last-child{color:#b6d9e3}
+#settings #lastkey{color:var(--focus)}
+#settings #clearall{margin-top:16px}
+#dashboard #startdash{min-height:52px}
+#play #saveResult{background:linear-gradient(115deg,#6bd3b6,#a5eddb);border-color:#9be8d6;color:#08271e}
+#play #newgame{background:linear-gradient(115deg,#6ad1e3,#a0e8f2);color:#081c25;border-color:#91e1ef}
+@media(max-width:560px){.page .panel{padding:15px}.page .panel h3{font-size:15px}.page table{font-size:12px}.page table th,.page table td{padding:9px 6px}.page .actions button{min-height:48px}}
