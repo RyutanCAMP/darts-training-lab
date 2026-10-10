@@ -135,3 +135,9 @@ body{color:var(--ink)}
 #history .result-archive[open]>summary{margin-bottom:14px}
 #settings .back-to-play{margin-bottom:18px;background:#193240;color:#c5edf4;border-color:#517687;min-height:46px}
 @media(max-width:560px){#play .bigscore{font-size:clamp(100px,27vw,150px)!important}#history .latest-score{font-size:88px}#history .latest-meta{gap:6px}#history .latest-meta span{font-size:11px}#play .playmeta strong{font-size:18px}}
+
+/* v0.3.2 — explicit visual verification and consistent score emphasis */
+#play #score,#play #resultscore,#history .latest-score{color:#E7FB67!important;-webkit-text-fill-color:#E7FB67!important;text-shadow:0 0 22px #b4ed383b,0 6px 20px #0008!important}
+#play #score{background:none!important;opacity:1!important;filter:none!important}
+#history #sessiondetail .accent{color:#E7FB67!important;font-size:1.35em;font-weight:900}
+#play .toast.award{border-color:#D6B56B;color:#FFDA91}
