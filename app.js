@@ -126,8 +126,9 @@ function dismissStartup(){const s=$('startupFx');if(s){s.style.animation='none';
 window.addEventListener('keydown',dismissStartup,{once:true});
 window.addEventListener('pointerdown',dismissStartup,{once:true});
 
-function finishRoundBreak(){if(roundBreakTimer!==null){clearTimeout(roundBreakTimer);roundBreakTimer=null}roundBreakUntil=0;$('roundBreak').classList.add('hidden')}
-function beginRoundBreak(round,score){finishRoundBreak();playSound('round');gameEffect('ROUND '+round+' CLEAR','+'+score+' POINTS  •  NEXT ROUND','round',1500);$('roundBreakLabel').textContent='ROUND '+round+' COMPLETE';$('roundBreakScore').textContent='+'+score;$('roundBreak').classList.remove('hidden');roundBreakUntil=Date.now()+Number(store.roundDelay)*1000;roundBreakTimer=setTimeout(finishRoundBreak,Number(store.roundDelay)*1000)}
+let roundBreakTicker=null;
+function finishRoundBreak(){if(roundBreakTimer!==null){clearTimeout(roundBreakTimer);roundBreakTimer=null}if(roundBreakTicker!==null){clearInterval(roundBreakTicker);roundBreakTicker=null}roundBreakUntil=0;$('roundBreak').classList.add('hidden')}
+function beginRoundBreak(round,score){finishRoundBreak();playSound('round');const duration=Math.max(1,Number(store.roundDelay)||8);$('roundBreakLabel').textContent='ROUND '+round+' CLEAR';$('roundBreakScore').textContent='+'+score;const box=$('roundBreak');box.style.setProperty('--cool-duration',duration+'s');box.classList.remove('hidden');roundBreakUntil=Date.now()+duration*1000;const count=$('roundBreakCountdown');const tick=()=>{if(count)count.textContent=String(Math.max(0,Math.ceil((roundBreakUntil-Date.now())/1000)))};tick();roundBreakTicker=setInterval(tick,100);roundBreakTimer=setTimeout(finishRoundBreak,duration*1000)}
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
 function changeTab(name){finishRoundBreak();if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
