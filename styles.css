@@ -166,3 +166,12 @@ body{color:var(--ink)}
 #play #resultpanel #saveResult{display:block;width:100%;min-height:62px;margin-top:10px;border-radius:14px;background:linear-gradient(115deg,#E7FB67,#bce66a)!important;color:#132319!important;border:1px solid #f0ffa6!important;box-shadow:0 8px 25px #a7d95a26;font-size:17px;font-weight:900}
 #play #resultpanel #saveResult:hover{background:linear-gradient(115deg,#f3ffac,#d5f38e)!important}
 @media(max-width:560px){#play #resultpanel{padding:19px 15px;scroll-margin-top:12px}#play #resultpanel h3{font-size:21px}#play #resultpanel #saveResult{font-size:15px;min-height:60px}}
+
+/* v0.3.5 — a brief natural pause between three-dart rounds */
+#play .round-break{margin:14px 0;padding:17px 16px;border:1px solid #41657a;border-radius:14px;background:linear-gradient(125deg,#1b3645,#142530);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;text-align:center}
+#play .round-break.hidden{display:none!important}
+#play .round-break>span:first-child{font-size:12px;letter-spacing:.09em;color:#9bd6e5;font-weight:800;width:100%}
+#play .round-break strong{font-size:32px;line-height:1;color:#E7FB67;font-variant-numeric:tabular-nums}
+#play .round-break-sub{font-size:12px;color:#a6bbc5}
+#play .round-break button{min-height:38px;padding:6px 16px;border:1px solid #6794a6;background:#24465a;color:#e4f6fb;font-weight:800}
+@media(max-width:560px){#play .round-break{gap:8px;padding:13px 10px}#play .round-break strong{font-size:27px}}
