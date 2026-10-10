@@ -252,3 +252,23 @@ body{color:var(--ink)}
 @media(max-width:440px){.top{padding:8px 4px!important}.top .brand{font-size:16px!important}.top .header-tools .tiny{font-size:9px!important}}
 .sound-samples{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .sound-samples button{font-size:12px;padding:8px 10px}
+
+/* v0.5.16 - minimal arcade cooldown popup */
+#play .round-break:not(.hidden){position:fixed!important;inset:0!important;z-index:105!important;display:flex!important;align-items:center!important;justify-content:center!important;margin:0!important;padding:18px!important;border:0!important;border-radius:0!important;background:rgba(3,9,19,.78)!important;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:cool-overlay-in .2s ease-out both!important;box-shadow:none!important}
+#play .round-break.hidden{display:none!important}
+#play .round-break .cool-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:min(88vw,340px);padding:27px 24px 24px;border-radius:22px;background:linear-gradient(155deg,#112a3c,#091622 70%);border:1px solid #3d8f9f;box-shadow:0 22px 70px #000b,0 0 38px #19e7e421;text-align:center;animation:cool-card-in .28s ease-out both}
+#play .cool-kicker{font-size:15px;font-weight:950;letter-spacing:.28em;color:#89f7ec;text-shadow:0 0 15px #39e9d4}
+#play .cool-ring{position:relative;width:152px;height:152px;display:grid;place-items:center;margin:4px auto}
+#play .cool-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+#play .cool-ring circle{fill:none;stroke-width:5}
+#play .cool-track{stroke:#244252}
+#play .cool-progress{stroke:#89f7ec;stroke-linecap:round;stroke-dasharray:320.44;stroke-dashoffset:0;animation:cool-countdown var(--cool-duration,8s) linear forwards;filter:drop-shadow(0 0 5px #54f3db)}
+#play .cool-ring>span{font-size:65px;line-height:1;font-weight:950;font-variant-numeric:tabular-nums;color:#f2fffd;text-shadow:0 0 20px #68efda55}
+#play .cool-round{font-size:12px;letter-spacing:.18em;font-weight:850;color:#9ebdcc}
+#play .cool-score{font-size:30px;line-height:1.05;color:#e7fb67}
+#play .cool-card button{margin-top:9px;min-height:40px;min-width:118px;border:1px solid #427888;border-radius:10px;background:#193747;color:#d9f6f5;font-weight:900;letter-spacing:.12em}
+#play .cool-card button span{font-size:20px;vertical-align:-1px}
+@keyframes cool-countdown{to{stroke-dashoffset:320.44}}
+@keyframes cool-overlay-in{from{opacity:0}to{opacity:1}}
+@keyframes cool-card-in{from{opacity:0;transform:translateY(12px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){#play .round-break:not(.hidden),#play .round-break .cool-card{animation:none!important}}
