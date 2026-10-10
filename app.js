@@ -97,7 +97,31 @@ $('specialStart').onclick=()=>specialBegin('START');
 $('specialChange').onclick=()=>specialBegin('CHANGE');
 $('specialExport').onclick=()=>download(JSON.stringify(specialData,null,2),'200s-button-signals.json','application/json');
 
-function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
+
+const board200sMap={"KeyA | A":"S20","KeyW | W":"S20","Digit7 | &":"T20","KeyY | Y":"D20","KeyQ | Q":"S1","KeyH | h":"S1","Minus | -":"T1","KeyJ | J":"D1","KeyZ | Z":"S18","KeyR | r":"S18","Quote | \"":"T18","KeyT | t":"D18","Slash | /":"S4","KeyM | M":"S4","Digit2 | @":"T4","KeyK | K":"D4","Digit2 | 2":"S13","Digit5 | %":"S13","KeyQ | q":"T13","Digit6 | ^":"D13","Period | .":"S6","KeyU | U":"S6","Digit4 | 4":"T6","KeyV | V":"D6","Equal | =":"S10","KeyM | m":"S10","KeyA | a":"T10","KeyL | l":"D10","KeyH | H":"S15","Digit4 | $":"S15","KeyE | e":"T15","BracketLeft | [":"D15","KeyR | R":"S2","Comma | <":"S2","KeyD | d":"T2","Digit9 | 9":"D2","KeyI | I":"S17","KeyF | f":"S17","Digit1 | 1":"T17","Comma | ,":"D17","KeyD | D":"S3","KeyI | i":"S3","Semicolon | ;":"T3","KeyS | S":"D3","Digit8 | 8":"S19","KeyC | c":"S19","Equal | +":"T19","KeyB | B":"D19","KeyO | O":"S7","KeyN | N":"S7","Slash | ?":"T7","Digit3 | 3":"D7","Digit3 | #":"S16","Minus | _":"S16","Period | >":"T16","KeyB | b":"D16","KeyP | p":"S8","KeyC | C":"S8","Digit8 | *":"T8","KeyK | k":"D8","Backslash | \\":"S11","Digit5 | 5":"S11","Digit7 | 7":"T11","KeyT | T":"D11","KeyL | L":"S14","Digit0 | 0":"S14","Digit6 | 6":"T14","KeyS | s":"D14","KeyG | g":"S9","KeyF | F":"S9","KeyE | E":"T9","Semicolon | :":"D9","Quote | '":"S12","KeyN | n":"S12","KeyP | P":"T12","KeyX | X":"D12","Digit9 | (":"S5","BracketRight | ]":"S5","KeyJ | j":"T5","Digit1 | !":"D5","KeyG | G":"OB","KeyO | o":"IB"};
+let board200sEnabled=true,board200sLastKey='',board200sLastAt=0;
+function board200sStatus(message){const el=$('board200sStatus');if(el)el.textContent=message}
+function board200sInput(e){
+ if(!board200sEnabled||!$('play').classList.contains('active'))return false;
+ if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
+ if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
+ const k=keyName(e),now=Date.now();
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
+ const segment=board200sMap[k];if(!segment)return false;
+ e.preventDefault();
+ if(k===board200sLastKey&&now-board200sLastAt<180)return true;
+ if(now-board200sLastAt<90)return true;
+ board200sLastKey=k;board200sLastAt=now;
+ if(roundBreakUntil>Date.now()){board200sStatus('ラウンド切替待ち：CHANGEで進めます');return true}
+ if(store.active.darts.length>=24){board200sStatus('24投完了：STARTで結果確定');return true}
+ add(segment,'board');
+ board200sStatus('受信：'+label(segment)+' / '+points(segment)+'点');
+ return true;
+}
+
+function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(board200sInput(e))return;if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{store.roundDelay=Number(b.dataset.delay);persist();render()});$('soundToggle').onclick=()=>{store.soundEnabled=store.soundEnabled===false;persist();render();if(store.soundEnabled)playSound('bull')};$('soundTest').onclick=()=>{if(store.soundEnabled===false){$('soundStatus').textContent='効果音をONにしてください';return}$('soundStatus').textContent='テスト音を再生中…';playSound('hat');setTimeout(()=>{if(audioCtx&&audioCtx.state==='running')$('soundStatus').textContent='再生処理は正常です。聞こえない場合は端末の音量とSafariを確認してください'},550)};$('skipRoundBreak').onclick=finishRoundBreak;$('backFromSettings').onclick=()=>changeTab('play');$('againFromHistory').onclick=()=>changeTab('play');$('analyseFromHistory').onclick=()=>changeTab('analysis');
 const select=$('targetselect');['OB','IB','MISS',...nums.flatMap(n=>['S'+n,'D'+n,'T'+n])].forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=label(s);select.appendChild(o)});
 $('assignkey').onclick=()=>{if(!lastKey){alert('まず200Sからキーを受信してください');return}store.bindings[lastKey]=select.value;persist();render();alert(lastKey+' を '+label(select.value)+' に登録しました')};
@@ -109,5 +133,5 @@ function editCalibrationAt(i){if(i<0||i>=calibrationTargets.length)return;const 
 $('calibrationBack').onclick=()=>editCalibrationAt(calibrationLastIndex);
 $('calibrationEdit').onclick=()=>{const input=prompt('修正する登録番号（1〜82）を入力してください。1=S20外側、2=S20内側、3=T20、4=D20。');if(input===null)return;const i=Number(input)-1;if(!Number.isInteger(i)||i<0||i>=calibrationTargets.length){alert('1〜82の番号を入力してください');return}if(!confirm(calibrationName(calibrationTargets[i])+' を修正しますか？'))return;editCalibrationAt(i)};
 $('calibrationExport').onclick=()=>download(JSON.stringify({format:'dtl-200s-calibration-v1',completedAt:store.calibrationCompletedAt||null,calibrationKeys:calibrationKeys(),bindings:store.bindings},null,2),'200s-keymap-backup.json','application/json');
-drawBoard();render();renderCalibration();rawRender();specialRender();
+$('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};drawBoard();render();renderCalibration();rawRender();specialRender();
 })();
