@@ -116,3 +116,22 @@ body{color:var(--ink)}
 
 /* v0.3 — practice-first information architecture */
 .header-tools{display:flex;align-items:center;gap:12px}.settings-icon{font-size:24px;width:46px;height:46px;display:grid;place-items:center;border:1px solid #476878;background:#182c39;color:#c4e9f1;border-radius:12px}.settings-icon:hover{background:#28495a;border-color:#80d4e4}.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:#101d27;padding:6px;border:1px solid #314a5a;border-radius:14px}.tabs button{font-size:15px;font-weight:800;letter-spacing:.04em;min-height:48px}.tabs button.active{background:#244657;color:#c7f3fb}.play-help{margin-bottom:13px}.play-extra{padding:15px 20px!important}.play-extra summary,.analysis-extra summary{cursor:pointer;color:#a8dbe7;font-weight:750;min-height:28px}.play-extra[open] summary{margin-bottom:16px}.analysis-extra{margin-top:16px;border:1px solid #385364;border-radius:14px;background:#142430;padding:16px}.analysis-extra[open]>summary{margin-bottom:8px}.result-actions{margin-bottom:16px}.result-actions button{min-height:50px}.page#play .playgrid{align-items:start}@media(max-width:560px){.header-tools .tiny{display:none}.tabs button{font-size:13px;min-height:47px}.play-help{font-size:13px}.play-extra{padding:13px!important}.top .brand{font-size:16px}.result-actions{grid-template-columns:1fr 1fr}}
+
+/* v0.3.1 — score-first and task-focused UX */
+:root{--score-highlight:#e7fb67}
+#play .bigscore{color:var(--score-highlight)!important;text-shadow:0 0 24px #b4ed3840,0 6px 20px #0008!important;font-weight:950;letter-spacing:-.07em;font-variant-numeric:tabular-nums;line-height:1.06}
+#play .playgrid>.panel:first-child{border-top:3px solid #c5e966}
+#play .playmeta .muted{font-size:12px;letter-spacing:.11em;font-weight:800}
+#play .rounds{margin-top:18px}
+#play #newgame{background:#1b3240!important;color:#d2edf4!important;border-color:#527687!important;box-shadow:none}
+#play #newgame:hover{background:#28485a!important}
+#play #saveResult{min-height:56px}
+#history .latest-result{border-top:3px solid #c5e966;background:radial-gradient(ellipse at 70% 10%,#304333 0,transparent 52%),linear-gradient(145deg,#1a2c39,#111d28)}
+#history .latest-score{font-size:clamp(72px,12vw,130px);line-height:1.12;font-weight:950;letter-spacing:-.06em;text-align:center;color:var(--score-highlight);text-shadow:0 0 25px #b4ed3830;font-variant-numeric:tabular-nums;padding:12px 0}
+#history .latest-meta{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;color:#c2d7e1}
+#history .latest-meta span{background:#203844;border:1px solid #3c5968;border-radius:30px;padding:5px 11px;font-size:12px}
+#history .result-archive{margin-top:16px;background:#142431;border:1px solid #385364;border-radius:14px;padding:14px}
+#history .result-archive>summary{cursor:pointer;color:#bde8f1;font-weight:750;min-height:30px}
+#history .result-archive[open]>summary{margin-bottom:14px}
+#settings .back-to-play{margin-bottom:18px;background:#193240;color:#c5edf4;border-color:#517687;min-height:46px}
+@media(max-width:560px){#play .bigscore{font-size:clamp(100px,27vw,150px)!important}#history .latest-score{font-size:88px}#history .latest-meta{gap:6px}#history .latest-meta span{font-size:11px}#play .playmeta strong{font-size:18px}}
