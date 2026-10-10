@@ -295,3 +295,5 @@ body{color:var(--ink)}
 @media(max-width:640px){.aim-layout{grid-template-columns:1fr}.aim-visual{max-width:350px;width:100%;margin:auto}}
 
 .achievement-panel{margin-top:16px}.achievement-panel h3{letter-spacing:.09em}.achievement-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:12px}.achievement-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:15px 6px;border:1px solid #34505e;border-radius:12px;background:linear-gradient(150deg,#173340,#0b1a27)}.achievement-tile span{font-size:11px;font-weight:850;letter-spacing:.06em;color:#a6c5ce;text-align:center}.achievement-tile strong{font-size:clamp(23px,3vw,34px);line-height:1;color:#e7fb67;font-variant-numeric:tabular-nums}@media(max-width:640px){.achievement-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.aim-heat-key{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-4px 0 10px;font-size:10px;letter-spacing:.1em;color:#91aebc}.aim-heat-key i{display:block;width:96px;height:8px;border-radius:10px;background:linear-gradient(90deg,#132a38,#67e9e5)}
