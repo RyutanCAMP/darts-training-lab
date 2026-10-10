@@ -36,3 +36,27 @@ body{background:radial-gradient(ellipse at 90% 0%,#1a3543 0%,transparent 37%),li
 .note{background:#172a37;border-left:3px solid #68bfd1;border-top-color:#355463;border-bottom-color:#355463;color:#e1edf2}
 button:focus-visible,[role=button]:focus-visible{outline:3px solid #90e8f4}
 @media(prefers-reduced-motion:no-preference){.primary{transition:transform .18s,box-shadow .18s,background .18s}.primary:active{transform:scale(.975)}.metric,.panel{transition:border-color .2s}.hit:hover{filter:brightness(1.4) drop-shadow(0 0 2px #b4edf5)}}
+
+/* v0.2.3 — DARTSLIVE-inspired semantic accent hierarchy, original layout */
+:root{--bull-green:#46c7a0;--bull-red:#ef6574;--award-amber:#ffca70;--ice:#7fd9ec}
+body{background:radial-gradient(ellipse at 72% -14%,#21394b 0,transparent 42%),linear-gradient(155deg,#080e15,#101b25 60%,#090e15)}
+.eyebrow,.metric .detail{color:#86b7c7}.brand span{color:#8bd6e6}
+#play .bigscore{color:#fff;font-size:clamp(100px,13vw,182px);text-shadow:0 5px 22px #0009}
+#play .toast{background:#182e3c;border:1px solid #375669;border-radius:10px;padding:8px;color:#b9e6f0;letter-spacing:.035em}
+#play .toast.award{background:linear-gradient(110deg,#49321e,#1b2a35);color:#ffd388;border-color:#bb8c46;box-shadow:0 0 22px #ffbf5130}
+#play .toast.bull{background:linear-gradient(110deg,#153c34,#1a3442);color:#a3f8d9;border-color:#4bc8a1;box-shadow:0 0 18px #44d4a032}
+#play .toast.miss{background:#292631;color:#d7acb5;border-color:#665361}
+#play .throw.active{border-color:#89d9ea;background:#183543}
+#play .throw .tiny{color:#a4b8c8}
+#play .rounds .active{background:#214253;color:#e5fbff}
+#play .rounds .done{background:#1b303b;color:#8dbac7}
+#play .resultpanel{background:linear-gradient(145deg,#183542,#12202d);border-color:#64a7b7}
+#play .resultscore{color:#fff}
+.metric:nth-child(4) .value{color:#ffd18b}
+#play #miss{border-color:#6c525e;color:#e9bac4}
+#play #undo{border-color:#456678}
+#play #newgame{background:#66c9de;border-color:#9be9f4;color:#071822}
+#play #saveResult{background:linear-gradient(110deg,#5bd4b5,#9de8d5);border-color:#9de8d5;color:#09241e}
+.chartbar{background:linear-gradient(180deg,#8fdaea,#32758c)}
+.pill{border-color:#537280;color:#d2e9ef}
+@media(max-width:560px){#play .bigscore{font-size:clamp(90px,25vw,140px)}.top{gap:9px}.tabs{gap:3px}.tabs button{padding:9px 10px;font-size:12px}}
