@@ -209,10 +209,37 @@ function sMetrics(ss){
  +metric('自己ベスト',best??'—','COUNT-UP / 24投')
  +metric('全期間平均',avg(ss)??'—',ss.length+'完走ゲーム');
 }
+
+let aimPeriod='10';
+const aimOrder=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+function aimPoint(d){
+ if(!d||d.segment==='MISS')return null;
+ if(isBull(d))return {x:0,y:0};
+ const n=Number(d.segment.slice(1)),idx=aimOrder.indexOf(n);
+ if(idx<0)return null;
+ const a=(-90+idx*18)*Math.PI/180;
+ const r=d.segment[0]==='T'?.62:d.segment[0]==='D'?.96:d.zone?.endsWith('I')?.43:.79;
+ return {x:Math.cos(a)*r,y:Math.sin(a)*r};
+}
+function renderAim(){
+ const root=$('aimAnalysis');if(!root)return;
+ const blocks=[];
+ for(const s of finished().slice().reverse())for(let i=0;i+2<s.darts.length;i+=3)blocks.push(s.darts.slice(i,i+3));
+ for(let i=0;i+2<store.active.darts.length;i+=3)blocks.push(store.active.darts.slice(i,i+3));
+ const rounds=blocks.slice(-(aimPeriod==='all'?blocks.length:Number(aimPeriod))),darts=rounds.flat(),pts=darts.map(aimPoint).filter(Boolean);
+ const median=vals=>{const a=vals.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
+ const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y)),percent=f=>pts.length?Math.round(100*pts.filter(f).length/pts.length):0;
+ const direction=pts.length?(Math.abs(my)<.08?'':my>0?'下':'上')+(Math.abs(mx)<.08?'':mx>0?'右':'左')||'中央':'記録なし';
+ const svg='<svg viewBox="0 0 260 260" role="img" aria-label="着弾エリアの推定分布"><circle cx="130" cy="130" r="102" fill="none" stroke="#49677a"/><circle cx="130" cy="130" r="77" fill="none" stroke="#49677a"/><circle cx="130" cy="130" r="51" fill="none" stroke="#49677a"/><line x1="22" y1="130" x2="238" y2="130" stroke="#49677a" stroke-dasharray="3 5"/><line x1="130" y1="22" x2="130" y2="238" stroke="#49677a" stroke-dasharray="3 5"/>'+pts.map(p=>'<circle cx="'+(130+p.x*102).toFixed(1)+'" cy="'+(130+p.y*102).toFixed(1)+'" r="4" fill="#67e9e5" opacity=".65"/>').join('')+(pts.length?'<circle cx="'+(130+mx*102).toFixed(1)+'" cy="'+(130+my*102).toFixed(1)+'" r="8" fill="#e7fb67"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
+ const choices=[['1','1R'],['10','10R'],['20','20R'],['all','ALL']].map(([key,label])=>'<button type="button" data-aim-period="'+key+'" class="'+(aimPeriod===key?'selected':'')+'">'+label+'</button>').join('');
+ const stat=(label,num)=>'<div class="aim-stat"><span>'+label+'</span><strong>'+num+'%</strong></div>';
+ root.innerHTML='<div class="aim-periods">'+choices+'</div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+direction+'寄り</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>セグメントの代表位置による推定です。実際の着弾座標ではありません。MISSは位置不明として除外します。上下左右の割合は重複する場合があります。</p></details>';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAim()}});
 function insight(ds){if(ds.length<30)return '現在の記録は'+ds.length+'投。まずはCOUNT-UPを繰り返して、30投以上のデータを集めましょう。AI診断ではなく、測定結果に基づく練習ヒントを表示します。';let arr=[1,2,3].map(i=>rate(ds.filter(d=>d.dartIndex===i))),min=arr.indexOf(Math.min(...arr));return '記録済み'+ds.length+'投のブル率は'+rate(ds)+'%。投球順別では'+(min+1)+'投目が'+arr[min]+'%で最も低い値です。サンプル数や日ごとの変動も確認しながら、次の練習で改善するか検証しましょう。フォーム原因はこの数値だけでは断定できません。'}
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
 $('metrics').innerHTML=sMetrics(ss);
-$('dashchart').innerHTML=chart(ss);$('analysischart').innerHTML=chart(ss);$('insight').textContent=insight(a);$('analysisnote').textContent=insight(a);$('dashbull').innerHTML=bullBars(a);$('allbull').innerHTML=bullBars(a);$('livebull').innerHTML=bullBars(ds);
+$('dashchart').innerHTML=chart(ss);$('analysischart').innerHTML=chart(ss);renderAim();$('insight').textContent=insight(a);$('analysisnote').textContent=insight(a);$('dashbull').innerHTML=bullBars(a);$('allbull').innerHTML=bullBars(a);$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';
 $('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?sum(d):'—')+'</b></div>'}).join('');
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?dartLabel(d):'READY')+'</span></div>'}).join('');
