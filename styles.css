@@ -214,3 +214,28 @@ body{color:var(--ink)}
 #play .play-sidebar>article:first-child{order:0!important}
 #play .play-sidebar>details:nth-child(2){order:1!important}
 #play .play-sidebar>details:nth-child(3){order:2!important}
+
+/* v0.5.9 - fixed overlays never change board layout */
+.game-fx{position:fixed;top:17%;left:50%;transform:translate(-50%,-14px) scale(.94);z-index:95;pointer-events:none;opacity:0;text-align:center;width:min(92vw,640px);padding:16px 24px;border-radius:22px;background:linear-gradient(115deg,rgba(8,20,32,.94),rgba(16,48,66,.91));border:1px solid rgba(141,227,245,.6);box-shadow:0 0 35px rgba(40,207,237,.2);transition:opacity .18s,transform .25s}
+.game-fx.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.game-fx-title{font-size:clamp(28px,6vw,66px);font-weight:950;letter-spacing:.055em;line-height:1.08;text-shadow:0 0 22px currentColor}
+.game-fx-sub{font-size:clamp(11px,2vw,17px);font-weight:700;letter-spacing:.18em;margin-top:7px}
+.game-fx.nice{color:#c2fff6;border-color:#66e8cf}
+.game-fx.bull{color:#80ffca;border-color:#3df5b5}
+.game-fx.inner{color:#ffe7a0;border-color:#ff7fba;box-shadow:0 0 45px #f9538666}
+.game-fx.award{color:#ffe792;border-color:#ffcb54;box-shadow:0 0 50px #f7ba4b66}
+.game-fx.round{color:#b9dfff;border-color:#7fc7ff}
+.game-fx.finish{color:#ffe9a8;border-color:#ffe9a8}
+.startup-fx{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(circle at center,#1c5260 0%,#091621 55%,#060d15 100%);opacity:1;animation:startup-exit .65s ease-in 1.65s forwards}
+.startup-fx-content{text-align:center;width:min(90vw,700px);animation:startup-rise .7s ease-out both}
+.startup-fx-kicker{font-size:clamp(10px,1.7vw,15px);letter-spacing:.32em;color:#94c4cf}
+.startup-fx-logo{font-size:clamp(30px,7vw,72px);font-weight:950;line-height:1.12;letter-spacing:.03em;text-shadow:0 0 28px #40c8deaa}
+.startup-fx-logo span{color:#85f8dc}
+.startup-fx-bar{height:3px;width:80%;margin:24px auto;background:linear-gradient(90deg,transparent,#8fffe3,transparent);transform-origin:left;animation:startup-scan 1.4s ease-in-out both}
+.startup-fx-caption{font-size:12px;letter-spacing:.32em;color:#c9f5ff}
+@keyframes startup-rise{from{opacity:0;transform:translateY(25px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes startup-scan{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes startup-exit{to{opacity:0;visibility:hidden}}
+#play .round-break:not(.hidden){animation:round-wait-pulse 1.7s ease-in-out infinite;border-color:#7bdbe7!important;box-shadow:0 0 28px #2dacc544}
+@keyframes round-wait-pulse{0%,100%{box-shadow:0 0 12px #2dacc522}50%{box-shadow:0 0 32px #2dacc577}}
+@media(prefers-reduced-motion:reduce){.startup-fx{display:none}.startup-fx-content,.startup-fx-bar,#play .round-break:not(.hidden){animation:none!important}.game-fx{transition:none!important}}
