@@ -327,13 +327,6 @@ body{color:var(--ink)}
 .analysis-extra summary,.aim-help summary,.result-archive summary,.play-extra summary{min-height:44px;box-sizing:border-box;padding-top:12px;padding-bottom:12px}
 .shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom))}
 .tabs{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
-.analysis-help{margin:14px 0 0;border:1px solid #34505e;border-radius:14px;background:#0d2230;padding:0 14px}
-.analysis-help>summary{cursor:pointer;min-height:44px;box-sizing:border-box;display:flex;align-items:center;gap:8px;color:#a8dbe7;font-size:13px;font-weight:900;letter-spacing:.08em}
-.help-body{padding:0 0 14px}
-.help-group{margin:12px 0 0}
-.help-group h4{margin:0 0 4px;font-size:10px;letter-spacing:.12em;color:#8fb2bf}
-.help-item{margin:8px 0;font-size:13px;line-height:1.7;color:#c4dbe3}
-.help-item b{display:inline-block;margin-right:8px;font-size:12px;letter-spacing:.04em;color:#e7fb67}
 .report-panel{margin-top:16px;border-color:#3b7777}
 .report-note{margin:2px 0 12px;font-size:11px;letter-spacing:.06em;color:#8fb2bf}
 .report-panel .actions{margin-top:0}
@@ -346,3 +339,15 @@ body{color:var(--ink)}
 .report-line.typing .t::after{content:"";display:inline-block;width:.55em;height:1em;margin-right:-.55em;background:#67e9e5;vertical-align:-.15em;animation:reportCaret 1s steps(2) infinite}
 @keyframes reportCaret{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.report-line.typing .t::after{animation:none}}
+h3.has-help{display:flex;align-items:center;gap:8px}
+.help-btn{flex:none;width:44px;height:44px;margin:-10px -8px -10px auto;padding:0;border:0;background:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:none}
+.help-btn span{display:block;width:24px;height:24px;border-radius:50%;border:1px solid #3b7777;background:#0d1826;color:#a3f8e7;font:800 13px/22px "Segoe UI","Yu Gothic",sans-serif;text-align:center}
+.help-btn[aria-expanded="true"] span{background:#67e9e5;border-color:#67e9e5;color:#08121e}
+body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:not(.primary):not(.warn):hover{border:0;border-radius:0;background:none;box-shadow:none;min-height:0}button.help-btn:focus-visible span{outline:2px solid #67e9e5;outline-offset:2px}
+.help-btn.inline{margin:0 0 0 -8px}
+.metric{position:relative}
+.metric .help-btn{position:absolute;top:2px;right:0;margin:0}
+.period-help-row{display:flex;align-items:center;gap:2px;margin:2px 0 0}.period-help-row .help-btn.inline{margin:0 0 0 -10px}
+.card-help{margin:10px 0 12px;padding:10px 12px;border-radius:10px;background:#0d2230;border:1px solid #2c4658;font-size:12.5px;line-height:1.7;color:#c4dbe3}
+.panel .card-help p{margin:0 0 6px;font-size:inherit;line-height:inherit;color:inherit}.panel .card-help p:last-child{margin:0}.card-help b{color:#ffd84a;margin-right:6px;font-size:11px;letter-spacing:.06em}.panel p.card-gloss{margin:2px 0 10px;font-size:12.5px;line-height:1.5;color:#9fc0cc;font-weight:400}
+.metric .card-help{margin:10px 0 0;font-size:12px;line-height:1.6}
