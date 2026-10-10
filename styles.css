@@ -189,3 +189,5 @@ body{color:var(--ink)}
 #settings .calibration-panel{margin-bottom:14px}#settings .calibration-progress{font-size:13px;font-weight:800;color:#a8cbd6;margin:14px 0 8px}#settings .calibration-target{font-size:clamp(19px,4vw,28px);font-weight:900;color:#E7FB67;padding:16px;background:#102736;border:1px solid #466375;border-radius:12px;margin:8px 0}#settings .calibration-status{min-height:24px;margin:8px 0}#settings .calibration-panel .actions{flex-wrap:wrap;gap:8px}#settings .calibration-panel .actions button{min-height:44px}
 
 #settings .calibration-panel #calibrationExport{border-color:#6d98a8;color:#e7fb67}
+
+#settings .raw-capture{border:1px solid #719b9f}#settings .raw-capture .actions{display:flex;flex-wrap:wrap;gap:8px}#settings .raw-capture .actions button{min-height:44px}
