@@ -188,7 +188,7 @@ function confirmResult(){finishRoundBreak();if(store.active.darts.length!==24)re
 function drawBoard(){const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-230 -230 460 460');svg.setAttribute('role','img');svg.setAttribute('aria-label','着弾位置を選択するダーツボード');function el(t,a){let n=document.createElementNS(NS,t);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n}function xy(r,a){return [r*Math.sin(a),-r*Math.cos(a)]}function wedge(r1,r2,a1,a2){let p=xy(r1,a1),q=xy(r2,a1),r=xy(r2,a2),s=xy(r1,a2);return 'M'+p+' L'+q+' A'+r2+' '+r2+' 0 0 1 '+r+' L'+s+' A'+r1+' '+r1+' 0 0 0 '+p+' Z'}el('circle',{r:225,fill:'#0a121b',stroke:'#4b6879','stroke-width':4});for(let i=0;i<20;i++){let a=i*Math.PI/10,n=nums[i];for(let [r1,r2,ring] of [[17,100,'S'],[100,113,'T'],[113,172,'S'],[172,185,'D']]){let col=ring==='S'?(i%2?'#ddd9c9':'#27323a'):(i%2?'#d64b55':'#2eb28d');let p=el('path',{d:wedge(r1,r2,a-Math.PI/20,a+Math.PI/20),fill:col,stroke:'#72828b','stroke-width':.65,class:'hit',tabindex:'0',role:'button','data-segment':ring+n+(ring==='S'?(r2===100?'I':'O'):''),'aria-label':label(ring+n)});p.addEventListener('click',()=>add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):'')));p.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):''))}})}let [x,y]=xy(206,a),t=el('text',{x,y,fill:'#edf3fa','font-size':15,'font-weight':700,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none'});t.textContent=n}let ob=el('circle',{r:17,fill:'#1d9b7b',stroke:'#d9e0d8','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'OB','aria-label':'OUTER BULL 25'});ob.onclick=()=>add('OB');ob.onkeydown=e=>{if(e.key==='Enter')add('OB')};let ib=el('circle',{r:7.7,fill:'#d94e5c',stroke:'#f0d2c6','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'IB','aria-label':'INNER BULL 50'});ib.onclick=e=>{e.stopPropagation();add('IB')};ib.onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();add('IB')}};$('board').appendChild(svg)}
 function bullBars(ds){return [1,2,3].map(i=>{let a=ds.filter(d=>d.dartIndex===i),p=rate(a);return '<div class="barrow"><span class="tiny">'+i+'投目</span><div class="track"><div class="fill" style="width:'+p+'%"></div></div><span class="tiny">'+p+'% <span class="muted">('+a.filter(isBull).length+'/'+a.length+')</span></span></div>'}).join('')}
 function chart(ss){
- if(!ss.length)return '<div class="empty">NO DATA</div>';
+ if(!ss.length)return '<div class="empty">—</div>';
  const ordered=ss.slice().reverse(),recent=ordered.slice(-20),scores=recent.map(s=>sum(s.darts));
  const width=640,height=215,left=44,right=16,top=20,bottom=30;
  const all=scores.map((_,i)=>{const absolute=ordered.length-recent.length+i;return Math.round(ordered.slice(Math.max(0,absolute-9),absolute+1).reduce((n,s)=>n+sum(s.darts),0)/Math.min(10,absolute+1))});
@@ -226,7 +226,7 @@ function renderAim(){
  const rounds=selectedRounds(),darts=rounds.flat(),pts=darts.map(aimPoint).filter(Boolean);
  const median=vals=>{const a=vals.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y)),percent=f=>pts.length?Math.round(100*pts.filter(f).length/pts.length):0;
- const direction=pts.length?((Math.abs(my)<.08?'':my>0?'下':'上')+(Math.abs(mx)<.08?'':mx>0?'右':'左')||'中央'):'記録なし';
+ const direction=pts.length?(((Math.abs(my)<.08?'':my>0?'下':'上')+(Math.abs(mx)<.08?'':mx>0?'右':'左'))||'中央'):'—';
 
  const ringOf=d=>{if(d.segment==='IB')return 'IB';if(d.segment==='OB')return 'OB';if(d.segment==='MISS')return null;if(d.segment[0]==='T'||d.segment[0]==='D')return d.segment[0];if(d.segment[0]==='S')return d.zone?.endsWith('I')?'SI':d.zone?.endsWith('O')?'SO':'S';return null};
  const counts=new Map();
@@ -243,8 +243,9 @@ function renderAim(){
 }
 function allRecordedRounds(){
  const blocks=[];
- for(const s of finished().slice().reverse())for(let i=0;i+2<s.darts.length;i+=3)blocks.push(s.darts.slice(i,i+3));
- for(let i=0;i+2<store.active.darts.length;i+=3)blocks.push(store.active.darts.slice(i,i+3));
+ const sessions=store.sessions.slice().reverse();
+ for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length)blocks.push(round)}
+ for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length)blocks.push(round)}
  return blocks;
 }
 function selectedRounds(){const blocks=allRecordedRounds();return aimPeriod==='all'?blocks:blocks.slice(-Number(aimPeriod))}
