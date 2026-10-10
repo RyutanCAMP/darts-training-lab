@@ -1,26 +1,34 @@
-# DARTS TRAINING LAB
+# DARTS TRAINING LAB — RETRO DARTS
 
-A personal darts practice and analytics app. Start small, then improve through real practice.
+A retro arcade-style COUNT-UP practice and analytics app for darts, including DARTSLIVE-200S input.
 
-## Core goal
+## Start
+- Open `index.html` with its companion `styles.css` and `app.js` on a static server, or open `preview.html` for a standalone browser preview.
+- All personal practice records are stored locally in the browser (`dtl-data-v1`).
+- Source: https://github.com/RyutanCAMP/darts-training-lab
 
-Record each dart, visualize progress, and eventually combine scoring history with AI coaching and throw videos.
+## Features (v0.5.26)
+- COUNT-UP: 8 rounds × 3 darts; scoring, MISS, undo, local results/history.
+- Manual input and DARTSLIVE-200S keyboard/calibration support.
+- Retro audio/visual effects and mobile-friendly layout.
+- Analysis: 1R / 10R / 20R / ALL, with 10R default on entry.
+- BULL metrics, per-dart throw-order rates, all-time achievements, score trend.
+- AIM ANALYSIS segment/ring heatmap and expandable A CLASS analytics.
 
-## Roadmap
+## Source files
+- `index.html`: markup
+- `styles.css`: styles
+- `app.js`: logic
+- `preview.html`: standalone preview with embedded styles and script — **keep in sync**
+- `data/200s-keymap.json`: keyboard mapping data
+- `CLAUDE.md`: development handoff, detailed rules, regression checklist
 
-- **v0.1**: Browser-based COUNT-UP (8 rounds / 24 darts), manual scoring, MISS, undo, local practice history, basic bull-rate statistics.
-- **v0.2**: Test and calibrate DARTSLIVE-200S Bluetooth input on Windows; verify actual key events before enabling automatic scoring.
-- **v0.3**: Historical charts and comparisons by first/second/third dart; CSV/JSON export and import.
-- **Later**: AI analysis based on measured data, synchronized throw videos, optional announcer voices and sound effects.
+## Design and accuracy
+- Favor clear graphics, short labels, and minimal explanatory text.
+- Segment hits are not precise x/y coordinates. Never present inferred locations as measured.
+- Do not invent official ratings from COUNT-UP scores.
+- Preserve backward compatibility with localStorage records.
+- Public repo: never commit personal practice data or secrets.
 
-## Design principles
-
-1. **History and analysis first**: Games and effects should support practice, not distract from it.
-2. **Keep raw per-dart records**: Store timestamps, session ID, round, dart order, segment and score where available.
-3. **Separate facts from AI hypotheses**: Do not infer throwing-form problems from scoring data alone.
-4. **No secrets or personal practice videos in Git**: This repository is public. Practice data should remain local unless deliberately exported.
-5. **Iterate with hardware tests**: Bluetooth mappings and board behavior are not yet verified.
-
-## Status
-
-Repository initialized. The first playable HTML app will be added and verified in a subsequent commit.
+## Development
+See [CLAUDE.md](CLAUDE.md) before editing. Test runtime rendering and the standalone mobile preview before reporting completion.
