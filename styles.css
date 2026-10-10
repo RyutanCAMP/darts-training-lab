@@ -143,3 +143,12 @@ body{color:var(--ink)}
 #play .toast.award{border-color:#D6B56B;color:#FFDA91}
 
 #play #score,#play #resultscore,#history .latest-score{color:#E7FB67!important;-webkit-text-fill-color:#E7FB67!important;text-shadow:0 0 22px #b4ed383b!important}
+
+/* v0.3.3 — persistent, truthful save-state feedback */
+#play .save-indicator{display:flex;align-items:center;justify-content:center;gap:9px;min-height:34px;margin:-4px auto 15px;padding:6px 12px;width:fit-content;max-width:100%;border-radius:30px;background:#16352e;border:1px solid #397e6b;color:#a4eed3;font-size:12px;font-weight:750;text-align:center}
+#play .save-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#55d7a8;box-shadow:0 0 8px #55d7a866}
+#play .save-indicator.save-pending{background:#3b311d;border-color:#98733d;color:#ffda92}
+#play .save-pending .save-dot{background:#ffca70;box-shadow:0 0 8px #ffca7077}
+#play .save-indicator.save-error{background:#43272c;border-color:#ba6877;color:#ffd0d7}
+#play .save-error .save-dot{background:#f27a8c}
+#history .saved-notice{background:#183b32;border:1px solid #4aab8b;border-radius:10px;padding:12px;color:#b5f7dc;font-weight:800;margin:10px 0}
