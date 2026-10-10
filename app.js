@@ -102,15 +102,16 @@ const board200sMap={"KeyA | A":"S20","KeyW | W":"S20","Digit7 | &":"T20","KeyY |
 let board200sEnabled=true,board200sLastKey='',board200sLastAt=0;
 function board200sStatus(message){const el=$('board200sStatus');if(el)el.textContent=message}
 function board200sInput(e){
- if(!board200sEnabled||!$('play').classList.contains('active'))return false;
+ if(!board200sEnabled)return false;
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
- if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
- if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
  if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
  const segment=board200sMap[k];if(!segment)return false;
  e.preventDefault();
+ if(!$('play').classList.contains('active'))changeTab('play');
  if(k===board200sLastKey&&now-board200sLastAt<180)return true;
  if(now-board200sLastAt<90)return true;
  board200sLastKey=k;board200sLastAt=now;
