@@ -209,3 +209,8 @@ body{color:var(--ink)}
 /* v0.5.6 sidebar: throw history, analytics, then current three darts */
 #play .play-sidebar>details:first-child{order:0!important}#play .play-sidebar>details:nth-child(2){order:1!important}#play .play-sidebar>article:nth-child(3){order:2!important}
 #settings #musicToggle[aria-pressed="true"]{color:#e7fb67;border-color:#91d8e5;background:#254656}
+
+/* v0.5.7: current three darts first, throw history second, analysis third */
+#play .play-sidebar>article:first-child{order:0!important}
+#play .play-sidebar>details:nth-child(2){order:1!important}
+#play .play-sidebar>details:nth-child(3){order:2!important}
