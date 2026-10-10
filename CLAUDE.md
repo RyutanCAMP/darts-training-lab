@@ -9,7 +9,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 - `preview.html`: **standalone, self-contained** preview for iPhone. It embeds the entire stylesheet in `<style>` and app script in the final `<script>`. **Every UI/code change must also be mirrored into this file**. Do not edit only `index.html` or `app.js`.
 - `data/200s-keymap.json`: board input mapping.
 - No framework/bundler. Vanilla HTML/CSS/JS; browser localStorage.
-- Current UI version at handoff: v0.5.28. Check the default branch for later changes before editing.
+- Current UI version at handoff: v0.5.29. Check the default branch for later changes before editing.
 
 ## Current experience
 - COUNT-UP: 8 rounds, 3 darts each (24 throws); score, MISS, undo, results/history, audio/visual effects.
@@ -32,6 +32,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 - `MISS` has unknown position: exclude from spatial position estimation, but handle denominators consistently and label any exclusions. Singles without an inner/outer `zone` (older records) are excluded the same way; AIM ANALYSIS shows the excluded counts (`MISS n / ZONE不明 n`).
 - `REF_MIN=20`: any figure backed by fewer throws is badged `REF` (reference only). THROW ORDER shows `EVEN` instead of BEST/LOW when rates tie, and `CLEAR DIFF` / `NO CLEAR DIFF` from Wilson 95% ranges.
 - The aim target is **not recorded**, so drift/offset are descriptive only (a deliberate aim at T20 also shows as offset). Never call them errors without that caveat.
+- JSON backup now also carries `settings` (200S `bindings`, `calibrationKeys`, `goalScore`); import restores them only when the local values are empty. CSV gained a trailing `zone` column (existing columns unchanged).
 - `store.goalScore` is an additive optional key (target score for SCORE & GOAL); older data without it works unchanged.
 - Current heatmap opacity is relative to the maximum cell, not literal opacity equal to percent. Preserve clarity of this distinction.
 
@@ -57,7 +58,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 
 ## Recommended first actions for Claude
 1. Read `README.md`, `index.html`, `styles.css`, `app.js`, and `preview.html`.
-2. Inspect current GitHub HEAD (do not assume v0.5.28 is still latest).
+2. Inspect current GitHub HEAD (do not assume v0.5.29 is still latest).
 3. Perform a smoke test of Analysis and fix real bugs before adding features.
 4. Confirm the exact next change with the user, then implement and mirror the standalone preview.
 5. Report what was changed, what was actually tested, and provide a preview link pointing to a **real commit SHA**.

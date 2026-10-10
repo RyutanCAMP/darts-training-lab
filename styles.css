@@ -324,3 +324,6 @@ body{color:var(--ink)}
 .goal-row input{width:104px;min-height:40px;border-radius:10px;border:1px solid #34505e;background:#0d1826;color:#e7fb67;font-size:16px;font-weight:800;padding:0 10px}
 .throw-order-card em,.throw-order-label em{font-style:normal}
 .insight-next summary::before{content:'▸';margin-right:6px}
+.analysis-extra summary,.aim-help summary,.result-archive summary,.play-extra summary{min-height:44px;box-sizing:border-box;padding-top:12px;padding-bottom:12px}
+.shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.tabs{padding-bottom:calc(8px + env(safe-area-inset-bottom))}

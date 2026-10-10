@@ -7,7 +7,7 @@ A retro arcade-style COUNT-UP practice and analytics app for darts, including DA
 - All personal practice records are stored locally in the browser (`dtl-data-v1`).
 - Source: https://github.com/RyutanCAMP/darts-training-lab
 
-## Features (v0.5.28)
+## Features (v0.5.29)
 - COUNT-UP: 8 rounds × 3 darts; scoring, MISS, undo, local results/history.
 - Manual input and DARTSLIVE-200S keyboard/calibration support.
 - Retro audio/visual effects and mobile-friendly layout.
