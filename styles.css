@@ -239,4 +239,15 @@ body{color:var(--ink)}
 #play .round-break:not(.hidden){animation:round-wait-pulse 1.7s ease-in-out infinite;border-color:#7bdbe7!important;box-shadow:0 0 28px #2dacc544}
 @keyframes round-wait-pulse{0%,100%{box-shadow:0 0 12px #2dacc522}50%{box-shadow:0 0 32px #2dacc577}}
 @media(prefers-reduced-motion:reduce){.startup-fx{display:none}.startup-fx-content,.startup-fx-bar,#play .round-break:not(.hidden){animation:none!important}.game-fx{transition:none!important}}
-\n.volume-controls{display:grid;gap:10px;margin:16px 0}.volume-controls label{display:grid;grid-template-columns:70px minmax(90px,1fr) 45px;gap:10px;align-items:center;font-size:13px}.volume-controls input{width:100%;accent-color:#8ff3dd}.volume-controls output{text-align:right;font-variant-numeric:tabular-nums}\n
+\n.volume-controls{display:grid;gap:10px;margin:16px 0}.volume-controls label{display:grid;grid-template-columns:70px minmax(90px,1fr) 45px;gap:10px;align-items:center;font-size:13px}.volume-controls input{width:100%;accent-color:#8ff3dd}.volume-controls output{text-align:right;font-variant-numeric:tabular-nums}
+
+/* v0.5.12 fixed mobile header alignment */
+.top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important}
+.top>div:first-child{min-width:0!important}
+.top .brand{white-space:normal;overflow-wrap:normal;line-height:1.1!important}
+.top .header-tools{display:flex!important;align-items:center!important;justify-content:flex-end!important;flex-shrink:0!important;gap:7px!important}
+.top .header-tools .tiny{white-space:nowrap;font-size:10px!important}
+.top .settings-icon{flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;padding:0!important;line-height:1!important;font-size:21px!important;display:grid!important;place-items:center!important}
+@media(max-width:440px){.top{padding:8px 4px!important}.top .brand{font-size:16px!important}.top .header-tools .tiny{font-size:9px!important}}
+.sound-samples{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.sound-samples button{font-size:12px;padding:8px 10px}
