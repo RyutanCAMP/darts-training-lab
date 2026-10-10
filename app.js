@@ -163,7 +163,7 @@ function beginRoundBreak(round,score,darts=[]){
  tick();roundBreakTicker=setInterval(tick,50);roundBreakTimer=setTimeout(finishRoundBreak,ms);
 }
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
-function changeTab(name){finishRoundBreak();if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
+function changeTab(name){finishRoundBreak();if(name==='analysis')aimPeriod='10';if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
 function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now())return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,corrected:false});if(s.darts.length===24){showResult=true;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
@@ -186,7 +186,7 @@ function undo(){finishRoundBreak();if(!store.active.darts.length)return;store.ac
 function finishEarly(){if(!store.active.darts.length)return;if(store.active.darts.length===24){confirmResult();return}if(confirm('このゲームを途中終了として保存しますか？（完走平均には含みません）')){if(!complete('abandoned'))return;showResult=false;toast('途中終了として保存しました');render()}}
 function confirmResult(){finishRoundBreak();if(store.active.darts.length!==24)return;let score=sum(store.active.darts);if(!complete('completed'))return;showResult=false;viewId=store.sessions[0].id;justSaved=true;toast('完走 '+score+' POINTS を履歴に保存しました');render();changeTab('history')}
 function drawBoard(){const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-230 -230 460 460');svg.setAttribute('role','img');svg.setAttribute('aria-label','着弾位置を選択するダーツボード');function el(t,a){let n=document.createElementNS(NS,t);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n}function xy(r,a){return [r*Math.sin(a),-r*Math.cos(a)]}function wedge(r1,r2,a1,a2){let p=xy(r1,a1),q=xy(r2,a1),r=xy(r2,a2),s=xy(r1,a2);return 'M'+p+' L'+q+' A'+r2+' '+r2+' 0 0 1 '+r+' L'+s+' A'+r1+' '+r1+' 0 0 0 '+p+' Z'}el('circle',{r:225,fill:'#0a121b',stroke:'#4b6879','stroke-width':4});for(let i=0;i<20;i++){let a=i*Math.PI/10,n=nums[i];for(let [r1,r2,ring] of [[17,100,'S'],[100,113,'T'],[113,172,'S'],[172,185,'D']]){let col=ring==='S'?(i%2?'#ddd9c9':'#27323a'):(i%2?'#d64b55':'#2eb28d');let p=el('path',{d:wedge(r1,r2,a-Math.PI/20,a+Math.PI/20),fill:col,stroke:'#72828b','stroke-width':.65,class:'hit',tabindex:'0',role:'button','data-segment':ring+n+(ring==='S'?(r2===100?'I':'O'):''),'aria-label':label(ring+n)});p.addEventListener('click',()=>add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):'')));p.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):''))}})}let [x,y]=xy(206,a),t=el('text',{x,y,fill:'#edf3fa','font-size':15,'font-weight':700,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none'});t.textContent=n}let ob=el('circle',{r:17,fill:'#1d9b7b',stroke:'#d9e0d8','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'OB','aria-label':'OUTER BULL 25'});ob.onclick=()=>add('OB');ob.onkeydown=e=>{if(e.key==='Enter')add('OB')};let ib=el('circle',{r:7.7,fill:'#d94e5c',stroke:'#f0d2c6','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'IB','aria-label':'INNER BULL 50'});ib.onclick=e=>{e.stopPropagation();add('IB')};ib.onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();add('IB')}};$('board').appendChild(svg)}
-function bullBars(ds){return [1,2,3].map(i=>{let a=ds.filter(d=>d.dartIndex===i),p=rate(a);return '<div class="barrow"><span class="tiny">'+i+'投目</span><div class="track"><div class="fill" style="width:'+p+'%"></div></div><span class="tiny">'+p+'% <span class="muted">('+a.filter(isBull).length+'/'+a.length+')</span></span></div>'}).join('')}
+function bullBars(ds){return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),p=a.length?rate(a):null;return '<div class="barrow"><span class="tiny">DART '+i+'</span><div class="track"><div class="fill" style="width:"+(p??0)+"%"></div></div><span class="tiny">'+(p===null?'—':p+'%')+' <span class="muted">('+a.filter(isBull).length+'/'+a.length+')</span></span></div>'}).join('')}
 function chart(ss){
  if(!ss.length)return '<div class="empty">—</div>';
  const ordered=ss.slice().reverse(),recent=ordered.slice(-20),scores=recent.map(s=>sum(s.darts));
@@ -258,7 +258,7 @@ function renderAnalysis(){
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();
+ renderAim();renderAdvanced();renderThrowOrder();
 }
 function scopeMetrics(ds,ss){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
@@ -267,6 +267,14 @@ function scopeMetrics(ds,ss){
  +value('BULL HITS',ds.filter(isBull).length,'SELECTED')
  +value('INNER BULL',ds.filter(d=>d.segment==='IB').length,'SELECTED')
  +value('PERSONAL BEST',best??'—','ALL TIME');
+}
+function renderThrowOrder(){
+ const ds=selectedDarts(),data=[1,2,3].map(i=>{const darts=ds.filter(d=>d.dartIndex===i);return {i,n:darts.length,bulls:darts.filter(isBull).length,rate:darts.length?Math.round(darts.filter(isBull).length/darts.length*100):null,avg:darts.length?Math.round(sum(darts)/darts.length*10)/10:null}});
+ const valid=data.filter(x=>x.n);
+ const best=valid.length?valid.reduce((a,b)=>b.rate>a.rate?b:a):null;
+ const weakest=valid.length?valid.reduce((a,b)=>b.rate<a.rate?b:a):null;
+ const cards=data.map(d=>'<div class="throw-order-card"><div class="throw-order-label">DART '+d.i+'</div><strong>'+(d.rate===null?'—':d.rate+'%')+'</strong><span>BULL '+d.bulls+'/'+d.n+'</span><span>AVG '+(d.avg===null?'—':d.avg)+'</span></div>').join('');
+ $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(best&&weakest&&best.i!==weakest.i?'BEST · DART '+best.i+'　/　LOW · DART '+weakest.i:best?'BEST · DART '+best.i:'—')+'</div>';
 }
 function renderAdvanced(){
  const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isBull(d)),np=nonbull.map(aimPoint);
