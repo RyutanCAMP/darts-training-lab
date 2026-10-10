@@ -217,6 +217,7 @@ function aimPoint(d){
  if(isBull(d))return {x:0,y:0};
  const n=Number(d.segment.slice(1)),idx=aimOrder.indexOf(n);
  if(idx<0)return null;
+ if(d.segment[0]==='S'&&!/^S\d+[IO]$/.test(d.zone||''))return null; /* single without inner/outer zone: ring unknown, excluded from position estimates */
  const a=(-90+idx*18)*Math.PI/180;
  const r=d.segment[0]==='T'?.54:d.segment[0]==='D'?.96:d.zone?.endsWith('I')?.35:.79;
  return {x:Math.cos(a)*r,y:Math.sin(a)*r};
@@ -225,10 +226,11 @@ function renderAim(){
  const root=$('aimAnalysis');if(!root)return;
  const rounds=selectedRounds(),darts=rounds.flat(),pts=darts.map(aimPoint).filter(Boolean);
  const median=vals=>{const a=vals.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
+ const missN=darts.filter(d=>d.segment==='MISS').length,unknownN=darts.length-pts.length-missN,excluded=[missN?'MISS '+missN:'',unknownN?'ZONE不明 '+unknownN:''].filter(Boolean);
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y)),percent=f=>pts.length?Math.round(100*pts.filter(f).length/pts.length):0;
  const direction=pts.length?(((Math.abs(my)<.08?'':my>0?'下':'上')+(Math.abs(mx)<.08?'':mx>0?'右':'左'))||'中央'):'—';
 
- const ringOf=d=>{if(d.segment==='IB')return 'IB';if(d.segment==='OB')return 'OB';if(d.segment==='MISS')return null;if(d.segment[0]==='T'||d.segment[0]==='D')return d.segment[0];if(d.segment[0]==='S')return d.zone?.endsWith('I')?'SI':d.zone?.endsWith('O')?'SO':'S';return null};
+ const ringOf=d=>{if(d.segment==='IB')return 'IB';if(d.segment==='OB')return 'OB';if(d.segment==='MISS')return null;if(d.segment[0]==='T'||d.segment[0]==='D')return d.segment[0];if(d.segment[0]==='S')return d.zone?.endsWith('I')?'SI':d.zone?.endsWith('O')?'SO':null;return null};
  const counts=new Map();
  for(const d of darts){const ring=ringOf(d);if(!ring)continue;const number=Number(d.segment.slice(1));const key=ring==='IB'||ring==='OB'?ring:(Number.isInteger(number)&&aimOrder.includes(number)?ring+number:null);if(key)counts.set(key,(counts.get(key)||0)+1)}
  const total=pts.length,maxCount=Math.max(1,...counts.values());
@@ -239,13 +241,14 @@ function renderAim(){
  const bulls=[['OB',9,18],['IB',0,9]].map(([ring,r0,r1])=>{const count=counts.get(ring)||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<circle cx="130" cy="130" r="'+r1+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#456477"><title>'+ring+'：'+share.toFixed(1)+'% ('+count+'投)</title></circle>'}).join('');
  const svg='<svg viewBox="0 0 260 260" role="img" aria-label="内外シングル・トリプル・ダブル別ヒートマップ">'+cells+bulls+(pts.length?'<circle cx="'+(130+mx*102).toFixed(1)+'" cy="'+(130+my*102).toFixed(1)+'" r="7" fill="#e7fb67" stroke="#091622" stroke-width="2"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
  const stat=(label,num)=>'<div class="aim-stat"><span>'+label+'</span><strong>'+num+'%</strong></div>';
- root.innerHTML='<div class="aim-heat-key"><span>LOW</span><i></i><span>HIGH</span></div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='—'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
+ root.innerHTML='<div class="aim-heat-key"><span>LOW</span><i></i><span>HIGH</span></div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='—'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投'+(excluded.length?' · 除外 '+excluded.join(' / '):'')+'</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
 }
 function allRecordedRounds(){
  const blocks=[];
  const sessions=store.sessions.slice().reverse();
- for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length)blocks.push(round)}
- for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length)blocks.push(round)}
+ /* Only complete 3-dart rounds count as a round (1R/10R/20R/ALL); an unfinished round never shrinks or skews the window. */
+ for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
+ for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
  return blocks;
 }
 function selectedRounds(){const blocks=allRecordedRounds();return aimPeriod==='all'?blocks:blocks.slice(-Number(aimPeriod))}
@@ -270,11 +273,12 @@ function scopeMetrics(ds,ss){
 }
 function renderThrowOrder(){
  const ds=selectedDarts(),data=[1,2,3].map(i=>{const darts=ds.filter(d=>d.dartIndex===i);return {i,n:darts.length,bulls:darts.filter(isBull).length,rate:darts.length?Math.round(darts.filter(isBull).length/darts.length*100):null,avg:darts.length?Math.round(sum(darts)/darts.length*10)/10:null}});
- const valid=data.filter(x=>x.n);
+ const REF_MIN=20,valid=data.filter(x=>x.n);
  const best=valid.length?valid.reduce((a,b)=>b.rate>a.rate?b:a):null;
  const weakest=valid.length?valid.reduce((a,b)=>b.rate<a.rate?b:a):null;
- const cards=data.map(d=>'<div class="throw-order-card"><div class="throw-order-label">DART '+d.i+'</div><strong>'+(d.rate===null?'—':d.rate+'%')+'</strong><span>BULL '+d.bulls+'/'+d.n+'</span><span>AVG '+(d.avg===null?'—':d.avg)+'</span></div>').join('');
- $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(best&&weakest&&best.i!==weakest.i?'BEST · DART '+best.i+'　/　LOW · DART '+weakest.i:best?'BEST · DART '+best.i:'—')+'</div>';
+ const isRef=x=>x.n>0&&x.n<REF_MIN,anyRef=valid.some(isRef);
+ const cards=data.map(d=>'<div class="throw-order-card"><div class="throw-order-label">DART '+d.i+(isRef(d)?'<em title="'+REF_MIN+'投未満は参考値">REF</em>':'')+'</div><strong>'+(d.rate===null?'—':d.rate+'%')+'</strong><span>BULL '+d.bulls+'/'+d.n+'</span><span>AVG '+(d.avg===null?'—':d.avg)+'</span></div>').join('');
+ $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(valid.length<2?'—':best.rate===weakest.rate?'EVEN':'BEST · DART '+best.i+'　/　LOW · DART '+weakest.i)+(valid.length>=2&&anyRef?'　·　REF':'')+'</div>';
 }
 function renderAdvanced(){
  const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isBull(d)),np=nonbull.map(aimPoint);
