@@ -152,3 +152,17 @@ body{color:var(--ink)}
 #play .save-indicator.save-error{background:#43272c;border-color:#ba6877;color:#ffd0d7}
 #play .save-error .save-dot{background:#f27a8c}
 #history .saved-notice{background:#183b32;border:1px solid #4aab8b;border-radius:10px;padding:12px;color:#b5f7dc;font-weight:800;margin:10px 0}
+
+/* v0.3.4 — quiet autosave, clear end-of-game confirmation */
+#play .save-indicator{margin:13px 0 0;padding:2px 0;min-height:20px;width:auto;justify-content:flex-start;background:transparent;border:0;border-radius:0;color:#7896a5;font-size:11px;font-weight:500;box-shadow:none}
+#play .save-dot{width:5px;height:5px;background:#568f7f;box-shadow:none}
+#play .save-indicator.save-pending{background:transparent;border:0;color:#a6a88e}
+#play .save-pending .save-dot{background:#c3a65d;box-shadow:none}
+#play .save-indicator.save-error{background:transparent;border:0;color:#ff9ca9;font-weight:750}
+#play #resultpanel{margin-top:18px;border:1px solid #72929b;border-top:3px solid #E7FB67;background:linear-gradient(145deg,#213744,#111e2a);padding:26px;scroll-margin-top:18px}
+#play #resultpanel .eyebrow{color:#b1c6cf}
+#play #resultpanel h3{font-size:24px;margin:6px 0}
+#play #resultpanel .resultscore{font-size:clamp(88px,13vw,148px);margin:10px auto 18px}
+#play #resultpanel #saveResult{display:block;width:100%;min-height:62px;margin-top:10px;border-radius:14px;background:linear-gradient(115deg,#E7FB67,#bce66a)!important;color:#132319!important;border:1px solid #f0ffa6!important;box-shadow:0 8px 25px #a7d95a26;font-size:17px;font-weight:900}
+#play #resultpanel #saveResult:hover{background:linear-gradient(115deg,#f3ffac,#d5f38e)!important}
+@media(max-width:560px){#play #resultpanel{padding:19px 15px;scroll-margin-top:12px}#play #resultpanel h3{font-size:21px}#play #resultpanel #saveResult{font-size:15px;min-height:60px}}
