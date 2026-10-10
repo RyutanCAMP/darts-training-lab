@@ -12,7 +12,7 @@ if(![5,8,10,15].includes(Number(store.roundDelay)))store.roundDelay=8;
 if(!store.active)store.active=newSession();
 if(localStorage.getItem(KEY)!==null){saveOK=true;savedAt=Date.now()}
 if(store.active.darts.length===24)showResult=true;
-const points=s=>s==='IB'?50:s==='OB'?25:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
+const points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
 const label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
 const dartLabel=d=>d.zone&&/^S\\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
 const isBull=d=>d.segment==='IB'||d.segment==='OB';
