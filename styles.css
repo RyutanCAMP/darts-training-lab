@@ -205,3 +205,7 @@ body{color:var(--ink)}
 @keyframes outer-bull-pulse{0%,35%{fill:#66ffca;stroke-width:4}65%{fill:#20a981}100%{stroke-width:1.5}}
 @keyframes inner-bull-burst{0%,20%,45%{fill:#fff6c0;stroke-width:5}32%,60%{fill:#ff4e89;stroke-width:3}100%{fill:#d94e5c;stroke-width:1.5}}
 @media(prefers-reduced-motion:reduce){#play .board svg .hit.flash-outer-bull,#play .board svg .hit.flash-inner-bull{animation:none!important;filter:none!important}}
+
+/* v0.5.6 sidebar: throw history, analytics, then current three darts */
+#play .play-sidebar>details:first-child{order:0!important}#play .play-sidebar>details:nth-child(2){order:1!important}#play .play-sidebar>article:nth-child(3){order:2!important}
+#settings #musicToggle[aria-pressed="true"]{color:#e7fb67;border-color:#91d8e5;background:#254656}
