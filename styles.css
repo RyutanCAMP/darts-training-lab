@@ -177,3 +177,10 @@ body{color:var(--ink)}
 @media(max-width:560px){#play .round-break{gap:8px;padding:13px 10px}#play .round-break strong{font-size:27px}}
 
 #settings .round-delay-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px;max-width:520px}#settings .round-delay-options button{min-height:50px;font-weight:800}#settings .round-delay-options button.selected{color:#E7FB67;border:2px solid #91D8E5;background:#254656}
+
+/* v0.3.7 sound preferences */
+#settings .sound-settings{margin-bottom:14px}
+#settings .sound-controls{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+#settings .sound-controls button{min-height:46px;font-weight:800}
+#settings #soundToggle[aria-pressed="true"]{border-color:#80b9bc;background:#244b51;color:#d6f6e8}
+#settings #soundToggle[aria-pressed="false"]{border-color:#5c6672;background:#25303a;color:#a6b3bd}
