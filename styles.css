@@ -278,3 +278,12 @@ body{color:var(--ink)}
 #play .cool-praise{font-size:clamp(23px,6vw,34px);font-weight:950;letter-spacing:.045em;line-height:1.2;color:#e7fb67;text-shadow:0 0 22px #e7fb6770;text-align:center;animation:cool-praise-in .3s ease-out both}
 @keyframes cool-praise-in{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){#play .cool-praise{animation:none!important}}
+
+/* v0.5.18 - rare achievements deserve a signature visual */
+.game-fx.record{z-index:150!important;background:radial-gradient(ellipse at center,#1d4d53e8 0%,#08121df5 70%)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.game-fx.record .game-fx-title{font-size:clamp(42px,11vw,86px)!important;line-height:1.05!important;color:#e7fb67!important;letter-spacing:.025em!important;text-shadow:0 0 14px #e7fb67c0,0 0 45px #67eadcaa,0 5px 0 #102c36!important;animation:retro-record-pop .65s cubic-bezier(.2,1.4,.4,1) both!important}
+.game-fx.record .game-fx-sub{font-size:clamp(15px,4vw,24px)!important;color:#c7fffa!important;letter-spacing:.1em!important;text-shadow:0 0 15px #89f7ec88!important}
+@keyframes retro-record-pop{0%{opacity:0;transform:scale(.5) rotate(-3deg)}55%{opacity:1;transform:scale(1.11) rotate(1deg)}100%{transform:scale(1) rotate(0)}}
+#play .round-break.cool-special .cool-card{border-color:#d6f766!important;box-shadow:0 22px 70px #000b,0 0 46px #e7fb6740!important}
+#play .round-break.cool-special .cool-praise{color:#f1ff79!important;font-size:clamp(26px,7vw,40px)!important;text-shadow:0 0 22px #e7fb67aa!important}
+@media(prefers-reduced-motion:reduce){.game-fx.record .game-fx-title{animation:none!important}}
