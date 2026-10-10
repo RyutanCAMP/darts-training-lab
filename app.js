@@ -163,7 +163,7 @@ function beginRoundBreak(round,score,darts=[]){
  tick();roundBreakTicker=setInterval(tick,50);roundBreakTimer=setTimeout(finishRoundBreak,ms);
 }
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
-function changeTab(name){finishRoundBreak();if(name==='analysis')aimPeriod='10';if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
+function changeTab(name){finishRoundBreak();if(name==='analysis'){aimPeriod='10';reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
 function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now())return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,corrected:false});if(s.darts.length===24){showResult=true;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
@@ -261,7 +261,7 @@ function renderAnalysis(){
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);
+ renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();
 }
 function scopeMetrics(ds,ss,prev){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
@@ -448,6 +448,71 @@ function renderMore(rounds,ds,prev){
  renderInsight({order,verdict,drift,after,rs});
 }
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();renderAnalysis()}});
+/* ===== Coach report (v0.5.30): rule-based text from the selected period; not an AI model. ===== */
+function buildReport(rounds,ds,prev){
+ const R=rounds.length,N=ds.length,label=aimPeriod==='all'?'ALL':aimPeriod+'R',head=label+' · '+(aimPeriod!=='all'&&R===Number(aimPeriod)?'':R+'R / ')+N+'投';
+ const order=orderStats(ds),v=orderVerdict(order),drift=dartStats(ds),after=afterStats(rounds),rs=roundStats(rounds);
+ const anyRef=order.some(x=>x.n>0&&x.n<REF_MIN);
+ const conf={k:'CONFIDENCE',label:'信頼度',lines:['データ量：'+N+'投。'+(N===0?'':anyRef?'投球順ごとに20投未満の項目があり、参考値として読んでください（REF）。':'投球順ごとに20投以上あります。'),'着弾位置はセグメントからの推定で、狙い位置は記録していません。','この文章は数値をもとにしたルール式の自動生成で、AIモデルによる判断ではありません。']};
+ if(R<3)return {head,sections:[{k:'SUMMARY',label:'総評',lines:['まだデータが少なく（'+R+'R / '+N+'投）、傾向は読み取れません。','3ラウンド（9投）以上、できれば1ゲーム（24投）を完走すると、投球順の比較が見られます。']},conf]};
+ const bulls=ds.filter(isBull).length,diff=prev?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
+ const trend=diff===null?'比較できる直前の期間はまだありません。':Math.abs(diff)<3?'直前の同じ長さの期間とほぼ同じです（'+(diff>=0?'+':'')+diff+'pt）。':diff>0?'直前の同じ長さの期間より '+diff+'pt 上がっています。':'直前の同じ長さの期間より '+(-diff)+'pt 下がっています。';
+ const scores=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt)).map(s=>sum(s.darts)),latest=scores[scores.length-1];
+ const summary=['ブル率は '+rate(ds)+'%（'+bulls+'/'+N+'投）。'+trend,'1ラウンドの平均は '+Math.round(mean(rounds.map(sum)))+' 点。'+(scores.length>=3?'直近のゲーム '+latest+' 点は、全 '+scores.length+' ゲーム中で上位 '+Math.ceil((scores.filter(x=>x>latest).length+1)/scores.length*100)+'% です。':'')];
+ const strengths=[],focus=[],drills=[];
+ const best=v.best,weak=v.weak,gap=best&&weak?best.rate-weak.rate:0;
+ if(gap>=10)strengths.push('DART '+best.i+' のブル率が最も高く '+best.rate+'% です（DART '+weak.i+' は '+weak.rate+'%）。'+(v.tag==='CLEAR DIFF'?'':'差はまだ参考値です。'));
+ if(diff!==null&&diff>=3)strengths.push('ブル率が直前の期間より '+diff+'pt 上がっています。');
+ const hats=rounds.filter(r=>r.every(isBull)).length,tons=rounds.filter(r=>sum(r)>=100).length;
+ if(hats)strengths.push('3投すべてブルのラウンド（HAT TRICK）が '+hats+' 回あります。');
+ else if(tons)strengths.push('100点以上のラウンドが '+tons+' 回あります。');
+ const pts=ds.map(aimPoint).filter(Boolean);
+ if(pts.length>=20){const mx=medianOf(pts.map(p=>p.x)),my=medianOf(pts.map(p=>p.y)),tight=Math.round(pts.filter(p=>Math.hypot(p.x-mx,p.y-my)<=.45).length/pts.length*100);if(tight>=50)strengths.push('着弾のまとまりが良好です（中央値から近い範囲に '+tight+'%）。')}
+ const [ab,am]=after;
+ if(ab.n>=10&&am.n>=10&&am.rate>=ab.rate)strengths.push('外した直後のブル率（'+am.rate+'%）が、ブル直後（'+ab.rate+'%）と同程度以上で、崩れにくい傾向です。');
+ if(gap>=10){const clear=v.tag==='CLEAR DIFF';focus.push('DART '+weak.i+' のブル率が低めです（'+weak.rate+'%、DART '+best.i+' は '+best.rate+'%）。'+(clear?'差は偶然の幅を超えています。':'差は偶然の幅に収まる可能性があります。')+'この投目で精度が下がっているのかもしれません。');drills.push('DART '+weak.i+' の前に構えと立ち位置を確認し、10ラウンド分を同じ条件で比べる。')}
+ const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
+ if(dr){focus.push('DART '+dr.i+' は '+driftWord(dr.mx,dr.my)+' に着弾が偏っています（OFFSET '+dr.off.toFixed(2)+'）。狙い位置は未記録のため、意図した狙いの影響も含みます。');drills.push('DART '+dr.i+' だけ、10投のあいだ反対方向を少し意識して変化を見る。')}
+ if(ab.n>=10&&am.n>=10&&am.rate<=ab.rate-15){focus.push('外した直後のブル率が低めです（AFTER MISS '+am.rate+'%、AFTER BULL '+ab.rate+'%）。外した後に力みやすいのかもしれません。');drills.push('外した次の1投の前に、一拍置いてから構える。')}
+ if(rs.first.n>=6&&rs.second.n>=6){const d=rs.first.avg-rs.second.avg;
+  if(d>=8){focus.push('後半が落ちています（R1–4 平均 '+Math.round(rs.first.avg)+'、R5–8 平均 '+Math.round(rs.second.avg)+'）。集中や体力が切れているのかもしれません。');drills.push('R4とR5のあいだに水分補給や深呼吸を入れて、後半を比べる。')}
+  else if(d<=-8){focus.push('序盤が低めです（R1–4 平均 '+Math.round(rs.first.avg)+'、R5–8 平均 '+Math.round(rs.second.avg)+'）。立ち上がりに時間がかかっているのかもしれません。');drills.push('1ゲーム目の前に数投の素振りを入れて、R1–4 を比べる。')}}
+ const miss=ds.filter(d=>d.segment==='MISS').length;
+ if(N>=12&&miss/N>=.15){focus.push('MISS が '+miss+' 投あります（'+Math.round(miss/N*100)+'%）。場外やバウンスアウト、入力の取りこぼしが混ざっているかもしれません。');drills.push('MISS になった理由を数ゲームだけ思い出してメモする。')}
+ if(!strengths.length)strengths.push('際立った強みは、まだデータから見つかっていません。');
+ if(!focus.length){focus.push('大きな偏りや落ち込みは見つかっていません。');drills.push('同じ条件で投げ続けて、データをためてから見直す。')}
+ if(anyRef&&drills.length<3)drills.push('20ラウンド（60投）以上ためると、REF が外れて比較しやすくなります。');
+ return {head,sections:[{k:'SUMMARY',label:'総評',lines:summary.filter(Boolean)},{k:'STRENGTHS',label:'強み',lines:strengths.slice(0,3)},{k:'FOCUS',label:'課題',lines:focus.slice(0,3)},{k:'NEXT DRILL',label:'次の練習',lines:drills.slice(0,3)},conf]};
+}
+let reportOn=false,reportTimer=null,lastReport=null;
+function showReport(animate){
+ if(reportTimer){clearInterval(reportTimer);reportTimer=null}
+ const rounds=selectedRounds(),ds=rounds.flat(),rep=buildReport(rounds,ds,previousRounds()),root=$('reportBody'),items=[];
+ lastReport=rep;root.textContent='';
+ const meta=document.createElement('div');meta.className='report-meta';meta.textContent=rep.head;root.appendChild(meta);
+ for(const s of rep.sections){
+  const sec=document.createElement('section'),lab=document.createElement('div');sec.className='report-sec';lab.className='report-label';lab.textContent=s.k+' · '+s.label;sec.appendChild(lab);
+  for(const text of s.lines){const p=document.createElement('p'),t=document.createElement('span'),rest=document.createElement('span');p.className='report-line';t.className='t';rest.className='rest';p.append(t,rest);sec.appendChild(p);items.push({p,t,rest,text})}
+  root.appendChild(sec);
+ }
+ const paint=n=>{let left=n;for(const x of items){const k=Math.max(0,Math.min(x.text.length,left));x.t.textContent=x.text.slice(0,k);x.rest.textContent=x.text.slice(k);x.p.classList.toggle('typing',k>0&&k<x.text.length);left-=x.text.length}};
+ const total=items.reduce((a,x)=>a+x.text.length,0),reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ root.dataset.done='0';
+ if(!animate||reduce){paint(total);root.dataset.done='1';return}
+ let shown=0;const step=Math.max(3,Math.ceil(total/90));paint(0);
+ reportTimer=setInterval(()=>{shown+=step;paint(shown);if(shown>=total){clearInterval(reportTimer);reportTimer=null;root.dataset.done='1'}},30);
+}
+function renderReportState(){
+ $('reportBody').classList.toggle('hidden',!reportOn);$('reportCopy').classList.toggle('hidden',!reportOn);
+ $('reportBtn').textContent=reportOn?'REGENERATE':'GENERATE REPORT';
+ if(reportOn)showReport(false);else{if(reportTimer){clearInterval(reportTimer);reportTimer=null}$('reportStatus').textContent=''}
+}
+$('reportBtn').onclick=()=>{reportOn=true;$('reportStatus').textContent='';$('reportBody').classList.remove('hidden');$('reportCopy').classList.remove('hidden');$('reportBtn').textContent='REGENERATE';showReport(true)};
+$('reportCopy').onclick=async()=>{
+ if(!lastReport)return;
+ const text=[lastReport.head].concat(lastReport.sections.map(s=>'['+s.k+' '+s.label+']\n'+s.lines.map(l=>'・'+l).join('\n'))).join('\n\n');
+ try{await navigator.clipboard.writeText(text);$('reportStatus').textContent='コピーしました'}catch(e){$('reportStatus').textContent='コピーできませんでした。文章を長押しして選択してください'}
+};
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
 renderAnalysis();$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';

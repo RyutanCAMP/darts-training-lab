@@ -330,8 +330,27 @@ body{color:var(--ink)}
 .analysis-extra summary,.aim-help summary,.result-archive summary,.play-extra summary{min-height:44px;box-sizing:border-box;padding-top:12px;padding-bottom:12px}
 .shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom))}
 .tabs{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.analysis-help{margin:14px 0 0;border:1px solid #34505e;border-radius:14px;background:#0d2230;padding:0 14px}
+.analysis-help>summary{cursor:pointer;min-height:44px;box-sizing:border-box;display:flex;align-items:center;gap:8px;color:#a8dbe7;font-size:13px;font-weight:900;letter-spacing:.08em}
+.help-body{padding:0 0 14px}
+.help-group{margin:12px 0 0}
+.help-group h4{margin:0 0 4px;font-size:10px;letter-spacing:.12em;color:#8fb2bf}
+.help-item{margin:8px 0;font-size:13px;line-height:1.7;color:#c4dbe3}
+.help-item b{display:inline-block;margin-right:8px;font-size:12px;letter-spacing:.04em;color:#e7fb67}
+.report-panel{margin-top:16px;border-color:#3b7777}
+.report-note{margin:2px 0 12px;font-size:11px;letter-spacing:.06em;color:#8fb2bf}
+.report-panel .actions{margin-top:0}
+.report-body{margin-top:14px}
+.report-meta{font-size:11px;font-weight:800;letter-spacing:.12em;color:#67e9e5}
+.report-sec{margin-top:14px;padding-top:12px;border-top:1px solid #2c4658}
+.report-label{margin-bottom:6px;font-size:10px;font-weight:900;letter-spacing:.12em;color:#e7fb67}
+.report-line{margin:6px 0;font-size:14px;line-height:1.75;color:#e4f2f6}
+.report-line .rest{color:transparent;user-select:none}
+.report-line.typing .t::after{content:"";display:inline-block;width:.55em;height:1em;margin-right:-.55em;background:#67e9e5;vertical-align:-.15em;animation:reportCaret 1s steps(2) infinite}
+@keyframes reportCaret{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.report-line.typing .t::after{animation:none}}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
-<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><span class="tiny muted">v0.5.29 / 200S</span><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
+<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><span class="tiny muted">v0.5.30 / 200S</span><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
 
 <section class="page active" id="play"><div class="play-heading"><strong>COUNT-UP</strong><span>8 ROUND / 24 DARTS</span></div><div class="grid playgrid"><article class="panel"><div class="playmeta"><span class="muted">TOTAL SCORE</span><strong id="roundlabel">ROUND 1 / 8</strong></div><div class="bigscore" id="score" aria-live="polite">0</div><div class="rounds" id="rounds"></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="クーリングタイム"><div class="cool-card"><div class="cool-kicker">COOL DOWN</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><p class="tiny muted" style="text-align:center">リングをクリック：SINGLE / DOUBLE / TRIPLE / BULL</p></article><div class="grid play-sidebar"><article class="panel"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="actions"><button id="newgame">新しいゲーム</button></div><div class="actions"><button id="endgame" class="warn">途中終了して保存</button></div><p class="tiny muted">3投で自動的に次のラウンドへ。未投球は自動補完しません。</p><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></article><details class="panel play-extra" open><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra" open><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div></div><article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article></section>
@@ -339,6 +358,29 @@ body{color:var(--ink)}
 <section class="page" id="analysis"><div class="eyebrow">DARTS INTELLIGENCE</div><h1 class="section-title">PERFORMANCE</h1>
 <div class="analysis-periods" id="analysisPeriods" role="group" aria-label="分析するラウンド数"><button data-aim-period="1">1R</button><button data-aim-period="10" class="selected">10R</button><button data-aim-period="20">20R</button><button data-aim-period="all">ALL</button></div>
 <div class="analysis-scope" id="analysisScope">0R · 0 DARTS</div>
+<details class="analysis-help" id="analysisHelp"><summary>HELP <span class="tiny muted">見方ガイド</span></summary><div class="help-body">
+<div class="help-group"><h4>まず見る3つ</h4>
+<p class="help-item"><b>BULL RATE</b>上で選んだ期間のブル率です。10R は直近10ラウンド（30投）。▲▼は直前の同じ長さの期間との差です。</p>
+<p class="help-item"><b>INSIGHT</b>FACT は数値で確認できた事実です。NEXT を開くと、考えられる原因（仮説）と試すことが出ます。断定ではありません。</p>
+<p class="help-item"><b>REPORT</b>一番下のボタンで、いまの期間を文章にまとめます。</p></div>
+<div class="help-group"><h4>1・2・3投目の違い</h4>
+<p class="help-item"><b>BULL BY DART</b>1・2・3投目それぞれのブル率です。</p>
+<p class="help-item"><b>THROW ORDER</b>RANGE は95%の幅です。幅が大きく重なるうちは、差が偶然かもしれません。CLEAR DIFF は幅が重ならず、差が出ている目安です。IB はブルのうち中心（50点）の数です。</p>
+<p class="help-item"><b>DRIFT BY DART</b>投目ごとの偏りです。OFFSET は 0 が中心、1 がボードの端。SPREAD は散らばりで、小さいほどまとまっています。</p></div>
+<div class="help-group"><h4>ズレの方向</h4>
+<p class="help-item"><b>AIM ANALYSIS</b>明るいほど多く入った場所です（最も多い場所が基準）。黄色い丸は中央値の目安。実際の座標ではなく、入ったセグメントから推定しています。MISS と内外が不明な記録は除き、件数を表示します。</p>
+<p class="help-item"><b>DIRECTION</b>8方向の割合です。<b>CONSISTENCY</b>の CLUSTER は、中央値の近く（0.45以内）に入った割合です。</p>
+<p class="help-item"><b>注意</b>狙った場所は記録していません。T20 を狙っていれば「上寄り」と出るのは自然です。</p></div>
+<div class="help-group"><h4>流れとラウンド</h4>
+<p class="help-item"><b>AFTER HIT / MISS</b>同じラウンド内で、ブル・MISS・それ以外の直後の1投が、ブルになった割合です。</p>
+<p class="help-item"><b>ROUND SCORE</b>R1〜R8 の平均点です。HALF は R1–4 と R5–8 の比較です。</p>
+<p class="help-item"><b>SCORE BREAKDOWN</b>得点がどこから来ているかです。<b>PACE</b>は投球間隔の中央値と、速い時・遅い時のブル率です。</p></div>
+<div class="help-group"><h4>全期間（期間の選択に左右されません）</h4>
+<p class="help-item"><b>SCORE &amp; GOAL</b>SD は得点のばらつきで、小さいほど安定です。TOP は直近ゲームの順位で、小さいほど上位です。GOAL は任意の目標点です。</p>
+<p class="help-item"><b>BEST GAME vs AVG</b>ベストの回と平均を、ラウンドごとに並べます。<b>CONDITIONS</b>は時間帯や何ゲーム目かで平均点を比べます。<b>PRACTICE LOG</b>は直近35日の練習量です。</p></div>
+<div class="help-group"><h4>REF について</h4>
+<p class="help-item"><b>REF</b>根拠の投数が20投に届いていない印です。偶然の幅が大きい参考値として読んでください。</p></div>
+</div></details>
 <div class="grid cols4" id="metrics"></div>
 <article class="panel insight-panel hidden" id="insightPanel" style="margin-top:16px"><h3>INSIGHT <span class="tiny muted">SELECTED PERIOD</span></h3><div id="insightBody"></div></article>
 <article class="panel aim-panel" style="margin-top:16px"><h3>AIM ANALYSIS</h3><div id="aimAnalysis"></div></article>
@@ -359,7 +401,8 @@ body{color:var(--ink)}
 <article class="panel"><h3>BEST GAME vs AVG <span class="tiny muted">ALL TIME</span></h3><div id="advancedBestVsAvg"></div></article>
 <article class="panel"><h3>CONDITIONS <span class="tiny muted">ALL TIME</span></h3><div id="advancedConditions"></div></article>
 <article class="panel"><h3>PRACTICE LOG <span class="tiny muted">ALL TIME</span></h3><div id="advancedLog"></div></article></div>
-<div class="actions"><button class="primary" id="startdash">BACK TO PLAY →</button></div></details></section>
+<div class="actions"><button class="primary" id="startdash">BACK TO PLAY →</button></div></details>
+<article class="panel report-panel" id="reportPanel"><h3>COACH REPORT <span class="tiny muted">SELECTED PERIOD</span></h3><div class="report-note">AUTO · 数値をもとにルールで文章化します（AIモデルではありません）</div><div class="actions"><button class="primary" id="reportBtn" type="button">GENERATE REPORT</button><button id="reportCopy" class="hidden" type="button">COPY</button></div><div class="report-body hidden" id="reportBody" aria-live="polite"></div><div class="tiny muted" id="reportStatus" role="status"></div></article></section>
 <section class="page" id="settings"><button class="back-to-play" id="backFromSettings">← PLAYに戻る</button><div class="eyebrow">SYSTEM CONFIGURATION</div><h1 class="section-title">設定とバックアップ</h1><p class="lead">投球中の記録はこのブラウザに自動保存。完走後に結果を確定すると履歴に登録されます。GitHubには送信されません。</p><article class="panel sound-settings"><h3>効果音</h3><div class="sound-controls"><button type="button" id="soundToggle" aria-pressed="true">効果音 ON</button><button type="button" id="soundTest">音を試す ♪</button><button type="button" id="musicToggle" aria-pressed="false">BGM OFF</button><span id="soundStatus" class="tiny muted" role="status" aria-live="polite"></span></div><div class="sound-samples"><button type="button" data-sound-test="hit">シングル</button><button type="button" data-sound-test="double">ダブル</button><button type="button" data-sound-test="triple">トリプル</button><button type="button" data-sound-test="bull">アウターブル</button><button type="button" data-sound-test="inner">インナーブル</button><button type="button" data-sound-test="hat">HAT TRICK</button></div><p class="tiny muted">RETRO DARTS ORIGINAL SOUND — すべてアプリ内で生成するオリジナル効果音です。外部音源は使用していません。</p><div class="volume-controls"><label>命中音 <input type="range" min="0" max="100" data-sound-volume="hit"><output id="hitVolumeValue">75%</output></label><label>演出音 <input type="range" min="0" max="100" data-sound-volume="fx"><output id="fxVolumeValue">80%</output></label><label>BGM <input type="range" min="0" max="100" data-sound-volume="bgm"><output id="bgmVolumeValue">25%</output></label></div><p class="tiny muted">命中音・ブル・ファンファーレを合成したオリジナルサウンドです。音声はブラウザ操作後に有効になります。</p></article><article class="panel"><h3>ラウンド間の待ち時間</h3><p class="tiny muted">3投後の待ち時間。次へボタンでスキップできます。</p><div class="round-delay-options"><button data-delay="5">5秒</button><button data-delay="8">8秒</button><button data-delay="10">10秒</button><button data-delay="15">15秒</button></div></article><div class="grid cols2"><article class="panel"><h3>データ管理</h3><p class="tiny muted">ブラウザのデータ削除・別PCへの移動に備えて、定期的にJSONを保存してください。</p><div class="actions"><button class="primary" id="exportjson">JSONバックアップ</button><button id="exportcsv">CSV出力</button></div><div class="flex" style="margin-top:14px"><label for="importjson">JSON復元：</label><input type="file" id="importjson" accept=".json,application/json"></div><p class="tiny muted">復元時は現在の履歴に統合し、同じIDは重複登録しません。</p><button id="clearall" class="warn">全履歴を削除</button></article><article class="panel"><h3>200S ボード接続</h3><label class="tiny"><input type="checkbox" id="board200sToggle" checked> 200S 自動入力を有効にする</label><p class="tiny muted">82エリアとSTART・CHANGEは設定済み。Bluetooth接続後、そのままPLAY画面で投げられます。</p><p class="tiny muted" id="board200sStatus" role="status">200S 入力待機中</p></article><div hidden aria-hidden="true" style="display:none"><article class="panel raw-capture"><h3>200S START・CHANGE 信号記録</h3><p class="tiny muted">82か所の記録は完了済み。ここでは本体ボタン2個だけ調べます。まず「STARTを記録」をクリックし、200S本体のSTARTを1回押してください。続いてCHANGEも同様に。得点データは変更しません。</p><div class="actions"><button type="button" class="primary" id="specialStart">① STARTを記録</button><button type="button" id="specialChange">② CHANGEを記録</button><button type="button" id="specialExport">③ JSON保存</button></div><p class="tiny muted" id="specialStatus" role="status">STARTから記録してください</p><pre class="log" id="specialLog">未記録</pre></article><article class="panel raw-capture"><h3>200S 信号まとめ取り <span class="pill">NEW</span></h3><p class="tiny muted">登録はせず、ボードから届く生のキー信号をまとめて記録します。200Sのスタートボタンは押さず、画面の順番どおりに各エリアを1回ずつ押してください。Shiftなどの信号も記録します。</p><div id="rawProgress" class="calibration-progress">未開始</div><div id="rawTarget" class="calibration-target">記録開始を押してください</div><div id="rawStatus" class="tiny muted" role="status">記録したデータはブラウザに保存されます</div><div class="actions"><button type="button" id="rawStart" class="primary">記録開始 / 再開</button><button type="button" id="rawUndo">直前をやり直す</button><button type="button" id="rawSkip">次へスキップ</button><button type="button" id="rawPause">一時停止</button><button type="button" id="rawExport">記録をJSON保存</button></div><details><summary>受信した信号を確認</summary><pre id="rawLog" class="log">記録なし</pre></details><p class="tiny muted">1回押すと、その直後のキー信号をひとまとめにします。信号が複数届いても記録し、約0.8秒静かになったら次へ進みます。押し間違えた場合は「直前をやり直す」。</p></article><article class="panel calibration-panel"><h3>200S 自動登録 <span class="pill">BETA</span></h3><p class="tiny muted">PCで200Sを接続し、画面の「最初に1回だけ押す」をクリックしてください。200S本体のスタートボタンは押さないでください。表示された位置を1回ずつ押すと、受信したキーコードを自動登録します。途中で閉じても続きから再開できます。</p><div class="calibration-progress" id="calibrationProgress">登録済み 0 / 82</div><div class="calibration-target" id="calibrationTarget">開始すると押す場所が表示されます</div><div class="calibration-status tiny muted" id="calibrationStatus" role="status" aria-live="polite">待機中</div><div class="actions"><button type="button" class="primary" id="calibrationStart">最初に1回だけ押す</button><button type="button" id="calibrationBack">直前を修正</button><button type="button" id="calibrationEdit">場所を選んで修正</button><button type="button" id="calibrationSkip">スキップ</button><button type="button" id="calibrationStop">一時停止</button><button type="button" id="calibrationExport">対応表を保存（JSON）</button></div><p class="tiny muted">完了後もブラウザ内に保存され、JSONバックアップを作成できます。キーが重複しても登録は止まりません。表示された場所をもう一度押すか、スキップしてください。通常のキーボード入力も受け付けるため、登録中はボード以外のキーを押さないでください。</p></article><article class="panel"><h3>200S入力テスト <span class="pill">EXPERIMENTAL</span></h3><p class="tiny muted">Bluetoothで200SをWindowsに接続後、この画面を開いてキーを押すと、ブラウザが受け取った入力を確認できます。実機のキー割当は未検証です。受信できない場合はWindows側の補助アプリが必要になる可能性があります。</p><div class="flex"><label>最後のキー <strong id="lastkey">未受信</strong></label></div><div class="flex" style="margin-top:10px"><select id="targetselect" aria-label="割当先"></select><button id="assignkey">このキーを割当</button><button id="clearbindings">割当を削除</button></div><p class="tiny muted">登録したキーはPLAY画面で着弾入力として利用。通常のキーボード操作と衝突する可能性があります。</p><details><summary>受信ログ・割当一覧</summary><pre class="log" id="keylog">未受信</pre><pre class="log" id="bindinglog">割当なし</pre></details></article></div></div></section>
 <nav class="tabs" aria-label="画面切り替え"><button data-tab="play" class="active">PLAY</button><button data-tab="history">RESULT / 履歴</button><button data-tab="analysis">ANALYSIS / 分析</button></nav><footer class="footer">DARTS TRAINING LAB · INDEPENDENT PROJECT · NOT AFFILIATED WITH DARTSLIVE</footer></div>
 <script>
@@ -527,7 +570,7 @@ function beginRoundBreak(round,score,darts=[]){
  tick();roundBreakTicker=setInterval(tick,50);roundBreakTimer=setTimeout(finishRoundBreak,ms);
 }
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
-function changeTab(name){finishRoundBreak();if(name==='analysis')aimPeriod='10';if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
+function changeTab(name){finishRoundBreak();if(name==='analysis'){aimPeriod='10';reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
 function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now())return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,corrected:false});if(s.darts.length===24){showResult=true;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
@@ -625,7 +668,7 @@ function renderAnalysis(){
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);
+ renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();
 }
 function scopeMetrics(ds,ss,prev){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
@@ -812,6 +855,71 @@ function renderMore(rounds,ds,prev){
  renderInsight({order,verdict,drift,after,rs});
 }
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();renderAnalysis()}});
+/* ===== Coach report (v0.5.30): rule-based text from the selected period; not an AI model. ===== */
+function buildReport(rounds,ds,prev){
+ const R=rounds.length,N=ds.length,label=aimPeriod==='all'?'ALL':aimPeriod+'R',head=label+' · '+(aimPeriod!=='all'&&R===Number(aimPeriod)?'':R+'R / ')+N+'投';
+ const order=orderStats(ds),v=orderVerdict(order),drift=dartStats(ds),after=afterStats(rounds),rs=roundStats(rounds);
+ const anyRef=order.some(x=>x.n>0&&x.n<REF_MIN);
+ const conf={k:'CONFIDENCE',label:'信頼度',lines:['データ量：'+N+'投。'+(N===0?'':anyRef?'投球順ごとに20投未満の項目があり、参考値として読んでください（REF）。':'投球順ごとに20投以上あります。'),'着弾位置はセグメントからの推定で、狙い位置は記録していません。','この文章は数値をもとにしたルール式の自動生成で、AIモデルによる判断ではありません。']};
+ if(R<3)return {head,sections:[{k:'SUMMARY',label:'総評',lines:['まだデータが少なく（'+R+'R / '+N+'投）、傾向は読み取れません。','3ラウンド（9投）以上、できれば1ゲーム（24投）を完走すると、投球順の比較が見られます。']},conf]};
+ const bulls=ds.filter(isBull).length,diff=prev?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
+ const trend=diff===null?'比較できる直前の期間はまだありません。':Math.abs(diff)<3?'直前の同じ長さの期間とほぼ同じです（'+(diff>=0?'+':'')+diff+'pt）。':diff>0?'直前の同じ長さの期間より '+diff+'pt 上がっています。':'直前の同じ長さの期間より '+(-diff)+'pt 下がっています。';
+ const scores=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt)).map(s=>sum(s.darts)),latest=scores[scores.length-1];
+ const summary=['ブル率は '+rate(ds)+'%（'+bulls+'/'+N+'投）。'+trend,'1ラウンドの平均は '+Math.round(mean(rounds.map(sum)))+' 点。'+(scores.length>=3?'直近のゲーム '+latest+' 点は、全 '+scores.length+' ゲーム中で上位 '+Math.ceil((scores.filter(x=>x>latest).length+1)/scores.length*100)+'% です。':'')];
+ const strengths=[],focus=[],drills=[];
+ const best=v.best,weak=v.weak,gap=best&&weak?best.rate-weak.rate:0;
+ if(gap>=10)strengths.push('DART '+best.i+' のブル率が最も高く '+best.rate+'% です（DART '+weak.i+' は '+weak.rate+'%）。'+(v.tag==='CLEAR DIFF'?'':'差はまだ参考値です。'));
+ if(diff!==null&&diff>=3)strengths.push('ブル率が直前の期間より '+diff+'pt 上がっています。');
+ const hats=rounds.filter(r=>r.every(isBull)).length,tons=rounds.filter(r=>sum(r)>=100).length;
+ if(hats)strengths.push('3投すべてブルのラウンド（HAT TRICK）が '+hats+' 回あります。');
+ else if(tons)strengths.push('100点以上のラウンドが '+tons+' 回あります。');
+ const pts=ds.map(aimPoint).filter(Boolean);
+ if(pts.length>=20){const mx=medianOf(pts.map(p=>p.x)),my=medianOf(pts.map(p=>p.y)),tight=Math.round(pts.filter(p=>Math.hypot(p.x-mx,p.y-my)<=.45).length/pts.length*100);if(tight>=50)strengths.push('着弾のまとまりが良好です（中央値から近い範囲に '+tight+'%）。')}
+ const [ab,am]=after;
+ if(ab.n>=10&&am.n>=10&&am.rate>=ab.rate)strengths.push('外した直後のブル率（'+am.rate+'%）が、ブル直後（'+ab.rate+'%）と同程度以上で、崩れにくい傾向です。');
+ if(gap>=10){const clear=v.tag==='CLEAR DIFF';focus.push('DART '+weak.i+' のブル率が低めです（'+weak.rate+'%、DART '+best.i+' は '+best.rate+'%）。'+(clear?'差は偶然の幅を超えています。':'差は偶然の幅に収まる可能性があります。')+'この投目で精度が下がっているのかもしれません。');drills.push('DART '+weak.i+' の前に構えと立ち位置を確認し、10ラウンド分を同じ条件で比べる。')}
+ const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
+ if(dr){focus.push('DART '+dr.i+' は '+driftWord(dr.mx,dr.my)+' に着弾が偏っています（OFFSET '+dr.off.toFixed(2)+'）。狙い位置は未記録のため、意図した狙いの影響も含みます。');drills.push('DART '+dr.i+' だけ、10投のあいだ反対方向を少し意識して変化を見る。')}
+ if(ab.n>=10&&am.n>=10&&am.rate<=ab.rate-15){focus.push('外した直後のブル率が低めです（AFTER MISS '+am.rate+'%、AFTER BULL '+ab.rate+'%）。外した後に力みやすいのかもしれません。');drills.push('外した次の1投の前に、一拍置いてから構える。')}
+ if(rs.first.n>=6&&rs.second.n>=6){const d=rs.first.avg-rs.second.avg;
+  if(d>=8){focus.push('後半が落ちています（R1–4 平均 '+Math.round(rs.first.avg)+'、R5–8 平均 '+Math.round(rs.second.avg)+'）。集中や体力が切れているのかもしれません。');drills.push('R4とR5のあいだに水分補給や深呼吸を入れて、後半を比べる。')}
+  else if(d<=-8){focus.push('序盤が低めです（R1–4 平均 '+Math.round(rs.first.avg)+'、R5–8 平均 '+Math.round(rs.second.avg)+'）。立ち上がりに時間がかかっているのかもしれません。');drills.push('1ゲーム目の前に数投の素振りを入れて、R1–4 を比べる。')}}
+ const miss=ds.filter(d=>d.segment==='MISS').length;
+ if(N>=12&&miss/N>=.15){focus.push('MISS が '+miss+' 投あります（'+Math.round(miss/N*100)+'%）。場外やバウンスアウト、入力の取りこぼしが混ざっているかもしれません。');drills.push('MISS になった理由を数ゲームだけ思い出してメモする。')}
+ if(!strengths.length)strengths.push('際立った強みは、まだデータから見つかっていません。');
+ if(!focus.length){focus.push('大きな偏りや落ち込みは見つかっていません。');drills.push('同じ条件で投げ続けて、データをためてから見直す。')}
+ if(anyRef&&drills.length<3)drills.push('20ラウンド（60投）以上ためると、REF が外れて比較しやすくなります。');
+ return {head,sections:[{k:'SUMMARY',label:'総評',lines:summary.filter(Boolean)},{k:'STRENGTHS',label:'強み',lines:strengths.slice(0,3)},{k:'FOCUS',label:'課題',lines:focus.slice(0,3)},{k:'NEXT DRILL',label:'次の練習',lines:drills.slice(0,3)},conf]};
+}
+let reportOn=false,reportTimer=null,lastReport=null;
+function showReport(animate){
+ if(reportTimer){clearInterval(reportTimer);reportTimer=null}
+ const rounds=selectedRounds(),ds=rounds.flat(),rep=buildReport(rounds,ds,previousRounds()),root=$('reportBody'),items=[];
+ lastReport=rep;root.textContent='';
+ const meta=document.createElement('div');meta.className='report-meta';meta.textContent=rep.head;root.appendChild(meta);
+ for(const s of rep.sections){
+  const sec=document.createElement('section'),lab=document.createElement('div');sec.className='report-sec';lab.className='report-label';lab.textContent=s.k+' · '+s.label;sec.appendChild(lab);
+  for(const text of s.lines){const p=document.createElement('p'),t=document.createElement('span'),rest=document.createElement('span');p.className='report-line';t.className='t';rest.className='rest';p.append(t,rest);sec.appendChild(p);items.push({p,t,rest,text})}
+  root.appendChild(sec);
+ }
+ const paint=n=>{let left=n;for(const x of items){const k=Math.max(0,Math.min(x.text.length,left));x.t.textContent=x.text.slice(0,k);x.rest.textContent=x.text.slice(k);x.p.classList.toggle('typing',k>0&&k<x.text.length);left-=x.text.length}};
+ const total=items.reduce((a,x)=>a+x.text.length,0),reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ root.dataset.done='0';
+ if(!animate||reduce){paint(total);root.dataset.done='1';return}
+ let shown=0;const step=Math.max(3,Math.ceil(total/90));paint(0);
+ reportTimer=setInterval(()=>{shown+=step;paint(shown);if(shown>=total){clearInterval(reportTimer);reportTimer=null;root.dataset.done='1'}},30);
+}
+function renderReportState(){
+ $('reportBody').classList.toggle('hidden',!reportOn);$('reportCopy').classList.toggle('hidden',!reportOn);
+ $('reportBtn').textContent=reportOn?'REGENERATE':'GENERATE REPORT';
+ if(reportOn)showReport(false);else{if(reportTimer){clearInterval(reportTimer);reportTimer=null}$('reportStatus').textContent=''}
+}
+$('reportBtn').onclick=()=>{reportOn=true;$('reportStatus').textContent='';$('reportBody').classList.remove('hidden');$('reportCopy').classList.remove('hidden');$('reportBtn').textContent='REGENERATE';showReport(true)};
+$('reportCopy').onclick=async()=>{
+ if(!lastReport)return;
+ const text=[lastReport.head].concat(lastReport.sections.map(s=>'['+s.k+' '+s.label+']\n'+s.lines.map(l=>'・'+l).join('\n'))).join('\n\n');
+ try{await navigator.clipboard.writeText(text);$('reportStatus').textContent='コピーしました'}catch(e){$('reportStatus').textContent='コピーできませんでした。文章を長押しして選択してください'}
+};
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
 renderAnalysis();$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';
