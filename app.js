@@ -236,9 +236,15 @@ function renderAim(){
  root.innerHTML='<div class="aim-periods">'+choices+'</div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+direction+'寄り</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>セグメントの代表位置による推定です。実際の着弾座標ではありません。MISSは位置不明として除外します。上下左右の割合は重複する場合があります。</p></details>';
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAim()}});
+function achievementTotals(){
+ const games=finished(),darts=games.flatMap(s=>s.darts),rounds=games.flatMap(s=>Array.from({length:8},(_,i)=>s.darts.slice(i*3,i*3+3))).filter(a=>a.length===3);
+ const bulls=darts.filter(isBull).length,inner=darts.filter(d=>d.segment==='IB').length,hats=rounds.filter(a=>a.every(isBull)).length,ton80=rounds.filter(a=>a.every(d=>d.segment==='T20')).length,high=rounds.filter(a=>{const n=sum(a);return n>=151&&n<180}).length;
+ const items=[['BULL',bulls],['INNER BULL',inner],['HAT TRICK',hats],['TON 80',ton80],['HIGH TON',high]];
+ return items.map(([label,n])=>'<div class="achievement-tile"><span>'+label+'</span><strong>'+n+'</strong></div>').join('');
+}
 function insight(ds){if(ds.length<30)return '現在の記録は'+ds.length+'投。まずはCOUNT-UPを繰り返して、30投以上のデータを集めましょう。AI診断ではなく、測定結果に基づく練習ヒントを表示します。';let arr=[1,2,3].map(i=>rate(ds.filter(d=>d.dartIndex===i))),min=arr.indexOf(Math.min(...arr));return '記録済み'+ds.length+'投のブル率は'+rate(ds)+'%。投球順別では'+(min+1)+'投目が'+arr[min]+'%で最も低い値です。サンプル数や日ごとの変動も確認しながら、次の練習で改善するか検証しましょう。フォーム原因はこの数値だけでは断定できません。'}
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
-$('metrics').innerHTML=sMetrics(ss);
+$('metrics').innerHTML=sMetrics(ss);$('achievementTotals').innerHTML=achievementTotals();
 $('dashchart').innerHTML=chart(ss);$('analysischart').innerHTML=chart(ss);renderAim();$('insight').textContent=insight(a);$('analysisnote').textContent=insight(a);$('dashbull').innerHTML=bullBars(a);$('allbull').innerHTML=bullBars(a);$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';
 $('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?sum(d):'—')+'</b></div>'}).join('');
