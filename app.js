@@ -14,7 +14,7 @@ if(localStorage.getItem(KEY)!==null){saveOK=true;savedAt=Date.now()}
 if(store.active.darts.length===24)showResult=true;
 const points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
 const label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
-const dartLabel=d=>d.zone&&/^S\\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
+const dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
 const isBull=d=>d.segment==='IB'||d.segment==='OB';
 const sum=ds=>ds.reduce((a,d)=>a+d.score,0);
 const all=()=>store.sessions.flatMap(s=>s.darts);
@@ -254,37 +254,29 @@ function allRecordedRounds(){
 function selectedRounds(){const blocks=allRecordedRounds();return aimPeriod==='all'?blocks:blocks.slice(-Number(aimPeriod))}
 function selectedDarts(){return selectedRounds().flat()}
 function renderAnalysis(){
- const rounds=selectedRounds(),ds=rounds.flat(),ss=finished();
+ const rounds=selectedRounds(),ds=rounds.flat(),ss=finished(),prev=previousRounds();
  document.querySelectorAll('[data-aim-period]').forEach(b=>{const active=b.dataset.aimPeriod===aimPeriod;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active))});
  $('analysisScope').textContent=rounds.length+'R · '+ds.length+' DARTS';
- $('metrics').innerHTML=scopeMetrics(ds,ss);
+ $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();renderThrowOrder();
+ renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);
 }
-function scopeMetrics(ds,ss){
+function scopeMetrics(ds,ss,prev){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
  const value=(name,n,detail)=>'<div class="panel metric"><div class="label">'+name+'</div><div class="value">'+n+'</div><div class="detail">'+detail+'</div></div>';
- return value('BULL RATE',ds.length?rate(ds)+'%':'—',ds.filter(isBull).length+' / '+ds.length)
+ const diff=prev&&ds.length?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
+ return value('BULL RATE',ds.length?rate(ds)+'%':'—',ds.filter(isBull).length+' / '+ds.length+(diff===null?'':' · '+signed(diff,'pt')))
  +value('BULL HITS',ds.filter(isBull).length,'SELECTED')
  +value('INNER BULL',ds.filter(d=>d.segment==='IB').length,'SELECTED')
  +value('PERSONAL BEST',best??'—','ALL TIME');
-}
-function renderThrowOrder(){
- const ds=selectedDarts(),data=[1,2,3].map(i=>{const darts=ds.filter(d=>d.dartIndex===i);return {i,n:darts.length,bulls:darts.filter(isBull).length,rate:darts.length?Math.round(darts.filter(isBull).length/darts.length*100):null,avg:darts.length?Math.round(sum(darts)/darts.length*10)/10:null}});
- const REF_MIN=20,valid=data.filter(x=>x.n);
- const best=valid.length?valid.reduce((a,b)=>b.rate>a.rate?b:a):null;
- const weakest=valid.length?valid.reduce((a,b)=>b.rate<a.rate?b:a):null;
- const isRef=x=>x.n>0&&x.n<REF_MIN,anyRef=valid.some(isRef);
- const cards=data.map(d=>'<div class="throw-order-card"><div class="throw-order-label">DART '+d.i+(isRef(d)?'<em title="'+REF_MIN+'投未満は参考値">REF</em>':'')+'</div><strong>'+(d.rate===null?'—':d.rate+'%')+'</strong><span>BULL '+d.bulls+'/'+d.n+'</span><span>AVG '+(d.avg===null?'—':d.avg)+'</span></div>').join('');
- $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(valid.length<2?'—':best.rate===weakest.rate?'EVEN':'BEST · DART '+best.i+'　/　LOW · DART '+weakest.i)+(valid.length>=2&&anyRef?'　·　REF':'')+'</div>';
 }
 function renderAdvanced(){
  const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isBull(d)),np=nonbull.map(aimPoint);
  const directions=['↑','↗','→','↘','↓','↙','←','↖'],counts=Array(8).fill(0);
  for(const p of np){const deg=(Math.atan2(p.y,p.x)*180/Math.PI+450)%360;counts[Math.round(deg/45)%8]++}
- const bar=(label,value,max,extra='')=>'<div class="advanced-bar"><span>'+label+'</span><div class="track"><div class="fill" style="width:'+(max?Math.min(100,value/max*100):0).toFixed(1)+'%"></div></div><strong>'+extra+'</strong></div>';
+ const bar=(label,value,max,extra='')=>advBar(label,value,max,extra);
  $('advancedDirection').innerHTML='<div class="direction-grid">'+counts.map((n,i)=>'<div class="direction-cell"><span>'+directions[i]+'</span><strong>'+(np.length?Math.round(n/np.length*100):0)+'%</strong></div>').join('')+'</div>';
  const median=a=>{a.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y));
@@ -306,6 +298,156 @@ function achievementTotals(){
  const items=[['BULL',bulls],['INNER BULL',inner],['HAT TRICK',hats],['TON 80',ton80],['HIGH TON',high]];
  return items.map(([label,n])=>'<div class="achievement-tile"><span>'+label+'</span><strong>'+n+'</strong></div>').join('');
 }
+/* ===== Analysis helpers (v0.5.28) =====
+   All figures are derived from recorded segments only (not measured x/y), selected period unless marked ALL TIME. */
+const REF_MIN=20; /* fewer throws than this are shown as REF (reference only) */
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const medianOf=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?(s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2):0};
+const wilson=(k,n)=>{if(!n)return null;const z=1.96,p=k/n,d=1+z*z/n,c=p+z*z/(2*n),m=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n));return [Math.max(0,Math.round((c-m)/d*100)),Math.min(100,Math.round((c+m)/d*100))]};
+const arrowOf=(x,y)=>{if(Math.hypot(x,y)<.08)return '●';const deg=(Math.atan2(y,x)*180/Math.PI+450)%360;return ['↑','↗','→','↘','↓','↙','←','↖'][Math.round(deg/45)%8]};
+const driftWord=(x,y)=>{const w=(Math.abs(y)<.08?'':y>0?'下':'上')+(Math.abs(x)<.08?'':x>0?'右':'左');return w?w+'寄り':'中央'};
+const badge=n=>n>0&&n<REF_MIN?'<em title="'+REF_MIN+'投未満は参考値">REF</em>':'';
+const signed=(v,unit='')=>(v>0?'▲ +'+v:v<0?'▼ '+v:'＝ 0')+unit;
+const advBar=(label,value,max,extra='',cls='')=>'<div class="advanced-bar '+cls+'"><span>'+label+'</span><div class="track"><div class="fill" style="width:'+(max?Math.min(100,value/max*100):0).toFixed(1)+'%"></div></div><strong>'+extra+'</strong></div>';
+const statCard=(label,big,lines=[],ref='')=>'<div class="throw-order-card"><div class="throw-order-label">'+label+ref+'</div><strong>'+big+'</strong>'+lines.map(t=>'<span>'+t+'</span>').join('')+'</div>';
+const dayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function previousRounds(){
+ if(aimPeriod==='all')return null;
+ const N=Number(aimPeriod),b=allRecordedRounds(),prev=b.slice(Math.max(0,b.length-2*N),Math.max(0,b.length-N));
+ return prev.length===N?prev:null;
+}
+function orderStats(ds){
+ return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),b=a.filter(isBull).length;
+  return {i,n:a.length,bulls:b,ib:a.filter(d=>d.segment==='IB').length,rate:a.length?Math.round(b/a.length*100):null,avg:a.length?Math.round(sum(a)/a.length*10)/10:null,ci:wilson(b,a.length)}});
+}
+function orderVerdict(data){
+ const valid=data.filter(x=>x.n);
+ if(valid.length<2)return {text:'—',best:null,weak:null,tag:''};
+ const best=valid.reduce((a,b)=>b.rate>a.rate?b:a),weak=valid.reduce((a,b)=>b.rate<a.rate?b:a),anyRef=valid.some(x=>x.n<REF_MIN);
+ if(best.rate===weak.rate)return {text:'EVEN',best,weak,tag:anyRef?'REF':''};
+ return {text:'BEST · DART '+best.i+'　/　LOW · DART '+weak.i,best,weak,tag:anyRef?'REF':best.ci[0]>weak.ci[1]?'CLEAR DIFF':'NO CLEAR DIFF'};
+}
+function renderThrowOrder(){
+ const data=orderStats(selectedDarts()),v=orderVerdict(data);
+ const cards=data.map(d=>statCard('DART '+d.i,d.rate===null?'—':d.rate+'%',['BULL '+d.bulls+'/'+d.n,'RANGE '+(d.ci?d.ci[0]+'–'+d.ci[1]+'%':'—'),'IB '+d.ib+'/'+d.bulls,'AVG '+(d.avg===null?'—':d.avg)],badge(d.n))).join('');
+ $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+v.text+(v.tag?'　·　'+v.tag:'')+'</div><div class="tiny muted">RANGE = 95% 信頼区間 · IB = BULLのうちINNER</div>';
+}
+function dartStats(ds){
+ return [1,2,3].map(i=>{
+  const a=ds.filter(d=>d.dartIndex===i),pts=a.map(aimPoint).filter(Boolean),mx=medianOf(pts.map(p=>p.x)),my=medianOf(pts.map(p=>p.y));
+  return {i,n:a.length,np:pts.length,mx,my,off:Math.hypot(mx,my),spread:pts.length?mean(pts.map(p=>Math.hypot(p.x-mx,p.y-my))):null};
+ });
+}
+function renderDrift(){
+ const st=dartStats(selectedDarts());
+ const cards=st.map(s=>statCard('DART '+s.i,s.np?arrowOf(s.mx,s.my):'—',[s.np?driftWord(s.mx,s.my):'—','OFFSET '+(s.np?s.off.toFixed(2):'—'),'SPREAD '+(s.spread===null?'—':s.spread.toFixed(2))],badge(s.np))).join('');
+ $('advancedDrift').innerHTML='<div class="throw-order-grid drift">'+cards+'</div><div class="tiny muted">セグメント推定 · MISS・ZONE不明は除外 · n '+st.map(s=>s.np).join(' / ')+'</div>';
+}
+function afterStats(rounds){
+ const g={bull:[0,0],miss:[0,0],other:[0,0]};
+ for(const r of rounds)for(let k=1;k<3;k++){const p=r[k-1],c=r[k];if(!p||!c)continue;const key=isBull(p)?'bull':p.segment==='MISS'?'miss':'other';g[key][1]++;if(isBull(c))g[key][0]++}
+ return [['AFTER BULL','bull'],['AFTER MISS','miss'],['AFTER OTHER','other']].map(([label,key])=>({label,k:g[key][0],n:g[key][1],rate:g[key][1]?Math.round(g[key][0]/g[key][1]*100):null,ci:wilson(g[key][0],g[key][1])}));
+}
+function renderAfter(rounds){
+ const st=afterStats(rounds);
+ const cards=st.map(s=>statCard(s.label,s.rate===null?'—':s.rate+'%',['BULL '+s.k+'/'+s.n,'RANGE '+(s.ci?s.ci[0]+'–'+s.ci[1]+'%':'—')],badge(s.n))).join('');
+ const b=st[0],m=st[1],gap=b.n&&m.n?b.rate-m.rate:null;
+ $('advancedAfter').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(gap===null?'—':'BULL − MISS　'+(gap>0?'+':'')+gap+'pt'+(st.some(s=>s.n&&s.n<REF_MIN)?'　·　REF':''))+'</div><div class="tiny muted">同じラウンド内の次の1投 · OTHER = ブル以外の命中</div>';
+ return st;
+}
+function roundStats(rounds){
+ const by=Array.from({length:8},()=>[]);
+ for(const r of rounds){const i=r[0]&&r[0].roundIndex;if(Number.isInteger(i)&&i>=1&&i<=8)by[i-1].push(sum(r))}
+ const avg=a=>a.length?mean(a):null,first=by.slice(0,4).flat(),second=by.slice(4).flat(),all=by.flat();
+ return {by,avgs:by.map(avg),first:{n:first.length,avg:avg(first)},second:{n:second.length,avg:avg(second)},all,avg:avg(all)};
+}
+function renderRoundScore(rs,prev){
+ const max=Math.max(1,...rs.avgs.filter(x=>x!==null));
+ const rows=rs.avgs.map((a,i)=>advBar('R'+(i+1),a||0,max,a===null?'—':Math.round(a)+' · '+rs.by[i].length+'R','wide'+(rs.by[i].length&&rs.by[i].length<3?' dim':''))).join('');
+ const prevAvg=prev&&prev.length?mean(prev.map(sum)):null,d=rs.avg!==null&&prevAvg!==null?Math.round((rs.avg-prevAvg)*10)/10:null;
+ const halves=rs.first.avg!==null&&rs.second.avg!==null?'R1–4 '+Math.round(rs.first.avg)+'　/　R5–8 '+Math.round(rs.second.avg)+'　('+(rs.second.avg-rs.first.avg>=0?'+':'')+Math.round(rs.second.avg-rs.first.avg)+')'+(Math.min(rs.first.n,rs.second.n)<12?'　·　REF':''):'—';
+ const buckets=[['0–29',0,29],['30–59',30,59],['60–99',60,99],['100–149',100,149],['150+',150,180]].map(([l,lo,hi])=>[l,rs.all.filter(x=>x>=lo&&x<=hi).length]);
+ const top=Math.max(1,...buckets.map(b=>b[1]));
+ $('advancedRoundScore').innerHTML='<div class="advanced-big">'+(rs.avg===null?'—':rs.avg.toFixed(1))+'</div><div class="tiny muted">AVG / ROUND'+(d===null?'':' · '+signed(d)+' VS PREV')+'</div>'+rows+'<div class="advanced-sub">HALF</div><div class="throw-order-verdict">'+halves+'</div><div class="advanced-sub">DISTRIBUTION</div>'+buckets.map(([l,n])=>advBar(l,n,top,n+' · '+(rs.all.length?Math.round(n/rs.all.length*100):0)+'%','wide')).join('')+'<div class="tiny muted">薄い行 = 3R未満（参考）</div>';
+}
+function renderBreakdown(ds){
+ const cats=[['IN BULL',d=>d.segment==='IB'],['OUT BULL',d=>d.segment==='OB'],['TRIPLE',d=>d.segment[0]==='T'],['DOUBLE',d=>d.segment[0]==='D'],['SINGLE',d=>d.segment[0]==='S'],['MISS',d=>d.segment==='MISS']];
+ const total=sum(ds);
+ $('advancedBreakdown').innerHTML='<div class="tiny muted">TOTAL '+total+' pt · '+ds.length+'投</div>'+cats.map(([l,f])=>{const a=ds.filter(f),p=sum(a);return advBar(l,p,total,(total?Math.round(p/total*100):0)+'% · '+a.length+'投','wide')}).join('');
+}
+function paceStats(rounds){
+ const iv=[];
+ for(const r of rounds)for(let k=1;k<3;k++){const dt=(Date.parse(r[k].timestamp)-Date.parse(r[k-1].timestamp))/1000;if(dt>0&&dt<=120)iv.push({dt,bull:isBull(r[k])})}
+ if(iv.length<6)return null;
+ const med=medianOf(iv.map(x=>x.dt)),f=a=>({n:a.length,k:a.filter(x=>x.bull).length});
+ return {med,fast:f(iv.filter(x=>x.dt<=med)),slow:f(iv.filter(x=>x.dt>med))};
+}
+function renderPace(rounds){
+ const p=paceStats(rounds);
+ if(!p){$('advancedPace').innerHTML='<div class="advanced-big">—</div><div class="tiny muted">投球間隔が6区間以上たまると表示</div>';return}
+ const rt=x=>x.n?Math.round(x.k/x.n*100)+'%':'—';
+ $('advancedPace').innerHTML='<div class="throw-order-grid">'+statCard('MEDIAN',p.med.toFixed(1)+'s',['DART間隔'])+statCard('FAST',rt(p.fast),['BULL '+p.fast.k+'/'+p.fast.n,'≦ '+p.med.toFixed(1)+'s'],badge(p.fast.n))+statCard('SLOW',rt(p.slow),['BULL '+p.slow.k+'/'+p.slow.n,'> '+p.med.toFixed(1)+'s'],badge(p.slow.n))+'</div><div class="tiny muted">同じラウンド内、前の投球からの入力間隔 · 120秒超は除外</div>';
+}
+function renderLog(){
+ const byDay=new Map();
+ for(const d of all().concat(store.active.darts)){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
+ const today=new Date(),cells=[];
+ for(let i=34;i>=0;i--){const t=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i),k=dayKey(t),n=byDay.get(k)||0;cells.push({k,n,t,today:i===0})}
+ const level=n=>n===0?0:n<24?1:n<72?2:n<144?3:4;
+ const days28=cells.slice(-28).filter(c=>c.n>0).length;
+ let streak=0,i=cells.length-1;if(!cells[i].n)i--;while(i>=0&&cells[i].n>0){streak++;i--}
+ const sinceMon=(today.getDay()+6)%7,week=cells.slice(-(sinceMon+1)).reduce((a,c)=>a+c.n,0);
+ $('advancedLog').innerHTML='<div class="throw-order-grid">'+statCard('DAYS',days28+'/28',['LAST 28D'])+statCard('STREAK',streak,['DAYS'])+statCard('THIS WEEK',week,['DARTS'])+'</div><div class="practice-grid">'+cells.map(c=>'<div class="practice-cell l'+level(c.n)+(c.today?' today':'')+'" title="'+(c.t.getMonth()+1)+'/'+c.t.getDate()+'：'+c.n+'投"></div>').join('')+'</div><div class="tiny muted">直近35日 · 色の濃さ = 投数</div>';
+}
+function renderConditions(){
+ const gs=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt));
+ if(!gs.length){$('advancedConditions').innerHTML='<div class="advanced-big">—</div>';return}
+ const seen={},rows=gs.map(s=>{const k=dayKey(s.startedAt);seen[k]=(seen[k]||0)+1;return {score:sum(s.darts),h:new Date(s.startedAt).getHours(),nth:seen[k]}});
+ const group=(title,defs)=>{
+  const stats=defs.map(([l,f])=>{const a=rows.filter(f);return {l,g:a.length,avg:a.length?mean(a.map(x=>x.score)):null}}),max=Math.max(1,...stats.map(s=>s.avg||0));
+  return '<div class="advanced-sub">'+title+'</div>'+stats.map(s=>advBar(s.l,s.avg||0,max,s.avg===null?'—':Math.round(s.avg)+' · '+s.g+'G','wide'+(s.g&&s.g<3?' dim':''))).join('');
+ };
+ $('advancedConditions').innerHTML=group('TIME OF DAY',[['MORNING',x=>x.h>=5&&x.h<11],['DAY',x=>x.h>=11&&x.h<17],['EVENING',x=>x.h>=17&&x.h<22],['NIGHT',x=>x.h>=22||x.h<5]])+group('GAME OF THE DAY',[['1ST',x=>x.nth===1],['2ND',x=>x.nth===2],['3RD+',x=>x.nth>=3]])+'<div class="tiny muted">MORNING 5–11 · DAY 11–17 · EVENING 17–22 · NIGHT 22–5 / 平均スコア · G=ゲーム数 · 薄い行は3G未満(参考)</div>';
+}
+function renderGoal(){
+ const input=$('goalInput');if(input&&document.activeElement!==input)input.value=store.goalScore||'';
+ const gs=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt)),sc=gs.map(s=>sum(s.darts)),body=$('advancedGoalBody');
+ if(!sc.length){body.innerHTML='<div class="advanced-big">—</div>';return}
+ const last=sc.slice(-10),avg=mean(last),sd=Math.sqrt(mean(last.map(x=>(x-avg)*(x-avg)))),latest=sc[sc.length-1],rank=sc.filter(x=>x>latest).length+1,top=Math.ceil(rank/sc.length*100);
+ const ref=last.length<5?'<em title="5ゲーム未満は参考値">REF</em>':'';
+ let goal='';
+ if(store.goalScore>0){const gap=Math.round(store.goalScore-avg);goal=advBar('GOAL',avg,store.goalScore,Math.round(avg/store.goalScore*100)+'%','wide')+'<div class="throw-order-verdict">'+(gap>0?'GAP '+gap+' pt':'REACHED +'+(-gap)+' pt')+'</div>'}
+ body.innerHTML='<div class="throw-order-grid">'+statCard('AVG',Math.round(avg),['LAST '+last.length+'G'],ref)+statCard('SD',Math.round(sd),['ばらつき'])+statCard('BEST',Math.max(...last),['MIN '+Math.min(...last),'LAST '+last.length+'G'])+'</div><div class="tiny muted">LATEST '+latest+' · TOP '+top+'% of '+sc.length+'G</div>'+goal;
+}
+function renderBestVsAvg(){
+ const gs=finished(),root=$('advancedBestVsAvg');
+ if(gs.length<2){root.innerHTML='<div class="advanced-big">—</div><div class="tiny muted">2ゲーム以上で表示</div>';return}
+ const per=s=>Array.from({length:8},(_,i)=>sum(s.darts.slice(i*3,i*3+3))),all=gs.map(per),best=gs.reduce((a,b)=>sum(b.darts)>sum(a.darts)?b:a),bestR=per(best);
+ const avgR=bestR.map((_,i)=>mean(all.map(r=>r[i]))),max=Math.max(1,...avgR,...bestR);
+ root.innerHTML='<div class="tiny muted">BEST '+sum(best.darts)+' vs AVG '+Math.round(mean(gs.map(s=>sum(s.darts))))+' · '+gs.length+'G</div><div class="tiny muted">棒 = 平均 / 黄線 = ベスト</div>'+bestR.map((b,i)=>{const diff=Math.round(b-avgR[i]);return '<div class="advanced-bar wide"><span>R'+(i+1)+'</span><div class="track has-mark"><div class="fill" style="width:'+(avgR[i]/max*100).toFixed(1)+'%"></div><i class="mark" style="left:'+(b/max*100).toFixed(1)+'%"></i></div><strong>'+(diff>=0?'+':'')+diff+'</strong></div>'}).join('');
+}
+/* Measured facts first; interpretations are labelled as possibilities (aim target is not recorded). */
+function renderInsight(ctx){
+ const items=[],{order,verdict:v,drift,after,rs}=ctx;
+ if(v.best&&v.weak&&v.best.rate-v.weak.rate>=10)items.push({fact:'BULL  DART '+v.best.i+' '+v.best.rate+'%　/　DART '+v.weak.i+' '+v.weak.rate+'%',ref:v.tag==='REF',hyp:'DART '+v.weak.i+' の精度が下がっている可能性。サンプルが少ないうちは偶然の幅があります。',tryIt:'DART '+v.weak.i+' の前に構えを確認し、20R分ためて再確認。'});
+ const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
+ if(dr)items.push({fact:'DART '+dr.i+'  '+driftWord(dr.mx,dr.my)+'  OFFSET '+dr.off.toFixed(2),ref:dr.np<REF_MIN,hyp:'その方向に着弾が偏っている可能性。狙い位置は未記録のため、意図した狙いの影響もあります。',tryIt:'DART '+dr.i+' だけ、次の10投で反対方向を少し意識して変化を見る。'});
+ const [ab,am]=after;
+ if(ab.n>=10&&am.n>=10&&Math.abs(ab.rate-am.rate)>=15){const lower=am.rate<ab.rate;items.push({fact:'AFTER BULL '+ab.rate+'%　/　AFTER MISS '+am.rate+'%',ref:ab.n<REF_MIN||am.n<REF_MIN,hyp:lower?'外した直後に崩れやすい可能性。':'外した後のほうが集中している可能性。',tryIt:lower?'外した次の1投の前に一拍置く。':''})}
+ if(rs.first.n>=6&&rs.second.n>=6&&Math.abs(rs.first.avg-rs.second.avg)>=8){const fade=rs.first.avg>rs.second.avg;items.push({fact:'R1–4 '+Math.round(rs.first.avg)+'　/　R5–8 '+Math.round(rs.second.avg),ref:Math.min(rs.first.n,rs.second.n)<12,hyp:fade?'後半に落ちやすい可能性。':'序盤が立ち上がりきっていない可能性。',tryIt:fade?'R4とR5の間に一呼吸入れて比較。':'R1の前に数投の素振りを入れて比較。'})}
+ const top=items.slice(0,3),panel=$('insightPanel');
+ panel.classList.toggle('hidden',!top.length);
+ $('insightBody').innerHTML=top.map(x=>'<div class="insight-fact"><span class="insight-tag">FACT</span><span>'+x.fact+(x.ref?' <em title="参考値">REF</em>':'')+'</span></div>').join('')+(top.length?'<details class="insight-next"><summary>NEXT</summary>'+top.map(x=>'<p><b>HYPOTHESIS</b> '+x.hyp+(x.tryIt?'<br><b>TRY</b> '+x.tryIt:'')+'</p>').join('')+'</details>':'');
+}
+function renderMore(rounds,ds,prev){
+ const order=orderStats(ds),verdict=orderVerdict(order),drift=dartStats(ds),rs=roundStats(rounds);
+ renderDrift();
+ const after=renderAfter(rounds);
+ renderRoundScore(rs,prev);renderBreakdown(ds);renderPace(rounds);
+ renderGoal();renderBestVsAvg();renderConditions();renderLog();
+ renderInsight({order,verdict,drift,after,rs});
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();renderAnalysis()}});
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
 renderAnalysis();$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';

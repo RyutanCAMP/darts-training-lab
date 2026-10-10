@@ -305,8 +305,30 @@ body{color:var(--ink)}
 
 .throw-order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}.throw-order-card{min-width:0;background:#102b39;border:1px solid #34505e;border-radius:12px;padding:12px 5px;text-align:center;display:flex;flex-direction:column;gap:7px}.throw-order-label{font-size:11px;font-weight:900;color:#a6c5ce}.throw-order-card strong{font-size:clamp(20px,4vw,31px);color:#e7fb67}.throw-order-card span{font-size:11px;color:#abc3cd}.throw-order-verdict{color:#67e9e5;font-weight:800;font-size:12px;letter-spacing:.05em}
 .throw-order-label em{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.06em;color:#e9c46a;border:1px solid #6f6a3e;border-radius:6px;padding:0 4px;margin-left:5px;vertical-align:1px}
+.advanced-bar.wide{grid-template-columns:70px minmax(0,1fr) 92px}
+.advanced-bar.dim{opacity:.55}
+.advanced-sub{margin:16px 0 4px;font-size:10px;font-weight:900;letter-spacing:.12em;color:#8fb2bf}
+.track.has-mark{position:relative;overflow:visible}
+.track .mark{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1px;background:#e9c46a;border-radius:2px}
+.throw-order-grid.drift .throw-order-card strong{font-size:clamp(26px,7vw,36px)}
+.insight-panel{border-color:#4f7a4c}
+.insight-fact{display:flex;gap:9px;align-items:baseline;margin:10px 0;font-size:14px;line-height:1.5;color:#e4f2f6}
+.insight-tag{flex:none;font-size:10px;font-weight:900;letter-spacing:.08em;color:#102b39;background:#e7fb67;border-radius:5px;padding:1px 6px}
+.insight-fact em{font-style:normal;font-size:9px;font-weight:800;color:#e9c46a;border:1px solid #6f6a3e;border-radius:6px;padding:0 4px}
+.insight-next{margin-top:8px}
+.insight-next summary{cursor:pointer;color:#a8dbe7;font-size:12px;font-weight:800;letter-spacing:.08em;min-height:44px;display:flex;align-items:center}
+.insight-next p{margin:8px 0;font-size:13px;line-height:1.6;color:#c4dbe3}
+.insight-next b{font-size:10px;letter-spacing:.08em;color:#67e9e5}
+.practice-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:12px 0}
+.practice-cell{aspect-ratio:1;border-radius:5px;background:#102b39;border:1px solid #2c4658}
+.practice-cell.l1{background:#1d4d5a}.practice-cell.l2{background:#2a8a8a}.practice-cell.l3{background:#45c7bd}.practice-cell.l4{background:#a6f5e2}
+.practice-cell.today{outline:2px solid #e7fb67;outline-offset:1px}
+.goal-row{display:flex;align-items:center;gap:8px;margin:6px 0 12px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#a6c5ce}
+.goal-row input{width:104px;min-height:40px;border-radius:10px;border:1px solid #34505e;background:#0d1826;color:#e7fb67;font-size:16px;font-weight:800;padding:0 10px}
+.throw-order-card em,.throw-order-label em{font-style:normal}
+.insight-next summary::before{content:'▸';margin-right:6px}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
-<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><span class="tiny muted">v0.5.27 / 200S</span><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
+<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><span class="tiny muted">v0.5.28 / 200S</span><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
 
 <section class="page active" id="play"><div class="play-heading"><strong>COUNT-UP</strong><span>8 ROUND / 24 DARTS</span></div><div class="grid playgrid"><article class="panel"><div class="playmeta"><span class="muted">TOTAL SCORE</span><strong id="roundlabel">ROUND 1 / 8</strong></div><div class="bigscore" id="score" aria-live="polite">0</div><div class="rounds" id="rounds"></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="クーリングタイム"><div class="cool-card"><div class="cool-kicker">COOL DOWN</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><p class="tiny muted" style="text-align:center">リングをクリック：SINGLE / DOUBLE / TRIPLE / BULL</p></article><div class="grid play-sidebar"><article class="panel"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="actions"><button id="newgame">新しいゲーム</button></div><div class="actions"><button id="endgame" class="warn">途中終了して保存</button></div><p class="tiny muted">3投で自動的に次のラウンドへ。未投球は自動補完しません。</p><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></article><details class="panel play-extra" open><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra" open><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div></div><article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article></section>
@@ -315,15 +337,25 @@ body{color:var(--ink)}
 <div class="analysis-periods" id="analysisPeriods" role="group" aria-label="分析するラウンド数"><button data-aim-period="1">1R</button><button data-aim-period="10" class="selected">10R</button><button data-aim-period="20">20R</button><button data-aim-period="all">ALL</button></div>
 <div class="analysis-scope" id="analysisScope">0R · 0 DARTS</div>
 <div class="grid cols4" id="metrics"></div>
+<article class="panel insight-panel hidden" id="insightPanel" style="margin-top:16px"><h3>INSIGHT <span class="tiny muted">SELECTED PERIOD</span></h3><div id="insightBody"></div></article>
 <article class="panel aim-panel" style="margin-top:16px"><h3>AIM ANALYSIS</h3><div id="aimAnalysis"></div></article>
 <div class="grid cols2" style="margin-top:16px"><article class="panel"><h3>BULL BY DART</h3><div id="allbull"></div></article><article class="panel"><h3>SCORE TREND <span class="tiny muted">ALL TIME</span></h3><div id="analysischart"></div></article></div>
 <article class="panel achievement-panel"><h3>ACHIEVEMENTS <span class="tiny muted">ALL TIME</span></h3><div class="achievement-grid" id="achievementTotals"></div></article>
 <details class="analysis-extra"><summary>ADVANCED ANALYTICS <span class="tiny muted">A CLASS</span></summary>
-<div class="grid cols2 advanced-grid"><article class="panel"><h3>THROW ORDER <span class="tiny muted">DART 1 / 2 / 3</span></h3><div id="advancedThrowOrder"></div></article><article class="panel"><h3>DIRECTION <span class="tiny muted">8 WAY</span></h3><div id="advancedDirection"></div></article>
+<div class="grid cols2 advanced-grid"><article class="panel"><h3>THROW ORDER <span class="tiny muted">DART 1 / 2 / 3</span></h3><div id="advancedThrowOrder"></div></article><article class="panel"><h3>DRIFT BY DART <span class="tiny muted">1 / 2 / 3</span></h3><div id="advancedDrift"></div></article>
+<article class="panel"><h3>DIRECTION <span class="tiny muted">8 WAY</span></h3><div id="advancedDirection"></div></article>
 <article class="panel"><h3>CONSISTENCY</h3><div id="advancedConsistency"></div></article>
+<article class="panel"><h3>AFTER HIT / MISS <span class="tiny muted">NEXT DART</span></h3><div id="advancedAfter"></div></article>
 <article class="panel"><h3>BULL TREND</h3><div id="advancedBullTrend"></div></article>
-<article class="panel"><h3>ROUND ANALYSIS</h3><div id="advancedRounds"></div></article>
-<article class="panel"><h3>BEST STREAK</h3><div id="advancedStreak"></div></article></div>
+<article class="panel"><h3>ROUND ANALYSIS <span class="tiny muted">BULL RATE</span></h3><div id="advancedRounds"></div></article>
+<article class="panel"><h3>ROUND SCORE <span class="tiny muted">R1 – R8</span></h3><div id="advancedRoundScore"></div></article>
+<article class="panel"><h3>SCORE BREAKDOWN</h3><div id="advancedBreakdown"></div></article>
+<article class="panel"><h3>PACE <span class="tiny muted">DART INTERVAL</span></h3><div id="advancedPace"></div></article>
+<article class="panel"><h3>BEST STREAK</h3><div id="advancedStreak"></div></article>
+<article class="panel"><h3>SCORE &amp; GOAL <span class="tiny muted">ALL TIME</span></h3><label class="goal-row">GOAL <input id="goalInput" type="number" inputmode="numeric" min="0" max="1440" step="10" placeholder="—" aria-label="目標スコア"> pt</label><div id="advancedGoalBody"></div></article>
+<article class="panel"><h3>BEST GAME vs AVG <span class="tiny muted">ALL TIME</span></h3><div id="advancedBestVsAvg"></div></article>
+<article class="panel"><h3>CONDITIONS <span class="tiny muted">ALL TIME</span></h3><div id="advancedConditions"></div></article>
+<article class="panel"><h3>PRACTICE LOG <span class="tiny muted">ALL TIME</span></h3><div id="advancedLog"></div></article></div>
 <div class="actions"><button class="primary" id="startdash">BACK TO PLAY →</button></div></details></section>
 <section class="page" id="settings"><button class="back-to-play" id="backFromSettings">← PLAYに戻る</button><div class="eyebrow">SYSTEM CONFIGURATION</div><h1 class="section-title">設定とバックアップ</h1><p class="lead">投球中の記録はこのブラウザに自動保存。完走後に結果を確定すると履歴に登録されます。GitHubには送信されません。</p><article class="panel sound-settings"><h3>効果音</h3><div class="sound-controls"><button type="button" id="soundToggle" aria-pressed="true">効果音 ON</button><button type="button" id="soundTest">音を試す ♪</button><button type="button" id="musicToggle" aria-pressed="false">BGM OFF</button><span id="soundStatus" class="tiny muted" role="status" aria-live="polite"></span></div><div class="sound-samples"><button type="button" data-sound-test="hit">シングル</button><button type="button" data-sound-test="double">ダブル</button><button type="button" data-sound-test="triple">トリプル</button><button type="button" data-sound-test="bull">アウターブル</button><button type="button" data-sound-test="inner">インナーブル</button><button type="button" data-sound-test="hat">HAT TRICK</button></div><p class="tiny muted">RETRO DARTS ORIGINAL SOUND — すべてアプリ内で生成するオリジナル効果音です。外部音源は使用していません。</p><div class="volume-controls"><label>命中音 <input type="range" min="0" max="100" data-sound-volume="hit"><output id="hitVolumeValue">75%</output></label><label>演出音 <input type="range" min="0" max="100" data-sound-volume="fx"><output id="fxVolumeValue">80%</output></label><label>BGM <input type="range" min="0" max="100" data-sound-volume="bgm"><output id="bgmVolumeValue">25%</output></label></div><p class="tiny muted">命中音・ブル・ファンファーレを合成したオリジナルサウンドです。音声はブラウザ操作後に有効になります。</p></article><article class="panel"><h3>ラウンド間の待ち時間</h3><p class="tiny muted">3投後の待ち時間。次へボタンでスキップできます。</p><div class="round-delay-options"><button data-delay="5">5秒</button><button data-delay="8">8秒</button><button data-delay="10">10秒</button><button data-delay="15">15秒</button></div></article><div class="grid cols2"><article class="panel"><h3>データ管理</h3><p class="tiny muted">ブラウザのデータ削除・別PCへの移動に備えて、定期的にJSONを保存してください。</p><div class="actions"><button class="primary" id="exportjson">JSONバックアップ</button><button id="exportcsv">CSV出力</button></div><div class="flex" style="margin-top:14px"><label for="importjson">JSON復元：</label><input type="file" id="importjson" accept=".json,application/json"></div><p class="tiny muted">復元時は現在の履歴に統合し、同じIDは重複登録しません。</p><button id="clearall" class="warn">全履歴を削除</button></article><article class="panel"><h3>200S ボード接続</h3><label class="tiny"><input type="checkbox" id="board200sToggle" checked> 200S 自動入力を有効にする</label><p class="tiny muted">82エリアとSTART・CHANGEは設定済み。Bluetooth接続後、そのままPLAY画面で投げられます。</p><p class="tiny muted" id="board200sStatus" role="status">200S 入力待機中</p></article><div hidden aria-hidden="true" style="display:none"><article class="panel raw-capture"><h3>200S START・CHANGE 信号記録</h3><p class="tiny muted">82か所の記録は完了済み。ここでは本体ボタン2個だけ調べます。まず「STARTを記録」をクリックし、200S本体のSTARTを1回押してください。続いてCHANGEも同様に。得点データは変更しません。</p><div class="actions"><button type="button" class="primary" id="specialStart">① STARTを記録</button><button type="button" id="specialChange">② CHANGEを記録</button><button type="button" id="specialExport">③ JSON保存</button></div><p class="tiny muted" id="specialStatus" role="status">STARTから記録してください</p><pre class="log" id="specialLog">未記録</pre></article><article class="panel raw-capture"><h3>200S 信号まとめ取り <span class="pill">NEW</span></h3><p class="tiny muted">登録はせず、ボードから届く生のキー信号をまとめて記録します。200Sのスタートボタンは押さず、画面の順番どおりに各エリアを1回ずつ押してください。Shiftなどの信号も記録します。</p><div id="rawProgress" class="calibration-progress">未開始</div><div id="rawTarget" class="calibration-target">記録開始を押してください</div><div id="rawStatus" class="tiny muted" role="status">記録したデータはブラウザに保存されます</div><div class="actions"><button type="button" id="rawStart" class="primary">記録開始 / 再開</button><button type="button" id="rawUndo">直前をやり直す</button><button type="button" id="rawSkip">次へスキップ</button><button type="button" id="rawPause">一時停止</button><button type="button" id="rawExport">記録をJSON保存</button></div><details><summary>受信した信号を確認</summary><pre id="rawLog" class="log">記録なし</pre></details><p class="tiny muted">1回押すと、その直後のキー信号をひとまとめにします。信号が複数届いても記録し、約0.8秒静かになったら次へ進みます。押し間違えた場合は「直前をやり直す」。</p></article><article class="panel calibration-panel"><h3>200S 自動登録 <span class="pill">BETA</span></h3><p class="tiny muted">PCで200Sを接続し、画面の「最初に1回だけ押す」をクリックしてください。200S本体のスタートボタンは押さないでください。表示された位置を1回ずつ押すと、受信したキーコードを自動登録します。途中で閉じても続きから再開できます。</p><div class="calibration-progress" id="calibrationProgress">登録済み 0 / 82</div><div class="calibration-target" id="calibrationTarget">開始すると押す場所が表示されます</div><div class="calibration-status tiny muted" id="calibrationStatus" role="status" aria-live="polite">待機中</div><div class="actions"><button type="button" class="primary" id="calibrationStart">最初に1回だけ押す</button><button type="button" id="calibrationBack">直前を修正</button><button type="button" id="calibrationEdit">場所を選んで修正</button><button type="button" id="calibrationSkip">スキップ</button><button type="button" id="calibrationStop">一時停止</button><button type="button" id="calibrationExport">対応表を保存（JSON）</button></div><p class="tiny muted">完了後もブラウザ内に保存され、JSONバックアップを作成できます。キーが重複しても登録は止まりません。表示された場所をもう一度押すか、スキップしてください。通常のキーボード入力も受け付けるため、登録中はボード以外のキーを押さないでください。</p></article><article class="panel"><h3>200S入力テスト <span class="pill">EXPERIMENTAL</span></h3><p class="tiny muted">Bluetoothで200SをWindowsに接続後、この画面を開いてキーを押すと、ブラウザが受け取った入力を確認できます。実機のキー割当は未検証です。受信できない場合はWindows側の補助アプリが必要になる可能性があります。</p><div class="flex"><label>最後のキー <strong id="lastkey">未受信</strong></label></div><div class="flex" style="margin-top:10px"><select id="targetselect" aria-label="割当先"></select><button id="assignkey">このキーを割当</button><button id="clearbindings">割当を削除</button></div><p class="tiny muted">登録したキーはPLAY画面で着弾入力として利用。通常のキーボード操作と衝突する可能性があります。</p><details><summary>受信ログ・割当一覧</summary><pre class="log" id="keylog">未受信</pre><pre class="log" id="bindinglog">割当なし</pre></details></article></div></div></section>
 <nav class="tabs" aria-label="画面切り替え"><button data-tab="play" class="active">PLAY</button><button data-tab="history">RESULT / 履歴</button><button data-tab="analysis">ANALYSIS / 分析</button></nav><footer class="footer">DARTS TRAINING LAB · INDEPENDENT PROJECT · NOT AFFILIATED WITH DARTSLIVE</footer></div>
@@ -343,7 +375,7 @@ if(localStorage.getItem(KEY)!==null){saveOK=true;savedAt=Date.now()}
 if(store.active.darts.length===24)showResult=true;
 const points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
 const label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
-const dartLabel=d=>d.zone&&/^S\\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
+const dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
 const isBull=d=>d.segment==='IB'||d.segment==='OB';
 const sum=ds=>ds.reduce((a,d)=>a+d.score,0);
 const all=()=>store.sessions.flatMap(s=>s.darts);
@@ -583,37 +615,29 @@ function allRecordedRounds(){
 function selectedRounds(){const blocks=allRecordedRounds();return aimPeriod==='all'?blocks:blocks.slice(-Number(aimPeriod))}
 function selectedDarts(){return selectedRounds().flat()}
 function renderAnalysis(){
- const rounds=selectedRounds(),ds=rounds.flat(),ss=finished();
+ const rounds=selectedRounds(),ds=rounds.flat(),ss=finished(),prev=previousRounds();
  document.querySelectorAll('[data-aim-period]').forEach(b=>{const active=b.dataset.aimPeriod===aimPeriod;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active))});
  $('analysisScope').textContent=rounds.length+'R · '+ds.length+' DARTS';
- $('metrics').innerHTML=scopeMetrics(ds,ss);
+ $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();renderThrowOrder();
+ renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);
 }
-function scopeMetrics(ds,ss){
+function scopeMetrics(ds,ss,prev){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
  const value=(name,n,detail)=>'<div class="panel metric"><div class="label">'+name+'</div><div class="value">'+n+'</div><div class="detail">'+detail+'</div></div>';
- return value('BULL RATE',ds.length?rate(ds)+'%':'—',ds.filter(isBull).length+' / '+ds.length)
+ const diff=prev&&ds.length?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
+ return value('BULL RATE',ds.length?rate(ds)+'%':'—',ds.filter(isBull).length+' / '+ds.length+(diff===null?'':' · '+signed(diff,'pt')))
  +value('BULL HITS',ds.filter(isBull).length,'SELECTED')
  +value('INNER BULL',ds.filter(d=>d.segment==='IB').length,'SELECTED')
  +value('PERSONAL BEST',best??'—','ALL TIME');
-}
-function renderThrowOrder(){
- const ds=selectedDarts(),data=[1,2,3].map(i=>{const darts=ds.filter(d=>d.dartIndex===i);return {i,n:darts.length,bulls:darts.filter(isBull).length,rate:darts.length?Math.round(darts.filter(isBull).length/darts.length*100):null,avg:darts.length?Math.round(sum(darts)/darts.length*10)/10:null}});
- const REF_MIN=20,valid=data.filter(x=>x.n);
- const best=valid.length?valid.reduce((a,b)=>b.rate>a.rate?b:a):null;
- const weakest=valid.length?valid.reduce((a,b)=>b.rate<a.rate?b:a):null;
- const isRef=x=>x.n>0&&x.n<REF_MIN,anyRef=valid.some(isRef);
- const cards=data.map(d=>'<div class="throw-order-card"><div class="throw-order-label">DART '+d.i+(isRef(d)?'<em title="'+REF_MIN+'投未満は参考値">REF</em>':'')+'</div><strong>'+(d.rate===null?'—':d.rate+'%')+'</strong><span>BULL '+d.bulls+'/'+d.n+'</span><span>AVG '+(d.avg===null?'—':d.avg)+'</span></div>').join('');
- $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(valid.length<2?'—':best.rate===weakest.rate?'EVEN':'BEST · DART '+best.i+'　/　LOW · DART '+weakest.i)+(valid.length>=2&&anyRef?'　·　REF':'')+'</div>';
 }
 function renderAdvanced(){
  const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isBull(d)),np=nonbull.map(aimPoint);
  const directions=['↑','↗','→','↘','↓','↙','←','↖'],counts=Array(8).fill(0);
  for(const p of np){const deg=(Math.atan2(p.y,p.x)*180/Math.PI+450)%360;counts[Math.round(deg/45)%8]++}
- const bar=(label,value,max,extra='')=>'<div class="advanced-bar"><span>'+label+'</span><div class="track"><div class="fill" style="width:'+(max?Math.min(100,value/max*100):0).toFixed(1)+'%"></div></div><strong>'+extra+'</strong></div>';
+ const bar=(label,value,max,extra='')=>advBar(label,value,max,extra);
  $('advancedDirection').innerHTML='<div class="direction-grid">'+counts.map((n,i)=>'<div class="direction-cell"><span>'+directions[i]+'</span><strong>'+(np.length?Math.round(n/np.length*100):0)+'%</strong></div>').join('')+'</div>';
  const median=a=>{a.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y));
@@ -635,6 +659,156 @@ function achievementTotals(){
  const items=[['BULL',bulls],['INNER BULL',inner],['HAT TRICK',hats],['TON 80',ton80],['HIGH TON',high]];
  return items.map(([label,n])=>'<div class="achievement-tile"><span>'+label+'</span><strong>'+n+'</strong></div>').join('');
 }
+/* ===== Analysis helpers (v0.5.28) =====
+   All figures are derived from recorded segments only (not measured x/y), selected period unless marked ALL TIME. */
+const REF_MIN=20; /* fewer throws than this are shown as REF (reference only) */
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const medianOf=a=>{const s=a.slice().sort((x,y)=>x-y);return s.length?(s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2):0};
+const wilson=(k,n)=>{if(!n)return null;const z=1.96,p=k/n,d=1+z*z/n,c=p+z*z/(2*n),m=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n));return [Math.max(0,Math.round((c-m)/d*100)),Math.min(100,Math.round((c+m)/d*100))]};
+const arrowOf=(x,y)=>{if(Math.hypot(x,y)<.08)return '●';const deg=(Math.atan2(y,x)*180/Math.PI+450)%360;return ['↑','↗','→','↘','↓','↙','←','↖'][Math.round(deg/45)%8]};
+const driftWord=(x,y)=>{const w=(Math.abs(y)<.08?'':y>0?'下':'上')+(Math.abs(x)<.08?'':x>0?'右':'左');return w?w+'寄り':'中央'};
+const badge=n=>n>0&&n<REF_MIN?'<em title="'+REF_MIN+'投未満は参考値">REF</em>':'';
+const signed=(v,unit='')=>(v>0?'▲ +'+v:v<0?'▼ '+v:'＝ 0')+unit;
+const advBar=(label,value,max,extra='',cls='')=>'<div class="advanced-bar '+cls+'"><span>'+label+'</span><div class="track"><div class="fill" style="width:'+(max?Math.min(100,value/max*100):0).toFixed(1)+'%"></div></div><strong>'+extra+'</strong></div>';
+const statCard=(label,big,lines=[],ref='')=>'<div class="throw-order-card"><div class="throw-order-label">'+label+ref+'</div><strong>'+big+'</strong>'+lines.map(t=>'<span>'+t+'</span>').join('')+'</div>';
+const dayKey=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function previousRounds(){
+ if(aimPeriod==='all')return null;
+ const N=Number(aimPeriod),b=allRecordedRounds(),prev=b.slice(Math.max(0,b.length-2*N),Math.max(0,b.length-N));
+ return prev.length===N?prev:null;
+}
+function orderStats(ds){
+ return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),b=a.filter(isBull).length;
+  return {i,n:a.length,bulls:b,ib:a.filter(d=>d.segment==='IB').length,rate:a.length?Math.round(b/a.length*100):null,avg:a.length?Math.round(sum(a)/a.length*10)/10:null,ci:wilson(b,a.length)}});
+}
+function orderVerdict(data){
+ const valid=data.filter(x=>x.n);
+ if(valid.length<2)return {text:'—',best:null,weak:null,tag:''};
+ const best=valid.reduce((a,b)=>b.rate>a.rate?b:a),weak=valid.reduce((a,b)=>b.rate<a.rate?b:a),anyRef=valid.some(x=>x.n<REF_MIN);
+ if(best.rate===weak.rate)return {text:'EVEN',best,weak,tag:anyRef?'REF':''};
+ return {text:'BEST · DART '+best.i+'　/　LOW · DART '+weak.i,best,weak,tag:anyRef?'REF':best.ci[0]>weak.ci[1]?'CLEAR DIFF':'NO CLEAR DIFF'};
+}
+function renderThrowOrder(){
+ const data=orderStats(selectedDarts()),v=orderVerdict(data);
+ const cards=data.map(d=>statCard('DART '+d.i,d.rate===null?'—':d.rate+'%',['BULL '+d.bulls+'/'+d.n,'RANGE '+(d.ci?d.ci[0]+'–'+d.ci[1]+'%':'—'),'IB '+d.ib+'/'+d.bulls,'AVG '+(d.avg===null?'—':d.avg)],badge(d.n))).join('');
+ $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+v.text+(v.tag?'　·　'+v.tag:'')+'</div><div class="tiny muted">RANGE = 95% 信頼区間 · IB = BULLのうちINNER</div>';
+}
+function dartStats(ds){
+ return [1,2,3].map(i=>{
+  const a=ds.filter(d=>d.dartIndex===i),pts=a.map(aimPoint).filter(Boolean),mx=medianOf(pts.map(p=>p.x)),my=medianOf(pts.map(p=>p.y));
+  return {i,n:a.length,np:pts.length,mx,my,off:Math.hypot(mx,my),spread:pts.length?mean(pts.map(p=>Math.hypot(p.x-mx,p.y-my))):null};
+ });
+}
+function renderDrift(){
+ const st=dartStats(selectedDarts());
+ const cards=st.map(s=>statCard('DART '+s.i,s.np?arrowOf(s.mx,s.my):'—',[s.np?driftWord(s.mx,s.my):'—','OFFSET '+(s.np?s.off.toFixed(2):'—'),'SPREAD '+(s.spread===null?'—':s.spread.toFixed(2))],badge(s.np))).join('');
+ $('advancedDrift').innerHTML='<div class="throw-order-grid drift">'+cards+'</div><div class="tiny muted">セグメント推定 · MISS・ZONE不明は除外 · n '+st.map(s=>s.np).join(' / ')+'</div>';
+}
+function afterStats(rounds){
+ const g={bull:[0,0],miss:[0,0],other:[0,0]};
+ for(const r of rounds)for(let k=1;k<3;k++){const p=r[k-1],c=r[k];if(!p||!c)continue;const key=isBull(p)?'bull':p.segment==='MISS'?'miss':'other';g[key][1]++;if(isBull(c))g[key][0]++}
+ return [['AFTER BULL','bull'],['AFTER MISS','miss'],['AFTER OTHER','other']].map(([label,key])=>({label,k:g[key][0],n:g[key][1],rate:g[key][1]?Math.round(g[key][0]/g[key][1]*100):null,ci:wilson(g[key][0],g[key][1])}));
+}
+function renderAfter(rounds){
+ const st=afterStats(rounds);
+ const cards=st.map(s=>statCard(s.label,s.rate===null?'—':s.rate+'%',['BULL '+s.k+'/'+s.n,'RANGE '+(s.ci?s.ci[0]+'–'+s.ci[1]+'%':'—')],badge(s.n))).join('');
+ const b=st[0],m=st[1],gap=b.n&&m.n?b.rate-m.rate:null;
+ $('advancedAfter').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+(gap===null?'—':'BULL − MISS　'+(gap>0?'+':'')+gap+'pt'+(st.some(s=>s.n&&s.n<REF_MIN)?'　·　REF':''))+'</div><div class="tiny muted">同じラウンド内の次の1投 · OTHER = ブル以外の命中</div>';
+ return st;
+}
+function roundStats(rounds){
+ const by=Array.from({length:8},()=>[]);
+ for(const r of rounds){const i=r[0]&&r[0].roundIndex;if(Number.isInteger(i)&&i>=1&&i<=8)by[i-1].push(sum(r))}
+ const avg=a=>a.length?mean(a):null,first=by.slice(0,4).flat(),second=by.slice(4).flat(),all=by.flat();
+ return {by,avgs:by.map(avg),first:{n:first.length,avg:avg(first)},second:{n:second.length,avg:avg(second)},all,avg:avg(all)};
+}
+function renderRoundScore(rs,prev){
+ const max=Math.max(1,...rs.avgs.filter(x=>x!==null));
+ const rows=rs.avgs.map((a,i)=>advBar('R'+(i+1),a||0,max,a===null?'—':Math.round(a)+' · '+rs.by[i].length+'R','wide'+(rs.by[i].length&&rs.by[i].length<3?' dim':''))).join('');
+ const prevAvg=prev&&prev.length?mean(prev.map(sum)):null,d=rs.avg!==null&&prevAvg!==null?Math.round((rs.avg-prevAvg)*10)/10:null;
+ const halves=rs.first.avg!==null&&rs.second.avg!==null?'R1–4 '+Math.round(rs.first.avg)+'　/　R5–8 '+Math.round(rs.second.avg)+'　('+(rs.second.avg-rs.first.avg>=0?'+':'')+Math.round(rs.second.avg-rs.first.avg)+')'+(Math.min(rs.first.n,rs.second.n)<12?'　·　REF':''):'—';
+ const buckets=[['0–29',0,29],['30–59',30,59],['60–99',60,99],['100–149',100,149],['150+',150,180]].map(([l,lo,hi])=>[l,rs.all.filter(x=>x>=lo&&x<=hi).length]);
+ const top=Math.max(1,...buckets.map(b=>b[1]));
+ $('advancedRoundScore').innerHTML='<div class="advanced-big">'+(rs.avg===null?'—':rs.avg.toFixed(1))+'</div><div class="tiny muted">AVG / ROUND'+(d===null?'':' · '+signed(d)+' VS PREV')+'</div>'+rows+'<div class="advanced-sub">HALF</div><div class="throw-order-verdict">'+halves+'</div><div class="advanced-sub">DISTRIBUTION</div>'+buckets.map(([l,n])=>advBar(l,n,top,n+' · '+(rs.all.length?Math.round(n/rs.all.length*100):0)+'%','wide')).join('')+'<div class="tiny muted">薄い行 = 3R未満（参考）</div>';
+}
+function renderBreakdown(ds){
+ const cats=[['IN BULL',d=>d.segment==='IB'],['OUT BULL',d=>d.segment==='OB'],['TRIPLE',d=>d.segment[0]==='T'],['DOUBLE',d=>d.segment[0]==='D'],['SINGLE',d=>d.segment[0]==='S'],['MISS',d=>d.segment==='MISS']];
+ const total=sum(ds);
+ $('advancedBreakdown').innerHTML='<div class="tiny muted">TOTAL '+total+' pt · '+ds.length+'投</div>'+cats.map(([l,f])=>{const a=ds.filter(f),p=sum(a);return advBar(l,p,total,(total?Math.round(p/total*100):0)+'% · '+a.length+'投','wide')}).join('');
+}
+function paceStats(rounds){
+ const iv=[];
+ for(const r of rounds)for(let k=1;k<3;k++){const dt=(Date.parse(r[k].timestamp)-Date.parse(r[k-1].timestamp))/1000;if(dt>0&&dt<=120)iv.push({dt,bull:isBull(r[k])})}
+ if(iv.length<6)return null;
+ const med=medianOf(iv.map(x=>x.dt)),f=a=>({n:a.length,k:a.filter(x=>x.bull).length});
+ return {med,fast:f(iv.filter(x=>x.dt<=med)),slow:f(iv.filter(x=>x.dt>med))};
+}
+function renderPace(rounds){
+ const p=paceStats(rounds);
+ if(!p){$('advancedPace').innerHTML='<div class="advanced-big">—</div><div class="tiny muted">投球間隔が6区間以上たまると表示</div>';return}
+ const rt=x=>x.n?Math.round(x.k/x.n*100)+'%':'—';
+ $('advancedPace').innerHTML='<div class="throw-order-grid">'+statCard('MEDIAN',p.med.toFixed(1)+'s',['DART間隔'])+statCard('FAST',rt(p.fast),['BULL '+p.fast.k+'/'+p.fast.n,'≦ '+p.med.toFixed(1)+'s'],badge(p.fast.n))+statCard('SLOW',rt(p.slow),['BULL '+p.slow.k+'/'+p.slow.n,'> '+p.med.toFixed(1)+'s'],badge(p.slow.n))+'</div><div class="tiny muted">同じラウンド内、前の投球からの入力間隔 · 120秒超は除外</div>';
+}
+function renderLog(){
+ const byDay=new Map();
+ for(const d of all().concat(store.active.darts)){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
+ const today=new Date(),cells=[];
+ for(let i=34;i>=0;i--){const t=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i),k=dayKey(t),n=byDay.get(k)||0;cells.push({k,n,t,today:i===0})}
+ const level=n=>n===0?0:n<24?1:n<72?2:n<144?3:4;
+ const days28=cells.slice(-28).filter(c=>c.n>0).length;
+ let streak=0,i=cells.length-1;if(!cells[i].n)i--;while(i>=0&&cells[i].n>0){streak++;i--}
+ const sinceMon=(today.getDay()+6)%7,week=cells.slice(-(sinceMon+1)).reduce((a,c)=>a+c.n,0);
+ $('advancedLog').innerHTML='<div class="throw-order-grid">'+statCard('DAYS',days28+'/28',['LAST 28D'])+statCard('STREAK',streak,['DAYS'])+statCard('THIS WEEK',week,['DARTS'])+'</div><div class="practice-grid">'+cells.map(c=>'<div class="practice-cell l'+level(c.n)+(c.today?' today':'')+'" title="'+(c.t.getMonth()+1)+'/'+c.t.getDate()+'：'+c.n+'投"></div>').join('')+'</div><div class="tiny muted">直近35日 · 色の濃さ = 投数</div>';
+}
+function renderConditions(){
+ const gs=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt));
+ if(!gs.length){$('advancedConditions').innerHTML='<div class="advanced-big">—</div>';return}
+ const seen={},rows=gs.map(s=>{const k=dayKey(s.startedAt);seen[k]=(seen[k]||0)+1;return {score:sum(s.darts),h:new Date(s.startedAt).getHours(),nth:seen[k]}});
+ const group=(title,defs)=>{
+  const stats=defs.map(([l,f])=>{const a=rows.filter(f);return {l,g:a.length,avg:a.length?mean(a.map(x=>x.score)):null}}),max=Math.max(1,...stats.map(s=>s.avg||0));
+  return '<div class="advanced-sub">'+title+'</div>'+stats.map(s=>advBar(s.l,s.avg||0,max,s.avg===null?'—':Math.round(s.avg)+' · '+s.g+'G','wide'+(s.g&&s.g<3?' dim':''))).join('');
+ };
+ $('advancedConditions').innerHTML=group('TIME OF DAY',[['MORNING',x=>x.h>=5&&x.h<11],['DAY',x=>x.h>=11&&x.h<17],['EVENING',x=>x.h>=17&&x.h<22],['NIGHT',x=>x.h>=22||x.h<5]])+group('GAME OF THE DAY',[['1ST',x=>x.nth===1],['2ND',x=>x.nth===2],['3RD+',x=>x.nth>=3]])+'<div class="tiny muted">MORNING 5–11 · DAY 11–17 · EVENING 17–22 · NIGHT 22–5 / 平均スコア · G=ゲーム数 · 薄い行は3G未満(参考)</div>';
+}
+function renderGoal(){
+ const input=$('goalInput');if(input&&document.activeElement!==input)input.value=store.goalScore||'';
+ const gs=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt)),sc=gs.map(s=>sum(s.darts)),body=$('advancedGoalBody');
+ if(!sc.length){body.innerHTML='<div class="advanced-big">—</div>';return}
+ const last=sc.slice(-10),avg=mean(last),sd=Math.sqrt(mean(last.map(x=>(x-avg)*(x-avg)))),latest=sc[sc.length-1],rank=sc.filter(x=>x>latest).length+1,top=Math.ceil(rank/sc.length*100);
+ const ref=last.length<5?'<em title="5ゲーム未満は参考値">REF</em>':'';
+ let goal='';
+ if(store.goalScore>0){const gap=Math.round(store.goalScore-avg);goal=advBar('GOAL',avg,store.goalScore,Math.round(avg/store.goalScore*100)+'%','wide')+'<div class="throw-order-verdict">'+(gap>0?'GAP '+gap+' pt':'REACHED +'+(-gap)+' pt')+'</div>'}
+ body.innerHTML='<div class="throw-order-grid">'+statCard('AVG',Math.round(avg),['LAST '+last.length+'G'],ref)+statCard('SD',Math.round(sd),['ばらつき'])+statCard('BEST',Math.max(...last),['MIN '+Math.min(...last),'LAST '+last.length+'G'])+'</div><div class="tiny muted">LATEST '+latest+' · TOP '+top+'% of '+sc.length+'G</div>'+goal;
+}
+function renderBestVsAvg(){
+ const gs=finished(),root=$('advancedBestVsAvg');
+ if(gs.length<2){root.innerHTML='<div class="advanced-big">—</div><div class="tiny muted">2ゲーム以上で表示</div>';return}
+ const per=s=>Array.from({length:8},(_,i)=>sum(s.darts.slice(i*3,i*3+3))),all=gs.map(per),best=gs.reduce((a,b)=>sum(b.darts)>sum(a.darts)?b:a),bestR=per(best);
+ const avgR=bestR.map((_,i)=>mean(all.map(r=>r[i]))),max=Math.max(1,...avgR,...bestR);
+ root.innerHTML='<div class="tiny muted">BEST '+sum(best.darts)+' vs AVG '+Math.round(mean(gs.map(s=>sum(s.darts))))+' · '+gs.length+'G</div><div class="tiny muted">棒 = 平均 / 黄線 = ベスト</div>'+bestR.map((b,i)=>{const diff=Math.round(b-avgR[i]);return '<div class="advanced-bar wide"><span>R'+(i+1)+'</span><div class="track has-mark"><div class="fill" style="width:'+(avgR[i]/max*100).toFixed(1)+'%"></div><i class="mark" style="left:'+(b/max*100).toFixed(1)+'%"></i></div><strong>'+(diff>=0?'+':'')+diff+'</strong></div>'}).join('');
+}
+/* Measured facts first; interpretations are labelled as possibilities (aim target is not recorded). */
+function renderInsight(ctx){
+ const items=[],{order,verdict:v,drift,after,rs}=ctx;
+ if(v.best&&v.weak&&v.best.rate-v.weak.rate>=10)items.push({fact:'BULL  DART '+v.best.i+' '+v.best.rate+'%　/　DART '+v.weak.i+' '+v.weak.rate+'%',ref:v.tag==='REF',hyp:'DART '+v.weak.i+' の精度が下がっている可能性。サンプルが少ないうちは偶然の幅があります。',tryIt:'DART '+v.weak.i+' の前に構えを確認し、20R分ためて再確認。'});
+ const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
+ if(dr)items.push({fact:'DART '+dr.i+'  '+driftWord(dr.mx,dr.my)+'  OFFSET '+dr.off.toFixed(2),ref:dr.np<REF_MIN,hyp:'その方向に着弾が偏っている可能性。狙い位置は未記録のため、意図した狙いの影響もあります。',tryIt:'DART '+dr.i+' だけ、次の10投で反対方向を少し意識して変化を見る。'});
+ const [ab,am]=after;
+ if(ab.n>=10&&am.n>=10&&Math.abs(ab.rate-am.rate)>=15){const lower=am.rate<ab.rate;items.push({fact:'AFTER BULL '+ab.rate+'%　/　AFTER MISS '+am.rate+'%',ref:ab.n<REF_MIN||am.n<REF_MIN,hyp:lower?'外した直後に崩れやすい可能性。':'外した後のほうが集中している可能性。',tryIt:lower?'外した次の1投の前に一拍置く。':''})}
+ if(rs.first.n>=6&&rs.second.n>=6&&Math.abs(rs.first.avg-rs.second.avg)>=8){const fade=rs.first.avg>rs.second.avg;items.push({fact:'R1–4 '+Math.round(rs.first.avg)+'　/　R5–8 '+Math.round(rs.second.avg),ref:Math.min(rs.first.n,rs.second.n)<12,hyp:fade?'後半に落ちやすい可能性。':'序盤が立ち上がりきっていない可能性。',tryIt:fade?'R4とR5の間に一呼吸入れて比較。':'R1の前に数投の素振りを入れて比較。'})}
+ const top=items.slice(0,3),panel=$('insightPanel');
+ panel.classList.toggle('hidden',!top.length);
+ $('insightBody').innerHTML=top.map(x=>'<div class="insight-fact"><span class="insight-tag">FACT</span><span>'+x.fact+(x.ref?' <em title="参考値">REF</em>':'')+'</span></div>').join('')+(top.length?'<details class="insight-next"><summary>NEXT</summary>'+top.map(x=>'<p><b>HYPOTHESIS</b> '+x.hyp+(x.tryIt?'<br><b>TRY</b> '+x.tryIt:'')+'</p>').join('')+'</details>':'');
+}
+function renderMore(rounds,ds,prev){
+ const order=orderStats(ds),verdict=orderVerdict(order),drift=dartStats(ds),rs=roundStats(rounds);
+ renderDrift();
+ const after=renderAfter(rounds);
+ renderRoundScore(rs,prev);renderBreakdown(ds);renderPace(rounds);
+ renderGoal();renderBestVsAvg();renderConditions();renderLog();
+ renderInsight({order,verdict,drift,after,rs});
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();renderAnalysis()}});
 function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
 renderAnalysis();$('livebull').innerHTML=bullBars(ds);
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';
