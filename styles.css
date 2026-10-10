@@ -141,3 +141,5 @@ body{color:var(--ink)}
 #play #score{background:none!important;opacity:1!important;filter:none!important}
 #history #sessiondetail .accent{color:#E7FB67!important;font-size:1.35em;font-weight:900}
 #play .toast.award{border-color:#D6B56B;color:#FFDA91}
+
+#play #score,#play #resultscore,#history .latest-score{color:#E7FB67!important;-webkit-text-fill-color:#E7FB67!important;text-shadow:0 0 22px #b4ed383b!important}
