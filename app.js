@@ -106,19 +106,16 @@ function playSound(kind='hit',delay=0){
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   // Gentle, upbeat four-second NEXT ROUND jingle (C major, ascending finish).
-   // Soft triangle notes instead of loud square-wave alarms and noise bursts.
-   const melody=[
-    [523.25,0,.18],[659.25,.23,.18],[783.99,.46,.25],
-    [659.25,.92,.17],[783.99,1.15,.17],[880,1.38,.30],
-    [783.99,1.93,.17],[880,2.16,.17],[1046.5,2.39,.29],
-    [783.99,2.94,.18],[987.77,3.17,.18],[1046.5,3.40,.43]
-   ];
-   melody.forEach(([freq,offset,duration])=>{
-    retroVoice(freq,at+offset,duration,.075*fx,'triangle',freq*.997,4200);
-    retroVoice(freq/2,at+offset,duration*.85,.025*fx,'sine',freq/2,2000);
+   // Gentle four-second taiko-like "don-chan, don-chan" rhythm.
+   // Keep this independent of the regular hit and achievement sound levels.
+   const beats=[0,.46,.92,1.38,1.84,2.30,2.76,3.22,3.68];
+   beats.forEach((offset,i)=>{
+    const t=at+offset,strong=i%2===0;
+    const volume=(strong?.062:.042)*fx;
+    retroVoice(strong?125:155,t,.26,volume,'sine',strong?62:83,650);
+    retroVoice(strong?185:210,t,.095,volume*.23,'triangle',strong?105:130,1000);
+    if(!strong)retroNoise(t,.035,.012*fx,280,1450);
    });
-   retroChord([523.25,659.25,783.99],at+3.64,.32,.028);
    return;
   }
   if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
