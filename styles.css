@@ -367,3 +367,12 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 .page .analysis-periods button.selected:not(.primary):not(.warn),.page .analysis-periods button.selected:not(.primary):not(.warn):hover,.page .aim-periods button.selected:not(.primary):not(.warn){background:#e7fb67;color:#091622;border-color:#e7fb67;box-shadow:0 0 18px #e7fb6755}
 /* v0.5.32: period buttons light up instantly (no fade) */
 .page .analysis-periods button,.page .aim-periods button{transition:none}
+
+/* v0.5.33 aim target */
+.play-heading{align-items:center}
+.page button.aim-chip:not(.primary):not(.warn){margin-left:auto;padding:5px 12px;min-height:32px;border-radius:30px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#e7fb67;border-color:#6c7f2f;background:#1a2610}
+.aim-target-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 4px}
+.page .aim-target-row button:not(.primary):not(.warn){padding:7px 14px;border-radius:30px;font-size:13px;font-weight:800;min-height:36px;transition:none}
+.page .aim-target-row button.selected:not(.primary):not(.warn){background:#e7fb67;color:#091622;border-color:#e7fb67;box-shadow:0 0 14px #e7fb6755}
+.aim-settings select{font-size:16px;min-height:44px;min-width:200px}
+.aim-settings{margin-bottom:14px}

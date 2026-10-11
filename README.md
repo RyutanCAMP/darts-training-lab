@@ -14,6 +14,7 @@ A retro arcade-style COUNT-UP practice and analytics app for darts, including DA
 - Analysis: 1R / 10R / 20R / ALL, with 10R default on entry. Only completed 3-dart rounds are counted.
 - BULL metrics, per-dart throw-order rates, all-time achievements, score trend.
 - AIM ANALYSIS segment/ring heatmap and expandable A CLASS analytics.
+- AIM TARGET (settings): BULL / T1–T20 / D1–D20 is recorded per dart; analysis is shown per aim. Older records count as BULL.
 - Per-card "?" help and a rule-based COACH REPORT (not an AI model) on the Analysis screen.
 - INSIGHT facts, per-dart drift, 95% ranges (REF = fewer than 20 throws), round score curve, score breakdown, goal gap, practice log.
 

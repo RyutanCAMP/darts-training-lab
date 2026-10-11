@@ -16,6 +16,15 @@ const points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:
 const label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
 const dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):label(d.segment);
 const isBull=d=>d.segment==='IB'||d.segment==='OB';
+const AIMS=['BULL'].concat(Array.from({length:20},(_,i)=>'T'+(20-i)),Array.from({length:20},(_,i)=>'D'+(20-i)));
+const validAim=a=>typeof a==='string'&&AIMS.includes(a);
+const aimOf=d=>validAim(d&&d.aim)?d.aim:'BULL';
+const curAim=()=>validAim(store.aimTarget)?store.aimTarget:'BULL';
+const aimHit=(d,a)=>a==='BULL'?isBull(d):d.segment===a;
+let hitAim='BULL',analysisAim=null;
+const isHit=d=>aimHit(d,hitAim);
+const hitRate=ds=>ds.length?Math.round(ds.filter(isHit).length/ds.length*1000)/10:0;
+const AT=t=>hitAim==='BULL'?t:t.replace(/\b(INNER |OUTER |IN |OUT )?BULL(S?)\b/g,(m,p,pl)=>p?m:hitAim+pl).replace(/ブル/g,hitAim).replace('（HAT TRICK）','');
 const sum=ds=>ds.reduce((a,d)=>a+d.score,0);
 const all=()=>store.sessions.flatMap(s=>s.darts);
 const finished=()=>store.sessions.filter(s=>s.status==='completed');
@@ -163,10 +172,10 @@ function beginRoundBreak(round,score,darts=[]){
  tick();roundBreakTicker=setInterval(tick,50);roundBreakTimer=setTimeout(finishRoundBreak,ms);
 }
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
-function changeTab(name){finishRoundBreak();if(name==='analysis'){aimPeriod='10';reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
+function changeTab(name){finishRoundBreak();if(name==='analysis'){aimPeriod='10';analysisAim=null;reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
-function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now())return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,corrected:false});if(s.darts.length===24){showResult=true;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
+function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now())return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,aim:curAim(),corrected:false});if(s.darts.length===24){showResult=true;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
  const round=s.darts.slice(Math.floor(i/3)*3),score=sum(round),last=s.darts.at(-1),shot=shotPraise(last);
  const completeRound=round.length===3,award=completeRound?roundPraise(round,score):null;
  if(completeRound&&['HAT TRICK!','TON 80!','HIGH TON!','LOW TON!'].includes(award)){
@@ -186,7 +195,7 @@ function undo(){finishRoundBreak();if(!store.active.darts.length)return;store.ac
 function finishEarly(){if(!store.active.darts.length)return;if(store.active.darts.length===24){confirmResult();return}if(confirm('このゲームを途中終了として保存しますか？（完走平均には含みません）')){if(!complete('abandoned'))return;showResult=false;toast('途中終了として保存しました');render()}}
 function confirmResult(){finishRoundBreak();if(store.active.darts.length!==24)return;let score=sum(store.active.darts);if(!complete('completed'))return;showResult=false;viewId=store.sessions[0].id;justSaved=true;toast('完走 '+score+' POINTS を履歴に保存しました');render();changeTab('history')}
 function drawBoard(){const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-230 -230 460 460');svg.setAttribute('role','img');svg.setAttribute('aria-label','着弾位置を選択するダーツボード');function el(t,a){let n=document.createElementNS(NS,t);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n}function xy(r,a){return [r*Math.sin(a),-r*Math.cos(a)]}function wedge(r1,r2,a1,a2){let p=xy(r1,a1),q=xy(r2,a1),r=xy(r2,a2),s=xy(r1,a2);return 'M'+p+' L'+q+' A'+r2+' '+r2+' 0 0 1 '+r+' L'+s+' A'+r1+' '+r1+' 0 0 0 '+p+' Z'}el('circle',{r:225,fill:'#0a121b',stroke:'#4b6879','stroke-width':4});for(let i=0;i<20;i++){let a=i*Math.PI/10,n=nums[i];for(let [r1,r2,ring] of [[17,100,'S'],[100,113,'T'],[113,172,'S'],[172,185,'D']]){let col=ring==='S'?(i%2?'#ddd9c9':'#27323a'):(i%2?'#d64b55':'#2eb28d');let p=el('path',{d:wedge(r1,r2,a-Math.PI/20,a+Math.PI/20),fill:col,stroke:'#72828b','stroke-width':.65,class:'hit',tabindex:'0',role:'button','data-segment':ring+n+(ring==='S'?(r2===100?'I':'O'):''),'aria-label':label(ring+n)});p.addEventListener('click',()=>add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):'')));p.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):''))}})}let [x,y]=xy(206,a),t=el('text',{x,y,fill:'#edf3fa','font-size':15,'font-weight':700,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none'});t.textContent=n}let ob=el('circle',{r:17,fill:'#1d9b7b',stroke:'#d9e0d8','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'OB','aria-label':'OUTER BULL 25'});ob.onclick=()=>add('OB');ob.onkeydown=e=>{if(e.key==='Enter')add('OB')};let ib=el('circle',{r:7.7,fill:'#d94e5c',stroke:'#f0d2c6','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'IB','aria-label':'INNER BULL 50'});ib.onclick=e=>{e.stopPropagation();add('IB')};ib.onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();add('IB')}};$('board').appendChild(svg)}
-function bullBars(ds){return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),p=a.length?rate(a):null;return '<div class="barrow"><span class="tiny">DART '+i+'</span><div class="track"><div class="fill" style="width:'+(p??0)+'%"></div></div><span class="tiny">'+(p===null?'—':p+'%')+' <span class="muted">('+a.filter(isBull).length+'/'+a.length+')</span></span></div>'}).join('')}
+function bullBars(ds,aim){const A=aim||hitAim;return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),k=a.filter(d=>aimHit(d,A)).length,p=a.length?Math.round(k/a.length*1000)/10:null;return '<div class="barrow"><span class="tiny">DART '+i+'</span><div class="track"><div class="fill" style="width:'+(p??0)+'%"></div></div><span class="tiny">'+(p===null?'—':p+'%')+' <span class="muted">('+k+'/'+a.length+')</span></span></div>'}).join('')}
 function chart(ss){
  if(!ss.length)return '<div class="empty">—</div>';
  const ordered=ss.slice().reverse(),recent=ordered.slice(-20),scores=recent.map(s=>sum(s.darts));
@@ -212,7 +221,14 @@ function sMetrics(ss){
 
 let aimPeriod='10';
 const aimOrder=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
-function aimPoint(d){
+function aimCenter(a){
+ if(!a||a==='BULL')return {x:0,y:0};
+ const idx=aimOrder.indexOf(Number(a.slice(1)));if(idx<0)return {x:0,y:0};
+ const ang=(-90+idx*18)*Math.PI/180,r=a[0]==='T'?.54:.96;
+ return {x:Math.cos(ang)*r,y:Math.sin(ang)*r};
+}
+function aimPoint(d){const p=aimPointRaw(d);if(!p)return null;const c=aimCenter(hitAim);return {x:p.x-c.x,y:p.y-c.y}}
+function aimPointRaw(d){
  if(!d||d.segment==='MISS')return null;
  if(isBull(d))return {x:0,y:0};
  const n=Number(d.segment.slice(1)),idx=aimOrder.indexOf(n);
@@ -224,7 +240,7 @@ function aimPoint(d){
 }
 function renderAim(){
  const root=$('aimAnalysis');if(!root)return;
- const rounds=selectedRounds(),darts=rounds.flat(),pts=darts.map(aimPoint).filter(Boolean);
+ const rounds=selectedRounds(),darts=rounds.flat(),pts=darts.map(aimPoint).filter(Boolean),rawPts=darts.map(aimPointRaw).filter(Boolean),tc=aimCenter(hitAim);
  const median=vals=>{const a=vals.sort((x,y)=>x-y);return a.length?(a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2):0};
  const missN=darts.filter(d=>d.segment==='MISS').length,unknownN=darts.length-pts.length-missN,excluded=[missN?'MISS '+missN:'',unknownN?'ZONE不明 '+unknownN:''].filter(Boolean);
  const mx=median(pts.map(p=>p.x)),my=median(pts.map(p=>p.y)),percent=f=>pts.length?Math.round(100*pts.filter(f).length/pts.length):0;
@@ -239,41 +255,57 @@ function renderAim(){
  const rings=[['SI',18,50,'INNER S'],['T',50,60,'TRIPLE'],['SO',60,91,'OUTER S'],['D',91,102,'DOUBLE']];
  const cells=rings.map(([ring,r0,r1,name])=>aimOrder.map((number,idx)=>{const count=counts.get(ring+number)||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<path d="'+sector(idx,r0,r1)+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#254758" stroke-width=".7"><title>'+name+' '+number+'：'+share.toFixed(1)+'% ('+count+'投)</title></path>'}).join('')).join('');
  const bulls=[['OB',9,18],['IB',0,9]].map(([ring,r0,r1])=>{const count=counts.get(ring)||0,share=total?count/total*100:0,opacity=count?(.15+.8*count/maxCount):0;return '<circle cx="130" cy="130" r="'+r1+'" fill="#67e9e5" fill-opacity="'+opacity.toFixed(3)+'" stroke="#456477"><title>'+ring+'：'+share.toFixed(1)+'% ('+count+'投)</title></circle>'}).join('');
- const svg='<svg viewBox="0 0 260 260" role="img" aria-label="内外シングル・トリプル・ダブル別ヒートマップ">'+cells+bulls+(pts.length?'<circle cx="'+(130+mx*102).toFixed(1)+'" cy="'+(130+my*102).toFixed(1)+'" r="7" fill="#e7fb67" stroke="#091622" stroke-width="2"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
+ const svg='<svg viewBox="0 0 260 260" role="img" aria-label="内外シングル・トリプル・ダブル別ヒートマップ">'+cells+bulls+'<circle cx="'+(130+tc.x*102).toFixed(1)+'" cy="'+(130+tc.y*102).toFixed(1)+'" r="11" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 3"><title>AIM '+hitAim+'</title></circle>'+(pts.length?'<circle cx="'+(130+median(rawPts.map(p=>p.x))*102).toFixed(1)+'" cy="'+(130+median(rawPts.map(p=>p.y))*102).toFixed(1)+'" r="7" fill="#e7fb67" stroke="#091622" stroke-width="2"/>':'')+'<text x="130" y="14" text-anchor="middle" fill="#b5ccd4" font-size="12">上</text><text x="130" y="255" text-anchor="middle" fill="#b5ccd4" font-size="12">下</text><text x="12" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">左</text><text x="248" y="135" text-anchor="middle" fill="#b5ccd4" font-size="12">右</text></svg>';
  const stat=(label,num)=>'<div class="aim-stat"><span>'+label+'</span><strong>'+num+'%</strong></div>';
- root.innerHTML='<div class="aim-heat-key"><span>LOW</span><i></i><span>HIGH</span></div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='—'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投'+(excluded.length?' · 除外 '+excluded.join(' / '):'')+'</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
+ root.innerHTML='<div class="aim-heat-key"><span>LOW</span><i></i><span>HIGH</span></div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='—'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投 · AIM '+hitAim+' '+hitRate(darts)+'%'+(excluded.length?' · 除外 '+excluded.join(' / '):'')+'</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
 }
-function allRecordedRounds(){
+function allRecordedRounds(raw){
  const blocks=[];
  const sessions=store.sessions.slice().reverse();
  /* Only complete 3-dart rounds count as a round (1R/10R/20R/ALL); an unfinished round never shrinks or skews the window. */
  for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
  for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
- return blocks;
+ return raw?blocks:blocks.filter(r=>aimOf(r[0])===effectiveAim(blocks));
+}
+function effectiveAim(blocks){
+ const aims=[...new Set(blocks.map(r=>aimOf(r[0])))];
+ if(analysisAim&&aims.includes(analysisAim))return analysisAim;
+ if(aims.includes(curAim()))return curAim();
+ return aims.length?aimOf(blocks[blocks.length-1][0]):curAim();
 }
 function selectedRounds(){const blocks=allRecordedRounds();return aimPeriod==='all'?blocks:blocks.slice(-Number(aimPeriod))}
 function selectedDarts(){return selectedRounds().flat()}
 function renderAnalysis(){
+ const rawBlocks=allRecordedRounds(true);hitAim=effectiveAim(rawBlocks);
  const rounds=selectedRounds(),ds=rounds.flat(),ss=finished(),prev=previousRounds();
  document.querySelectorAll('[data-aim-period]').forEach(b=>{const active=b.dataset.aimPeriod===aimPeriod;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active))});
- $('analysisScope').textContent=rounds.length+'R · '+ds.length+' DARTS';
+ const aimsIn=AIMS.filter(a=>rawBlocks.some(r=>aimOf(r[0])===a));
+ $('analysisScope').textContent=rounds.length+'R · '+ds.length+' DARTS'+(hitAim!=='BULL'||aimsIn.length>1?' · AIM '+hitAim:'');
+ $('analysisAim').classList.toggle('hidden',aimsIn.length<2);
+ $('analysisAim').innerHTML=aimsIn.length<2?'':'<span class="tiny muted">AIM</span>'+aimsIn.map(a=>'<button type="button" data-aim-sel="'+a+'" class="'+(a===hitAim?'selected':'')+'" aria-pressed="'+(a===hitAim)+'">'+a+'</button>').join('');
  $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
  $('achievementTotals').innerHTML=achievementTotals();
- renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();
+ renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();localizeAim();
+}
+const AIM_SKIP='#analysisAim,.card-help,.card-gloss,.help-btn,#achievementTotals,#advancedGoalBody,#advancedBestVsAvg,#advancedConditions,#advancedLog,#analysischart,#reportBody';
+function localizeAim(){
+ const root=$('analysis'),w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),nodes=[];
+ while(w.nextNode())nodes.push(w.currentNode);
+ for(const n of nodes){if(n.parentElement&&n.parentElement.closest(AIM_SKIP))continue;if(n.__o===undefined)n.__o=n.nodeValue;const v=AT(n.__o);if(n.nodeValue!==v)n.nodeValue=v}
 }
 function scopeMetrics(ds,ss,prev){
  const best=ss.length?Math.max(...ss.map(s=>sum(s.darts))):null;
  const value=(name,n,detail,key)=>'<div class="panel metric"><div class="label">'+name+'</div>'+helpBtn(key)+'<div class="value">'+n+'</div><div class="detail">'+detail+'</div>'+helpBox(key,true)+'</div>';
- const diff=prev&&ds.length?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
- return value('BULL RATE',ds.length?rate(ds)+'%':'—',ds.filter(isBull).length+' / '+ds.length+(diff===null?'':' · '+signed(diff,'pt')),'m-bull')
- +value('BULL HITS',ds.filter(isBull).length,'SELECTED','m-hits')
- +value('INNER BULL',ds.filter(d=>d.segment==='IB').length,'SELECTED','m-inner')
+ const diff=prev&&ds.length?Math.round((hitRate(ds)-hitRate(prev.flat()))*10)/10:null;
+ return value('BULL RATE',ds.length?hitRate(ds)+'%':'—',ds.filter(isHit).length+' / '+ds.length+(diff===null?'':' · '+signed(diff,'pt')),'m-bull')
+ +value('BULL HITS',ds.filter(isHit).length,'SELECTED','m-hits')
+ +(hitAim==='BULL'?value('INNER BULL',ds.filter(d=>d.segment==='IB').length,'SELECTED','m-inner'):value('AVG / DART',ds.length?(sum(ds)/ds.length).toFixed(1):'—','SELECTED','m-inner'))
  +value('PERSONAL BEST',best??'—','ALL TIME','m-best');
 }
 function renderAdvanced(){
- const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isBull(d)),np=nonbull.map(aimPoint);
+ const rounds=selectedRounds(),ds=rounds.flat(),pts=ds.map(aimPoint).filter(Boolean),nonbull=ds.filter(d=>aimPoint(d)&&!isHit(d)),np=nonbull.map(aimPoint);
  const directions=['↑','↗','→','↘','↓','↙','←','↖'],counts=Array(8).fill(0);
  for(const p of np){const deg=(Math.atan2(p.y,p.x)*180/Math.PI+450)%360;counts[Math.round(deg/45)%8]++}
  const bar=(label,value,max,extra='')=>advBar(label,value,max,extra);
@@ -283,15 +315,15 @@ function renderAdvanced(){
  const radii=pts.map(p=>Math.hypot(p.x-mx,p.y-my)),avg=radii.length?radii.reduce((a,b)=>a+b,0)/radii.length:0;
  const tight=pts.length?Math.round(pts.filter(p=>Math.hypot(p.x-mx,p.y-my)<=.45).length/pts.length*100):0;
  $('advancedConsistency').innerHTML='<div class="advanced-big">'+(pts.length?tight+'%':'—')+'</div><div class="tiny muted">CLUSTER · 0.45R</div>'+bar('SPREAD',Math.min(avg,1.5),1.5,pts.length?avg.toFixed(2):'—');
- const half=Math.floor(rounds.length/2),older=rounds.slice(0,half).flat(),newer=rounds.slice(half).flat(),newRate=newer.length?rate(newer):null,oldRate=older.length?rate(older):null;
+ const half=Math.floor(rounds.length/2),older=rounds.slice(0,half).flat(),newer=rounds.slice(half).flat(),newRate=newer.length?hitRate(newer):null,oldRate=older.length?hitRate(older):null;
  $('advancedBullTrend').innerHTML='<div class="advanced-big">'+(newRate===null?'—':newRate+'%')+'</div><div class="tiny muted">'+(oldRate===null?'BULL RATE':('PREV '+oldRate+'% · '+(newRate-oldRate>=0?'+':'')+(newRate-oldRate).toFixed(1)+'pt'))+'</div>'+bar('RECENT',newRate??0,100,'');
  const grouped=Array.from({length:8},()=>[]);
  for(const round of rounds){const d=round[0];if(d&&Number.isInteger(d.roundIndex)&&d.roundIndex>=1&&d.roundIndex<=8)grouped[d.roundIndex-1].push(round)}
- $('advancedRounds').innerHTML=grouped.map((arr,i)=>{const darts=arr.flat(),r=darts.length?rate(darts):0;return bar('R'+(i+1),r,100,darts.length?r+'%':'—')}).join('');
- let streak=0,best=0;for(const d of ds){streak=isBull(d)?streak+1:0;best=Math.max(best,streak)}
+ $('advancedRounds').innerHTML=grouped.map((arr,i)=>{const darts=arr.flat(),r=darts.length?hitRate(darts):0;return bar('R'+(i+1),r,100,darts.length?r+'%':'—')}).join('');
+ let streak=0,best=0;for(const d of ds){streak=isHit(d)?streak+1:0;best=Math.max(best,streak)}
  $('advancedStreak').innerHTML='<div class="advanced-big">'+best+'</div><div class="tiny muted">CONSECUTIVE BULLS</div>';
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAnalysis()}});
+document.addEventListener('click',e=>{const sb=e.target.closest('[data-aim-sel]');if(sb){analysisAim=sb.dataset.aimSel;renderAnalysis();return}const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAnalysis()}});
 function achievementTotals(){
  const games=finished(),darts=games.flatMap(s=>s.darts),rounds=games.flatMap(s=>Array.from({length:8},(_,i)=>s.darts.slice(i*3,i*3+3))).filter(a=>a.length===3);
  const bulls=darts.filter(isBull).length,inner=darts.filter(d=>d.segment==='IB').length,hats=rounds.filter(a=>a.every(isBull)).length,ton80=rounds.filter(a=>a.every(d=>d.segment==='T20')).length,high=rounds.filter(a=>{const n=sum(a);return n>=151&&n<180}).length;
@@ -317,7 +349,7 @@ function previousRounds(){
  return prev.length===N?prev:null;
 }
 function orderStats(ds){
- return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),b=a.filter(isBull).length;
+ return [1,2,3].map(i=>{const a=ds.filter(d=>d.dartIndex===i),b=a.filter(isHit).length;
   return {i,n:a.length,bulls:b,ib:a.filter(d=>d.segment==='IB').length,rate:a.length?Math.round(b/a.length*100):null,avg:a.length?Math.round(sum(a)/a.length*10)/10:null,ci:wilson(b,a.length)}});
 }
 function orderVerdict(data){
@@ -329,8 +361,8 @@ function orderVerdict(data){
 }
 function renderThrowOrder(){
  const data=orderStats(selectedDarts()),v=orderVerdict(data);
- const cards=data.map(d=>statCard('DART '+d.i,d.rate===null?'—':d.rate+'%',['BULL '+d.bulls+'/'+d.n,'RANGE '+(d.ci?d.ci[0]+'–'+d.ci[1]+'%':'—'),'IB '+d.ib+'/'+d.bulls,'AVG '+(d.avg===null?'—':d.avg)],badge(d.n))).join('');
- $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+v.text+(v.tag?'　·　'+v.tag:'')+'</div><div class="tiny muted">RANGE = 95% 信頼区間 · IB = BULLのうちINNER</div>';
+ const cards=data.map(d=>statCard('DART '+d.i,d.rate===null?'—':d.rate+'%',['BULL '+d.bulls+'/'+d.n,'RANGE '+(d.ci?d.ci[0]+'–'+d.ci[1]+'%':'—'),hitAim==='BULL'?'IB '+d.ib+'/'+d.bulls:'','AVG '+(d.avg===null?'—':d.avg)].filter(Boolean),badge(d.n))).join('');
+ $('advancedThrowOrder').innerHTML='<div class="throw-order-grid">'+cards+'</div><div class="throw-order-verdict">'+v.text+(v.tag?'　·　'+v.tag:'')+'</div><div class="tiny muted">RANGE = 95% 信頼区間'+(hitAim==='BULL'?' · IB = BULLのうちINNER':'')+'</div>';
 }
 function dartStats(ds){
  return [1,2,3].map(i=>{
@@ -345,7 +377,7 @@ function renderDrift(){
 }
 function afterStats(rounds){
  const g={bull:[0,0],miss:[0,0],other:[0,0]};
- for(const r of rounds)for(let k=1;k<3;k++){const p=r[k-1],c=r[k];if(!p||!c)continue;const key=isBull(p)?'bull':p.segment==='MISS'?'miss':'other';g[key][1]++;if(isBull(c))g[key][0]++}
+ for(const r of rounds)for(let k=1;k<3;k++){const p=r[k-1],c=r[k];if(!p||!c)continue;const key=isHit(p)?'bull':p.segment==='MISS'?'miss':'other';g[key][1]++;if(isHit(c))g[key][0]++}
  return [['AFTER BULL','bull'],['AFTER MISS','miss'],['AFTER OTHER','other']].map(([label,key])=>({label,k:g[key][0],n:g[key][1],rate:g[key][1]?Math.round(g[key][0]/g[key][1]*100):null,ci:wilson(g[key][0],g[key][1])}));
 }
 function renderAfter(rounds){
@@ -377,7 +409,7 @@ function renderBreakdown(ds){
 }
 function paceStats(rounds){
  const iv=[];
- for(const r of rounds)for(let k=1;k<3;k++){const dt=(Date.parse(r[k].timestamp)-Date.parse(r[k-1].timestamp))/1000;if(dt>0&&dt<=120)iv.push({dt,bull:isBull(r[k])})}
+ for(const r of rounds)for(let k=1;k<3;k++){const dt=(Date.parse(r[k].timestamp)-Date.parse(r[k-1].timestamp))/1000;if(dt>0&&dt<=120)iv.push({dt,bull:isHit(r[k])})}
  if(iv.length<6)return null;
  const med=medianOf(iv.map(x=>x.dt)),f=a=>({n:a.length,k:a.filter(x=>x.bull).length});
  return {med,fast:f(iv.filter(x=>x.dt<=med)),slow:f(iv.filter(x=>x.dt>med))};
@@ -457,15 +489,15 @@ function buildReport(rounds,ds,prev){
  const anyRef=order.some(x=>x.n>0&&x.n<REF_MIN);
  const conf={k:'CONFIDENCE',label:'信頼度',lines:['データ量：'+N+'投。'+(N===0?'':anyRef?'投球順ごとに20投未満の項目があり、参考値として読んでください（REF）。':'投球順ごとに20投以上あります。'),'着弾位置はセグメントからの推定で、狙いはブル前提で見ています。','この文章は数値をもとにしたルール式の自動生成で、AIモデルによる判断ではありません。']};
  if(R<3)return {head,sections:[{k:'SUMMARY',label:'総評',lines:['まだデータが少なく（'+R+'R / '+N+'投）、傾向は読み取れません。','3ラウンド（9投）以上、できれば1ゲーム（24投）を完走すると、投球順の比較が見られます。']},conf]};
- const bulls=ds.filter(isBull).length,diff=prev?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
+ const bulls=ds.filter(isHit).length,diff=prev?Math.round((hitRate(ds)-hitRate(prev.flat()))*10)/10:null;
  const trend=diff===null?'比較できる直前の期間はまだありません。':Math.abs(diff)<3?'直前の同じ長さの期間とほぼ同じです（'+(diff>=0?'+':'')+diff+'pt）。':diff>0?'直前の同じ長さの期間より '+diff+'pt 上がっています。':'直前の同じ長さの期間より '+(-diff)+'pt 下がっています。';
  const scores=finished().slice().sort((a,b)=>a.startedAt.localeCompare(b.startedAt)).map(s=>sum(s.darts)),latest=scores[scores.length-1];
- const summary=['ブル率は '+rate(ds)+'%（'+bulls+'/'+N+'投）。'+trend,'1ラウンドの平均は '+Math.round(mean(rounds.map(sum)))+' 点。'+(scores.length>=3?'直近のゲーム '+latest+' 点は、全 '+scores.length+' ゲーム中で上位 '+Math.ceil((scores.filter(x=>x>latest).length+1)/scores.length*100)+'% です。':'')];
+ const summary=['ブル率は '+hitRate(ds)+'%（'+bulls+'/'+N+'投）。'+trend,'1ラウンドの平均は '+Math.round(mean(rounds.map(sum)))+' 点。'+(scores.length>=3?'直近のゲーム '+latest+' 点は、全 '+scores.length+' ゲーム中で上位 '+Math.ceil((scores.filter(x=>x>latest).length+1)/scores.length*100)+'% です。':'')];
  const strengths=[],focus=[],drills=[];
  const best=v.best,weak=v.weak,gap=best&&weak?best.rate-weak.rate:0;
  if(gap>=10)strengths.push('DART '+best.i+' のブル率が最も高く '+best.rate+'% です（DART '+weak.i+' は '+weak.rate+'%）。'+(v.tag==='CLEAR DIFF'?'':'差はまだ参考値です。'));
  if(diff!==null&&diff>=3)strengths.push('ブル率が直前の期間より '+diff+'pt 上がっています。');
- const hats=rounds.filter(r=>r.every(isBull)).length,tons=rounds.filter(r=>sum(r)>=100).length;
+ const hats=rounds.filter(r=>r.every(isHit)).length,tons=rounds.filter(r=>sum(r)>=100).length;
  if(hats)strengths.push('3投すべてブルのラウンド（HAT TRICK）が '+hats+' 回あります。');
  else if(tons)strengths.push('100点以上のラウンドが '+tons+' 回あります。');
  const pts=ds.map(aimPoint).filter(Boolean);
@@ -484,7 +516,8 @@ function buildReport(rounds,ds,prev){
  if(!strengths.length)strengths.push('際立った強みは、まだデータから見つかっていません。');
  if(!focus.length){focus.push('大きな偏りや落ち込みは見つかっていません。');drills.push('同じ条件で投げ続けて、データをためてから見直す。')}
  if(anyRef&&drills.length<3)drills.push('20ラウンド（60投）以上ためると、REF が外れて比較しやすくなります。');
- return {head,sections:[{k:'SUMMARY',label:'総評',lines:summary.filter(Boolean)},{k:'STRENGTHS',label:'強み',lines:strengths.slice(0,3)},{k:'FOCUS',label:'課題',lines:focus.slice(0,3)},{k:'NEXT DRILL',label:'次の練習',lines:drills.slice(0,3)},conf]};
+ const rep=a=>a.map(AT);
+ return {head,sections:[{k:'SUMMARY',label:'総評',lines:rep(summary.filter(Boolean))},{k:'STRENGTHS',label:'強み',lines:rep(strengths.slice(0,3))},{k:'FOCUS',label:'課題',lines:rep(focus.slice(0,3))},{k:'NEXT DRILL',label:'次の練習',lines:rep(drills.slice(0,3))},conf]};
 }
 let reportOn=false,reportTimer=null,lastReport=null;
 function showReport(animate){
@@ -520,7 +553,7 @@ const HELP={
  period:['どの範囲の投げ方を分析するかを選びます。','10R＝直近10ラウンド（30投）。1Rは直近の1ラウンド、ALLはすべて。「全期間」と書かれたカード以外は、この選択に合わせて変わります。','途中のラウンド（3投そろっていない）は数えません。'],
  'm-bull':['投げた中で、ブルに入った割合です。','数字が大きいほど入っています。▲▼は、直前の同じ長さの期間との差です。','ALLでは差は出ません。'],
  'm-hits':['ブル（外側・中心どちらも）に入った回数です。','回数が増えるほど、安定して狙えています。','投数が少ない時は、偶然で上下します。'],
- 'm-inner':['中心（INNER BULL・50点）に入った回数です。','ブルの中でも、より中心に近く入れられているかが分かります。','投数が少ない時は、偶然で上下します。'],
+ 'm-inner':['中心（INNER BULL・50点）に入った回数です。','ブルの中でも、より中心に近く入れられているかが分かります。狙いがブル以外のときは、1投の平均点を表示します。','投数が少ない時は、偶然で上下します。'],
  'm-best':['完走したゲームの最高得点です。','自己ベストの目安として見ます。','全期間の数字で、途中終了は含みません。'],
  focus:['今日、いちばん先に意識する1点です。','数字から選んだ「試すこと」を1つ出します。下の INSIGHT の NEXT と同じ内容です。','可能性にもとづく提案で、断定ではありません。投数が少ないうちは偶然のこともあります。'],
  insight:['今の期間で、数字から言えることを最大3つ並べます。','FACT は確認できた事実です。NEXT を開くと、考えられる原因と試すことが出ます。','NEXT は断定ではなく可能性です。データが少ないうちは偶然のこともあります。'],
@@ -530,8 +563,8 @@ const HELP={
  achievements:['これまでの記録の累計です。','HAT TRICK＝3投ともブル、TON 80＝3投ともT20、HIGH TON＝1ラウンド151〜179点の回数です。','完走したゲームだけを数えます（全期間）。'],
  report:['今の期間の数字を、文章にまとめます。','ボタンを押すと表示されます。期間を変えると書き換わります。','ルールによる自動生成で、AIモデルではありません。'],
  throw:['何投目が一番入っているかを比べます。','大きい数字がブル率。RANGE は95%の幅で、幅が重なる間は差が偶然かもしれません。CLEAR DIFF は幅が重ならず、差が出ている目安です。','IB＝ブルのうち中心の数、AVG＝1投の平均点です。'],
- drift:['投球順ごとに、どちらへ偏っているかを見ます。','矢印は向き、OFFSET は中心からのズレ（0＝中心、1＝ボードの端）、SPREAD は散らばりです。SPREAD が小さいほどまとまっています。','狙いはブル前提です。ブルから見た偏りで、T20などを狙った投げが混ざると出ます。'],
- direction:['ブル以外に入った時、どの向きに多いかです。','割合が大きい向きほど、そちらへ外れやすい目安です。','狙いはブル前提で、ブルから見た向きです。'],
+ drift:['投球順ごとに、どちらへ偏っているかを見ます。','矢印は向き、OFFSET は中心からのズレ（0＝中心、1＝ボードの端）、SPREAD は散らばりです。SPREAD が小さいほどまとまっています。','狙いは設定した狙い（初めはブル）から見たズレです。'],
+ direction:['ブル以外に入った時、どの向きに多いかです。','割合が大きい向きほど、そちらへ外れやすい目安です。','狙いから見た向きです（狙いは設定で変更できます）。'],
  consistency:['どれだけ同じ場所にまとまっているかです。','CLUSTER は中央値の近くに入った割合で、高いほどまとまっています。SPREAD は小さいほど安定です。','MISSと内外が不明な記録は除きます。'],
  after:['ブルや外れた直後の1投が、どうなるかです。','ブルの後、外れた後、それぞれの次の1投のブル率を比べます。外れた後に下がるなら、切り替えが課題かもしれません。','同じラウンド内の流れだけを見ます。'],
  bulltrend:['期間の前半と後半で、ブル率が変わったかです。','大きい数字が後半、PREV が前半です。後半が高ければ、調子が上がっています。','期間が短いと偶然で動きます。'],
@@ -561,8 +594,12 @@ document.addEventListener('click',e=>{
  document.querySelectorAll('[data-help-for="'+k+'"]').forEach(x=>x.classList.toggle('hidden',!on));
 });
 setupHelp();
-function render(){$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
-renderAnalysis();$('livebull').innerHTML=bullBars(ds);
+function renderAimSetting(){
+ const sel=$('aimSelect');if(sel&&sel.value!==curAim())sel.value=curAim();
+ const chip=$('aimChip');if(chip)chip.textContent='AIM '+curAim();
+}
+function render(){renderAimSetting();$('soundToggle').textContent=store.soundEnabled===false?'効果音 OFF':'効果音 ON';$('soundToggle').setAttribute('aria-pressed',String(store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(store.roundDelay))});updateSaveIndicator();$('savedNotice').classList.toggle('hidden',!justSaved);const s=store.active,ds=s.darts,n=ds.length,ss=finished(),a=completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+sum(x.darts),0)/ss.length):0,bulls=a.filter(isBull).length;
+renderAnalysis();$('livebull').innerHTML=bullBars(ds,curAim());
 $('score').textContent=sum(ds);$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';$('progress').textContent=n+' / 24';
 $('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?sum(d):'—')+'</b></div>'}).join('');
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?dartLabel(d):'READY')+'</span></div>'}).join('');
@@ -577,15 +614,15 @@ $('bindinglog').textContent=Object.entries(store.bindings).map(([k,v])=>k+' → 
 }
 function resultCompare(ds,ss){
  if(!ss.length)return '<div class="cmp-first">FIRST GAME — ここが基準になります</div>';
- const sc=sum(ds),scores=ss.map(x=>sum(x.darts)),avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best=Math.max(...scores),rank=scores.filter(x=>x>sc).length+1,br=rate(ds),pbr=Math.round(ss.reduce((a,x)=>a+rate(x.darts),0)/ss.length*10)/10;
+ const sc=sum(ds),scores=ss.map(x=>sum(x.darts)),avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best=Math.max(...scores),rank=scores.filter(x=>x>sc).length+1,A=curAim(),rt=x=>x.length?x.filter(q=>aimHit(q,A)).length/x.length*100:0,br=rt(ds),pbr=Math.round(ss.reduce((a,x)=>a+rt(x.darts),0)/ss.length*10)/10;
  const d=(v,u)=>'<b class="'+(v>0?'up':v<0?'down':'')+'">'+(v>0?'▲ +':v<0?'▼ ':'± ')+(v<0?v:v===0?0:v)+(u||'')+'</b>';
  const r=Math.round((br-pbr)*10)/10;
- return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>BULL RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
+ return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>'+A+' RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
 }
 function renderDetail(){let s=store.sessions.find(x=>x.id===viewId);if(!s){$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}$('sessiondetail').innerHTML='<div class="flex"><b>'+date(s.startedAt)+'</b><span class="pill">'+(s.status==='completed'?'完走':'途中終了')+'</span><strong class="accent">'+sum(s.darts)+' POINTS</strong></div><div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map(d=>'<tr><td>'+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+label(d.segment)+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
 function download(content,filename,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-$('exportjson').onclick=()=>download(JSON.stringify({schemaVersion:1,sessions:store.sessions,active:store.active,settings:{bindings:store.bindings,calibrationKeys:calibrationKeys(),calibrationCompletedAt:store.calibrationCompletedAt||null,goalScore:store.goalScore||null}},null,2),'darts-training-lab-backup.json','application/json');
-$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone'],...store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'']))];download('\ufeff'+rows.map(r=>r.join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
+$('exportjson').onclick=()=>download(JSON.stringify({schemaVersion:1,sessions:store.sessions,active:store.active,settings:{bindings:store.bindings,calibrationKeys:calibrationKeys(),calibrationCompletedAt:store.calibrationCompletedAt||null,goalScore:store.goalScore||null,aimTarget:curAim()}},null,2),'darts-training-lab-backup.json','application/json');
+$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim'],...store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',aimOf(d)]))];download('\ufeff'+rows.map(r=>r.join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
 function validDart(d){return d&&typeof d==='object'&&typeof d.id==='string'&&Number.isInteger(d.roundIndex)&&d.roundIndex>=1&&d.roundIndex<=8&&Number.isInteger(d.dartIndex)&&d.dartIndex>=1&&d.dartIndex<=3&&typeof d.segment==='string'&&/^(S|D|T)([1-9]|1[0-9]|20)$|^(OB|IB|MISS)$/.test(d.segment)&&d.score===points(d.segment)}
 function validSession(s){return s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
 function restoreSettings(st){
@@ -598,10 +635,12 @@ function restoreSettings(st){
  if(ck&&typeof ck==='object'&&!Array.isArray(ck)&&!Object.keys(calibrationKeys()).length){const clean=Object.fromEntries(Object.entries(ck).filter(([t,k])=>/^(S\d+[OI]|T\d+|D\d+|OB|IB)$/.test(t)&&typeof k==='string'&&k.length<64));if(Object.keys(clean).length){store.calibrationKeys=clean;store.calibrationCompletedAt=typeof st.calibrationCompletedAt==='string'?st.calibrationCompletedAt:null;did=true}}
  const g=Math.round(Number(st.goalScore));
  if(!(store.goalScore>0)&&g>0&&g<=1440){store.goalScore=g;did=true}
+ if(!validAim(store.aimTarget)&&validAim(st.aimTarget)&&st.aimTarget!=='BULL'){store.aimTarget=st.aimTarget;did=true}
  return did;
 }
 $('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'))return;store.sessions=[...store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);persist();render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
 $('clearall').onclick=()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){store.sessions=[];viewId=null;persist();render()}};
+$('aimSelect').innerHTML='<option value="BULL">BULL（ブル）</option><optgroup label="TRIPLE">'+AIMS.filter(x=>x[0]==='T').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup><optgroup label="DOUBLE">'+AIMS.filter(x=>x[0]==='D').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup>';$('aimSelect').onchange=e=>{const v=e.target.value;if(!validAim(v))return;store.aimTarget=v;persist();render()};$('aimChip').onclick=()=>changeTab('settings');
 $('miss').onclick=()=>add('MISS');$('undo').onclick=undo;$('newgame').onclick=startNew;$('startdash').onclick=()=>{changeTab('play')};$('endgame').onclick=finishEarly;$('saveResult').onclick=confirmResult;
 const calibrationTargets=[...nums.flatMap(n=>['S'+n+'O','S'+n+'I','T'+n,'D'+n]),'OB','IB'];
 function calibrationSegment(target){return target.endsWith('O')&&target.startsWith('S')?'S'+target.slice(1,-1):target.endsWith('I')&&target.startsWith('S')?'S'+target.slice(1,-1):target}
