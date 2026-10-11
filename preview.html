@@ -382,6 +382,9 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 
 /* developer-only panels are hidden unless the URL has ?dev=1 */
 .no-dev .dev-only{display:none!important}
+
+/* Personal Records */
+.records-panel{margin-top:16px}.record-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.record-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:16px 8px;background:linear-gradient(145deg,#14323f,#091b28);border:1px solid #355668;border-radius:12px}.record-tile span{font-size:11px;font-weight:850;letter-spacing:.04em;color:#a7c3cd;text-align:center}.record-tile strong{font-size:clamp(24px,3.5vw,39px);line-height:1.15;color:#e7fb67;font-variant-numeric:tabular-nums}.record-tile small{font-size:10px;color:#69e5df;letter-spacing:.07em}@media(max-width:640px){.record-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
 <header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><span class="tiny muted">v0.5.33 / 200S</span><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
@@ -395,7 +398,7 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 <article class="panel focus-panel hidden" id="focusPanel" style="margin-top:16px"><h3>TODAY'S FOCUS</h3><div id="focusBody"></div></article><article class="panel insight-panel hidden" id="insightPanel" style="margin-top:16px"><h3>INSIGHT <span class="tiny muted">SELECTED PERIOD</span></h3><div id="insightBody"></div></article>
 <article class="panel aim-panel" style="margin-top:16px"><h3>AIM ANALYSIS</h3><div id="aimAnalysis"></div></article>
 <div class="grid cols2" style="margin-top:16px"><article class="panel"><h3>BULL BY DART</h3><div id="allbull"></div></article><article class="panel"><h3>SCORE TREND <span class="tiny muted">ALL TIME</span></h3><div id="analysischart"></div></article></div>
-<article class="panel achievement-panel"><h3>ACHIEVEMENTS <span class="tiny muted">ALL TIME</span></h3><div class="achievement-grid" id="achievementTotals"></div></article>
+<article class="panel achievement-panel"><h3>ACHIEVEMENTS <span class="tiny muted">ALL TIME</span></h3><div class="achievement-grid" id="achievementTotals"></div></article><article class="panel records-panel"><h3>PERSONAL RECORDS <span class="tiny muted">ALL TIME</span></h3><div class="record-grid" id="personalRecords"></div></article>
 <details class="analysis-extra"><summary>ADVANCED ANALYTICS <span class="tiny muted">A CLASS</span></summary>
 <div class="grid cols2 advanced-grid"><article class="panel"><h3>THROW ORDER <span class="tiny muted">DART 1 / 2 / 3</span></h3><div id="advancedThrowOrder"></div></article><article class="panel"><h3>DRIFT BY DART <span class="tiny muted">1 / 2 / 3</span></h3><div id="advancedDrift"></div></article>
 <article class="panel"><h3>DIRECTION <span class="tiny muted">8 WAY</span></h3><div id="advancedDirection"></div></article>
@@ -704,7 +707,7 @@ function renderAnalysis(){
  $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
- $('achievementTotals').innerHTML=achievementTotals();
+ $('achievementTotals').innerHTML=achievementTotals();$('personalRecords').innerHTML=personalRecords();
  renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();localizeAim();
 }
 const AIM_SKIP='#analysisAim,.card-help,.card-gloss,.help-btn,#achievementTotals,#advancedGoalBody,#advancedBestVsAvg,#advancedConditions,#advancedLog,#analysischart,#reportBody';
@@ -742,6 +745,30 @@ function renderAdvanced(){
  $('advancedStreak').innerHTML='<div class="advanced-big">'+best+'</div><div class="tiny muted">CONSECUTIVE BULLS</div>';
 }
 document.addEventListener('click',e=>{const sb=e.target.closest('[data-aim-sel]');if(sb){analysisAim=sb.dataset.aimSel;renderAnalysis();return}const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAnalysis()}});
+/* Personal bests: completed COUNT-UP games only, all-time. */
+function personalRecords(){
+ const games=finished().filter(s=>Array.isArray(s.darts)&&s.darts.length===24);
+ const rows=games.map(s=>{
+  const ds=s.darts,rounds=Array.from({length:8},(_,i)=>ds.slice(i*3,i*3+3));
+  let run=0,longest=0;
+  for(const d of ds){run=isBull(d)?run+1:0;longest=Math.max(longest,run)}
+  return {score:sum(ds),bulls:ds.filter(isBull).length,inner:ds.filter(d=>d.segment==='IB').length,
+   round:Math.max(...rounds.map(sum)),streak:longest,hats:rounds.filter(r=>r.every(isBull)).length,
+   ton80:rounds.filter(r=>r.every(d=>d.segment==='T20')).length};
+ });
+ const best=k=>rows.length?Math.max(...rows.map(r=>r[k])):null;
+ const items=[
+  ['HIGH SCORE',best('score'),'PTS'],
+  ['BULL / GAME',best('bulls'),'HITS'],
+  ['BULL RATE',best('bulls')===null?null:Math.round(best('bulls')/24*1000)/10,'%'],
+  ['INNER / GAME',best('inner'),'HITS'],
+  ['BEST ROUND',best('round'),'PTS'],
+  ['BULL STREAK',best('streak'),'DARTS'],
+  ['HAT / GAME',best('hats'),'TIMES'],
+  ['TON 80 / GAME',best('ton80'),'TIMES']
+ ];
+ return items.map(([label,value,unit])=>'<div class="record-tile"><span>'+label+'</span><strong>'+(value===null?'—':value)+'</strong><small>'+unit+'</small></div>').join('');
+}
 function achievementTotals(){
  const games=finished(),darts=games.flatMap(s=>s.darts),rounds=games.flatMap(s=>Array.from({length:8},(_,i)=>s.darts.slice(i*3,i*3+3))).filter(a=>a.length===3);
  const bulls=darts.filter(isBull).length,inner=darts.filter(d=>d.segment==='IB').length,hats=rounds.filter(a=>a.every(isBull)).length,ton80=rounds.filter(a=>a.every(d=>d.segment==='T20')).length,high=rounds.filter(a=>{const n=sum(a);return n>=151&&n<180}).length;
