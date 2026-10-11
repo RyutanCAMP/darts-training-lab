@@ -106,16 +106,19 @@ function playSound(kind='hit',delay=0){
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   // Four-second audible arcade countdown. The previous melody was too quiet
-   // (0.072 * FX volume) and lacked high-frequency presence on small speakers.
-   const notes=[523.25,659.25,783.99,659.25,523.25,659.25,880,783.99,587.33,698.46,880,698.46,587.33,523.25,440,523.25];
-   notes.forEach((freq,i)=>{
-    const t=at+i*.245;
-    retroVoice(freq,t,.225,.21*fx,'square',freq*.998,5500);
-    retroVoice(freq*2,t,.12,.065*fx,'triangle',freq*1.95,7500);
-    if(i%4===0){retroNoise(t,.065,.15*fx,1300,7800);retroVoice(130.81,t,.17,.15*fx,'sine',85,1700)}
+   // Gentle, upbeat four-second NEXT ROUND jingle (C major, ascending finish).
+   // Soft triangle notes instead of loud square-wave alarms and noise bursts.
+   const melody=[
+    [523.25,0,.18],[659.25,.23,.18],[783.99,.46,.25],
+    [659.25,.92,.17],[783.99,1.15,.17],[880,1.38,.30],
+    [783.99,1.93,.17],[880,2.16,.17],[1046.5,2.39,.29],
+    [783.99,2.94,.18],[987.77,3.17,.18],[1046.5,3.40,.43]
+   ];
+   melody.forEach(([freq,offset,duration])=>{
+    retroVoice(freq,at+offset,duration,.075*fx,'triangle',freq*.997,4200);
+    retroVoice(freq/2,at+offset,duration*.85,.025*fx,'sine',freq/2,2000);
    });
-   retroChord([523.25,783.99],at+3.73,.24,.12);
+   retroChord([523.25,659.25,783.99],at+3.64,.32,.028);
    return;
   }
   if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
