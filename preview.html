@@ -555,14 +555,18 @@ function playSound(kind='hit',delay=0){
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   // Soft low-pitched double drum beat ("don-don") for about three seconds.
-   const pairs=[0,.72,1.44,2.16];
-   pairs.forEach((offset)=>{
-    [0,.23].forEach((beat,j)=>{
-     const t=at+offset+beat;
-     retroVoice(j===0?100:91,t,.29,(j===0?.067:.054)*fx,'sine',j===0?48:43,500);
-     retroVoice(j===0?138:123,t,.09,.013*fx,'triangle',78,800);
-    });
+   // Light, playful three-second "te-tte-re-tte-re" arcade lever-inspired cue.
+   // Original synthesis; no sampled machine audio.
+   const phrase=[
+    [659.25,0,.10],[783.99,.14,.10],[987.77,.28,.18],
+    [783.99,.60,.10],[659.25,.74,.10],[783.99,.88,.20],
+    [659.25,1.22,.10],[783.99,1.36,.10],[987.77,1.50,.18],
+    [783.99,1.82,.10],[880,1.96,.10],[1046.5,2.10,.22],
+    [987.77,2.47,.12],[1046.5,2.62,.23]
+   ];
+   phrase.forEach(([freq,offset,duration])=>{
+    retroVoice(freq,at+offset,duration,.052*fx,'triangle',freq*.998,5200);
+    retroVoice(freq*2,at+offset,duration*.55,.011*fx,'sine',freq*2,6500);
    });
    return;
   }
@@ -729,7 +733,11 @@ function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||a
   else if(shot&&!completeRound)gameEffect(shot.title,'+'+points(segment)+' POINTS',shot.kind,850);
  }
  }if(s.darts.length===21)playSound('finalRound',.25);
- if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0)playSound('cooldown',hat?3.1:0);
+ if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){
+  // Queue the jingle after BULL/INNER BULL or achievement fanfare.
+  const cueDelay=hat?3.1:segment==='IB'?1.4:segment==='OB'?1.1:s.darts.length===21?1.15:segment.startsWith('T')?.65:.45;
+  playSound('cooldown',cueDelay);
+ }
  persist();render();flashBoardHit(segment,zone);if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){const completedRound=s.darts.length/3;const rd=s.darts.slice(-3),rs=sum(rd);if(hat){achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;beginRoundBreak(completedRound,rs,rd)},3100)}else beginRoundBreak(completedRound,rs,rd)}if(s.darts.length===24){const showFinal=()=>{showResult=true;render();requestAnimationFrame(()=>{$('resultpanel').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'})})};if(hat){showResult=false;gameEffect('HAT TRICK!','3 BULLS IN A ROW','award',3000);achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;showFinal()},3100)}else requestAnimationFrame(showFinal)}}
 function complete(status){let s=store.active;if(!s.darts.length)return false;const next=newSession();s.status=status;s.endedAt=new Date().toISOString();store.sessions.unshift(s);store.active=next;if(!persist()){store.active=s;store.sessions.shift();s.status='active';s.endedAt=null;return false}return true}
 function startNew(){cancelAchievementDelay();finishRoundBreak();if(store.active.darts.length===24){if(!confirm('現在の24投を完走として保存し、新しいゲームを始めますか？'))return;if(!complete('completed'))return}else if(store.active.darts.length){if(!confirm('進行中のゲームを途中終了として保存し、新しいゲームを始めますか？'))return;if(!complete('abandoned'))return}else store.active=newSession();showResult=false;persist();toast('NEW GAME — GOOD LUCK!');changeTab('play')}
