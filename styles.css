@@ -393,3 +393,10 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 @keyframes cool-pixel-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @media(prefers-reduced-motion:reduce){#play .cool-pixel{animation:none!important}}
 @media(max-width:560px){#play .cool-pixel{width:min(100%,170px)}}
+
+/* Cooldown visual hierarchy: larger pixel artwork, quieter score, original palette. */
+#play .cool-pixel{width:min(100%,290px);max-width:290px;margin:0 auto -8px}
+#play .cool-score{font-size:19px!important;line-height:1.2;letter-spacing:.06em;opacity:.88}
+#play .cool-round{font-size:11px;letter-spacing:.1em;opacity:.8}
+#play .cool-card{gap:8px;padding:22px 20px 20px}
+@media(max-width:560px){#play .cool-pixel{width:min(100%,250px)}#play .cool-score{font-size:18px!important}}
