@@ -376,3 +376,6 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 .page .aim-target-row button.selected:not(.primary):not(.warn){background:#e7fb67;color:#091622;border-color:#e7fb67;box-shadow:0 0 14px #e7fb6755}
 .aim-settings select{font-size:16px;min-height:44px;min-width:200px}
 .aim-settings{margin-bottom:14px}
+
+/* developer-only panels are hidden unless the URL has ?dev=1 */
+.no-dev .dev-only{display:none!important}

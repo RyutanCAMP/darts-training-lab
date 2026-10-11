@@ -1,3 +1,4 @@
+try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.add('no-dev')}catch(e){}
 
 (()=>{'use strict';
 const $=id=>document.getElementById(id),KEY='dtl-data-v1',nums=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
