@@ -365,3 +365,5 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 .focus-fact{margin-top:6px}
 /* v0.5.32: selected period must beat the generic .page button rule */
 .page .analysis-periods button.selected:not(.primary):not(.warn),.page .analysis-periods button.selected:not(.primary):not(.warn):hover,.page .aim-periods button.selected:not(.primary):not(.warn){background:#e7fb67;color:#091622;border-color:#e7fb67;box-shadow:0 0 18px #e7fb6755}
+/* v0.5.32: period buttons light up instantly (no fade) */
+.page .analysis-periods button,.page .aim-periods button{transition:none}

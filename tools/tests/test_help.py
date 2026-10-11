@@ -1,4 +1,4 @@
-import tempfile, pathlib
+import tempfile, pathlib, os
 ROOT=str(pathlib.Path(__file__).resolve().parent.parent.parent)
 import json, threading, http.server, socketserver, functools, os, re, random, datetime
 from playwright.sync_api import sync_playwright
@@ -21,7 +21,7 @@ seed=dict(schemaVersion=1,sessions=[game(k,base+datetime.timedelta(days=k)) for 
 ok=True
 def check(c,m):
     global ok; print(('PASS ' if c else 'FAIL ')+m); ok&=bool(c)
-EXPECT=['period','m-bull','m-hits','m-inner','m-best','insight','aim','allbull','trend','achievements','report','throw','drift','direction','consistency','after','bulltrend','rounds','roundscore','breakdown','pace','streak','goal','bestavg','conditions','log']
+EXPECT=['focus','period','m-bull','m-hits','m-inner','m-best','insight','aim','allbull','trend','achievements','report','throw','drift','direction','consistency','after','bulltrend','rounds','roundscore','breakdown','pace','streak','goal','bestavg','conditions','log']
 def new(b,name,data,vp=(390,844)):
     ctx=b.new_context(viewport={'width':vp[0],'height':vp[1]},device_scale_factor=2,is_mobile=True,has_touch=True)
     pg=ctx.new_page(); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
