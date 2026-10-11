@@ -9,7 +9,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 - `preview.html`: **standalone, self-contained** preview for iPhone. It embeds the entire stylesheet in `<style>` and app script in the final `<script>`. **Every UI/code change must also be mirrored into this file**. Do not edit only `index.html` or `app.js`.
 - `data/200s-keymap.json`: board input mapping.
 - No framework/bundler. Vanilla HTML/CSS/JS; browser localStorage.
-- Current UI version at handoff: v0.5.31. Check the default branch for later changes before editing.
+- Current UI version at handoff: v0.5.32. Check the default branch for later changes before editing.
 
 ## Current experience
 - COUNT-UP: 8 rounds, 3 darts each (24 throws); score, MISS, undo, results/history, audio/visual effects.
@@ -22,6 +22,9 @@ Continue development of the existing retro-styled darts practice app, **not a re
 - ACHIEVEMENTS: all-time BULL, INNER BULL, HAT TRICK, TON 80, HIGH TON (currently computed from completed games).
 - INSIGHT (main screen, hidden when empty): up to 3 measured FACT lines; interpretations/next steps are collapsed under NEXT and always worded as possibilities.
 - HELP is **per card**: each `HELP[key]` is `[what, how, note]`. A one-line caption (`p.card-gloss`, = what) sits under every card header; the "?" button (card headers, the four top tiles, the period selector) opens the note with 見方 / 注意 (tiles and the period note also show これは). Texts live in the `HELP` map in `app.js`; `setupHelp()`/`helpBtn()`/`helpBox()` wire them up. Keep texts short, plain Japanese; update them whenever a card's meaning changes. Bottom tab order: PLAY / ANALYSIS / RESULT (履歴).
+- TODAY'S FOCUS (`#focusPanel`, above INSIGHT, hidden when empty): the first insight item's TRY text as one line plus its FACT. GAME COMPLETE panel shows `#resultCompare` (VS AVG / VS BEST / RANK / BULL RATE vs AVG, NEW PERSONAL BEST; FIRST GAME when no history).
+- The user's stated aim is BULL (aim-target selection per dart is planned next); until then wording says "狙いはブル前提".
+- Selected-period buttons need `.page .analysis-periods button.selected:not(.primary):not(.warn)` to beat the generic `.page button` rule (10R was selected but not visibly lit before).
 - COACH REPORT (last panel on Analysis, button-triggered, typing effect, instant when reduced-motion): rule-based text built by `buildReport()` from the selected period; sections SUMMARY / STRENGTHS / FOCUS / NEXT DRILL / CONFIDENCE. It is **not an AI model** and must say so; facts and hypotheses stay separate, hypotheses use "かもしれません" wording, and it refreshes instantly when the period changes. `changeTab('analysis')` resets it to the button state.
 - BULL RATE tile shows the change vs the previous equal-length window (1R/10R/20R only; none for ALL).
 - Expandable ADVANCED ANALYTICS / A CLASS: THROW ORDER (BULL rate + 95% range, IB share, average score for DART 1/2/3, REF/EVEN/CLEAR DIFF verdict), DRIFT BY DART (median offset, direction, spread per dart), DIRECTION (8-way), CONSISTENCY, AFTER HIT / MISS, BULL TREND, ROUND ANALYSIS (bull rate by round), ROUND SCORE (avg per round, R1-4 vs R5-8, distribution), SCORE BREAKDOWN, PACE, BEST STREAK. ALL TIME cards: SCORE & GOAL, BEST GAME vs AVG, CONDITIONS (time of day / game of the day), PRACTICE LOG.
@@ -60,7 +63,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 
 ## Recommended first actions for Claude
 1. Read `README.md`, `index.html`, `styles.css`, `app.js`, and `preview.html`.
-2. Inspect current GitHub HEAD (do not assume v0.5.31 is still latest).
+2. Inspect current GitHub HEAD (do not assume v0.5.32 is still latest).
 3. Perform a smoke test of Analysis and fix real bugs before adding features.
 4. Confirm the exact next change with the user, then implement and mirror the standalone preview.
 5. Report what was changed, what was actually tested, and provide a preview link pointing to a **real commit SHA**.

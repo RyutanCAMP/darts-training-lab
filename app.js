@@ -431,11 +431,13 @@ function renderInsight(ctx){
  const items=[],{order,verdict:v,drift,after,rs}=ctx;
  if(v.best&&v.weak&&v.best.rate-v.weak.rate>=10)items.push({fact:'BULL  DART '+v.best.i+' '+v.best.rate+'%　/　DART '+v.weak.i+' '+v.weak.rate+'%',ref:v.tag==='REF',hyp:'DART '+v.weak.i+' の精度が下がっている可能性。サンプルが少ないうちは偶然の幅があります。',tryIt:'DART '+v.weak.i+' の前に構えを確認し、20R分ためて再確認。'});
  const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
- if(dr)items.push({fact:'DART '+dr.i+'  '+driftWord(dr.mx,dr.my)+'  OFFSET '+dr.off.toFixed(2),ref:dr.np<REF_MIN,hyp:'その方向に着弾が偏っている可能性。狙い位置は未記録のため、意図した狙いの影響もあります。',tryIt:'DART '+dr.i+' だけ、次の10投で反対方向を少し意識して変化を見る。'});
+ if(dr)items.push({fact:'DART '+dr.i+'  '+driftWord(dr.mx,dr.my)+'  OFFSET '+dr.off.toFixed(2),ref:dr.np<REF_MIN,hyp:'その方向に着弾が偏っている可能性。狙いはブルとして見ています。',tryIt:'DART '+dr.i+' だけ、次の10投で反対方向を少し意識して変化を見る。'});
  const [ab,am]=after;
  if(ab.n>=10&&am.n>=10&&Math.abs(ab.rate-am.rate)>=15){const lower=am.rate<ab.rate;items.push({fact:'AFTER BULL '+ab.rate+'%　/　AFTER MISS '+am.rate+'%',ref:ab.n<REF_MIN||am.n<REF_MIN,hyp:lower?'外した直後に崩れやすい可能性。':'外した後のほうが集中している可能性。',tryIt:lower?'外した次の1投の前に一拍置く。':''})}
  if(rs.first.n>=6&&rs.second.n>=6&&Math.abs(rs.first.avg-rs.second.avg)>=8){const fade=rs.first.avg>rs.second.avg;items.push({fact:'R1–4 '+Math.round(rs.first.avg)+'　/　R5–8 '+Math.round(rs.second.avg),ref:Math.min(rs.first.n,rs.second.n)<12,hyp:fade?'後半に落ちやすい可能性。':'序盤が立ち上がりきっていない可能性。',tryIt:fade?'R4とR5の間に一呼吸入れて比較。':'R1の前に数投の素振りを入れて比較。'})}
- const top=items.slice(0,3),panel=$('insightPanel');
+ const top=items.slice(0,3),panel=$('insightPanel'),fp=items.find(x=>x.tryIt);
+ $('focusPanel').classList.toggle('hidden',!fp);
+ $('focusBody').innerHTML=fp?'<div class="focus-line">'+fp.tryIt+'</div><div class="focus-fact tiny muted">'+fp.fact+(fp.ref?' <em title="参考値">REF</em>':'')+'</div>':'';
  panel.classList.toggle('hidden',!top.length);
  $('insightBody').innerHTML=top.map(x=>'<div class="insight-fact"><span class="insight-tag">FACT</span><span>'+x.fact+(x.ref?' <em title="参考値">REF</em>':'')+'</span></div>').join('')+(top.length?'<details class="insight-next"><summary>NEXT</summary>'+top.map(x=>'<p><b>HYPOTHESIS</b> '+x.hyp+(x.tryIt?'<br><b>TRY</b> '+x.tryIt:'')+'</p>').join('')+'</details>':'');
 }
@@ -453,7 +455,7 @@ function buildReport(rounds,ds,prev){
  const R=rounds.length,N=ds.length,label=aimPeriod==='all'?'ALL':aimPeriod+'R',head=label+' · '+(aimPeriod!=='all'&&R===Number(aimPeriod)?'':R+'R / ')+N+'投';
  const order=orderStats(ds),v=orderVerdict(order),drift=dartStats(ds),after=afterStats(rounds),rs=roundStats(rounds);
  const anyRef=order.some(x=>x.n>0&&x.n<REF_MIN);
- const conf={k:'CONFIDENCE',label:'信頼度',lines:['データ量：'+N+'投。'+(N===0?'':anyRef?'投球順ごとに20投未満の項目があり、参考値として読んでください（REF）。':'投球順ごとに20投以上あります。'),'着弾位置はセグメントからの推定で、狙い位置は記録していません。','この文章は数値をもとにしたルール式の自動生成で、AIモデルによる判断ではありません。']};
+ const conf={k:'CONFIDENCE',label:'信頼度',lines:['データ量：'+N+'投。'+(N===0?'':anyRef?'投球順ごとに20投未満の項目があり、参考値として読んでください（REF）。':'投球順ごとに20投以上あります。'),'着弾位置はセグメントからの推定で、狙いはブル前提で見ています。','この文章は数値をもとにしたルール式の自動生成で、AIモデルによる判断ではありません。']};
  if(R<3)return {head,sections:[{k:'SUMMARY',label:'総評',lines:['まだデータが少なく（'+R+'R / '+N+'投）、傾向は読み取れません。','3ラウンド（9投）以上、できれば1ゲーム（24投）を完走すると、投球順の比較が見られます。']},conf]};
  const bulls=ds.filter(isBull).length,diff=prev?Math.round((rate(ds)-rate(prev.flat()))*10)/10:null;
  const trend=diff===null?'比較できる直前の期間はまだありません。':Math.abs(diff)<3?'直前の同じ長さの期間とほぼ同じです（'+(diff>=0?'+':'')+diff+'pt）。':diff>0?'直前の同じ長さの期間より '+diff+'pt 上がっています。':'直前の同じ長さの期間より '+(-diff)+'pt 下がっています。';
@@ -472,7 +474,7 @@ function buildReport(rounds,ds,prev){
  if(ab.n>=10&&am.n>=10&&am.rate>=ab.rate)strengths.push('外した直後のブル率（'+am.rate+'%）が、ブル直後（'+ab.rate+'%）と同程度以上で、崩れにくい傾向です。');
  if(gap>=10){const clear=v.tag==='CLEAR DIFF';focus.push('DART '+weak.i+' のブル率が低めです（'+weak.rate+'%、DART '+best.i+' は '+best.rate+'%）。'+(clear?'差は偶然の幅を超えています。':'差は偶然の幅に収まる可能性があります。')+'この投目で精度が下がっているのかもしれません。');drills.push('DART '+weak.i+' の前に構えと立ち位置を確認し、10ラウンド分を同じ条件で比べる。')}
  const dr=drift.filter(s=>s.np>=10&&s.off>=.2).sort((a,b)=>b.off-a.off)[0];
- if(dr){focus.push('DART '+dr.i+' は '+driftWord(dr.mx,dr.my)+' に着弾が偏っています（OFFSET '+dr.off.toFixed(2)+'）。狙い位置は未記録のため、意図した狙いの影響も含みます。');drills.push('DART '+dr.i+' だけ、10投のあいだ反対方向を少し意識して変化を見る。')}
+ if(dr){focus.push('DART '+dr.i+' は '+driftWord(dr.mx,dr.my)+' に着弾が偏っています（OFFSET '+dr.off.toFixed(2)+'）。狙いはブル前提です。');drills.push('DART '+dr.i+' だけ、10投のあいだ反対方向を少し意識して変化を見る。')}
  if(ab.n>=10&&am.n>=10&&am.rate<=ab.rate-15){focus.push('外した直後のブル率が低めです（AFTER MISS '+am.rate+'%、AFTER BULL '+ab.rate+'%）。外した後に力みやすいのかもしれません。');drills.push('外した次の1投の前に、一拍置いてから構える。')}
  if(rs.first.n>=6&&rs.second.n>=6){const d=rs.first.avg-rs.second.avg;
   if(d>=8){focus.push('後半が落ちています（R1–4 平均 '+Math.round(rs.first.avg)+'、R5–8 平均 '+Math.round(rs.second.avg)+'）。集中や体力が切れているのかもしれません。');drills.push('R4とR5のあいだに水分補給や深呼吸を入れて、後半を比べる。')}
@@ -520,6 +522,7 @@ const HELP={
  'm-hits':['ブル（外側・中心どちらも）に入った回数です。','回数が増えるほど、安定して狙えています。','投数が少ない時は、偶然で上下します。'],
  'm-inner':['中心（INNER BULL・50点）に入った回数です。','ブルの中でも、より中心に近く入れられているかが分かります。','投数が少ない時は、偶然で上下します。'],
  'm-best':['完走したゲームの最高得点です。','自己ベストの目安として見ます。','全期間の数字で、途中終了は含みません。'],
+ focus:['今日、いちばん先に意識する1点です。','数字から選んだ「試すこと」を1つ出します。下の INSIGHT の NEXT と同じ内容です。','可能性にもとづく提案で、断定ではありません。投数が少ないうちは偶然のこともあります。'],
  insight:['今の期間で、数字から言えることを最大3つ並べます。','FACT は確認できた事実です。NEXT を開くと、考えられる原因と試すことが出ます。','NEXT は断定ではなく可能性です。データが少ないうちは偶然のこともあります。'],
  aim:['どこに多く入っているかを、ボードの色の濃さで見ます。','明るいほど多く入った場所です。黄色い丸は、入った場所の中央値の目安です。','実際の着弾位置ではなく、入ったセグメントからの推定です。MISSと内外が不明な記録は除き、件数を表示します。'],
  allbull:['1投目・2投目・3投目のうち、どれが入りやすいかです。','数字はブル率。括弧の中は 入った数/投数 です。','投数が少ないと差は参考です。'],
@@ -527,8 +530,8 @@ const HELP={
  achievements:['これまでの記録の累計です。','HAT TRICK＝3投ともブル、TON 80＝3投ともT20、HIGH TON＝1ラウンド151〜179点の回数です。','完走したゲームだけを数えます（全期間）。'],
  report:['今の期間の数字を、文章にまとめます。','ボタンを押すと表示されます。期間を変えると書き換わります。','ルールによる自動生成で、AIモデルではありません。'],
  throw:['何投目が一番入っているかを比べます。','大きい数字がブル率。RANGE は95%の幅で、幅が重なる間は差が偶然かもしれません。CLEAR DIFF は幅が重ならず、差が出ている目安です。','IB＝ブルのうち中心の数、AVG＝1投の平均点です。'],
- drift:['投球順ごとに、どちらへ偏っているかを見ます。','矢印は向き、OFFSET は中心からのズレ（0＝中心、1＝ボードの端）、SPREAD は散らばりです。SPREAD が小さいほどまとまっています。','狙い位置は記録していないため、T20を狙えば上寄りに出ます。ミスとは限りません。'],
- direction:['ブル以外に入った時、どの向きに多いかです。','割合が大きい向きほど、そちらへ外れやすい目安です。','狙い位置が未記録のため、狙いの影響を含みます。'],
+ drift:['投球順ごとに、どちらへ偏っているかを見ます。','矢印は向き、OFFSET は中心からのズレ（0＝中心、1＝ボードの端）、SPREAD は散らばりです。SPREAD が小さいほどまとまっています。','狙いはブル前提です。ブルから見た偏りで、T20などを狙った投げが混ざると出ます。'],
+ direction:['ブル以外に入った時、どの向きに多いかです。','割合が大きい向きほど、そちらへ外れやすい目安です。','狙いはブル前提で、ブルから見た向きです。'],
  consistency:['どれだけ同じ場所にまとまっているかです。','CLUSTER は中央値の近くに入った割合で、高いほどまとまっています。SPREAD は小さいほど安定です。','MISSと内外が不明な記録は除きます。'],
  after:['ブルや外れた直後の1投が、どうなるかです。','ブルの後、外れた後、それぞれの次の1投のブル率を比べます。外れた後に下がるなら、切り替えが課題かもしれません。','同じラウンド内の流れだけを見ます。'],
  bulltrend:['期間の前半と後半で、ブル率が変わったかです。','大きい数字が後半、PREV が前半です。後半が高ければ、調子が上がっています。','期間が短いと偶然で動きます。'],
@@ -542,7 +545,7 @@ const HELP={
  conditions:['いつ投げると調子が良いかです。','時間帯と、その日の何ゲーム目かで、平均点を比べます。G はゲーム数です。','3ゲーム未満の行は薄く表示し、参考です。'],
  log:['練習の量と続け方です。','濃いほど投数が多い日。DAYS＝直近28日の練習日数、STREAK＝連続日数、THIS WEEK＝今週の投数です。','直近35日を表示します。']
 };
-const HELP_CARDS=[['insight','insightBody'],['aim','aimAnalysis'],['allbull','allbull'],['trend','analysischart'],['achievements','achievementTotals'],['throw','advancedThrowOrder'],['drift','advancedDrift'],['direction','advancedDirection'],['consistency','advancedConsistency'],['after','advancedAfter'],['bulltrend','advancedBullTrend'],['rounds','advancedRounds'],['roundscore','advancedRoundScore'],['breakdown','advancedBreakdown'],['pace','advancedPace'],['streak','advancedStreak'],['goal','advancedGoalBody'],['bestavg','advancedBestVsAvg'],['conditions','advancedConditions'],['log','advancedLog'],['report','reportBody']];
+const HELP_CARDS=[['focus','focusBody'],['insight','insightBody'],['aim','aimAnalysis'],['allbull','allbull'],['trend','analysischart'],['achievements','achievementTotals'],['throw','advancedThrowOrder'],['drift','advancedDrift'],['direction','advancedDirection'],['consistency','advancedConsistency'],['after','advancedAfter'],['bulltrend','advancedBullTrend'],['rounds','advancedRounds'],['roundscore','advancedRoundScore'],['breakdown','advancedBreakdown'],['pace','advancedPace'],['streak','advancedStreak'],['goal','advancedGoalBody'],['bestavg','advancedBestVsAvg'],['conditions','advancedConditions'],['log','advancedLog'],['report','reportBody']];
 const helpOpen=new Set();
 const helpBtn=(key,cls='')=>'<button type="button" class="help-btn '+cls+'" data-help="'+key+'" aria-expanded="'+helpOpen.has(key)+'" aria-label="見方を開く"><span>?</span></button>';
 const helpBox=(key,withWhat)=>{const h=HELP[key]||['','',''];return '<div class="card-help'+(helpOpen.has(key)?'':' hidden')+'" data-help-for="'+key+'">'+(withWhat?'<p><b>これは</b>'+h[0]+'</p>':'')+'<p><b>見方</b>'+h[1]+'</p><p><b>注意</b>'+h[2]+'</p></div>'};
@@ -565,12 +568,19 @@ $('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIn
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?dartLabel(d):'READY')+'</span></div>'}).join('');
 $('throwlog').innerHTML=ds.slice().reverse().map((d,i)=>'<tr><td>'+(n-i)+' (R'+d.roundIndex+'-'+d.dartIndex+')</td><td>'+dartLabel(d)+'</td><td class="num">'+d.score+'</td></tr>').join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
 $('undo').disabled=!n;$('endgame').disabled=!n;
-$('resultpanel').classList.toggle('hidden',n!==24);$('resultscore').textContent=sum(ds);$('resultbull').textContent=ds.filter(isBull).length+' / 24';$('saveResult').disabled=n!==24;
+$('resultpanel').classList.toggle('hidden',n!==24);$('resultCompare').innerHTML=n===24?resultCompare(ds,ss):'';$('resultscore').textContent=sum(ds);$('resultbull').textContent=ds.filter(isBull).length+' / 24';$('saveResult').disabled=n!==24;
 $('miss').disabled=n===24;
 const latest=store.sessions[0];$('latestResult').innerHTML=latest?'<div class="latest-score">'+sum(latest.darts)+'</div><div class="latest-meta"><span>'+date(latest.startedAt)+'</span><span>'+(latest.status==='completed'?'24投 完走':'途中終了 '+latest.darts.length+'投')+'</span><span>BULL '+latest.darts.filter(isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
 $('sessions').innerHTML=store.sessions.map(x=>'<tr><td>'+date(x.startedAt)+'</td><td>'+(x.status==='completed'?'完走':'途中終了')+'</td><td>'+sum(x.darts)+'</td><td>'+x.darts.filter(isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{viewId=b.dataset.detail;renderDetail()});if(store.sessions.length&&!store.sessions.some(x=>x.id===viewId))viewId=store.sessions[0].id;renderDetail();
 $('bindinglog').textContent=Object.entries(store.bindings).map(([k,v])=>k+' → '+label(v)).join('\n')||'割当なし';
+}
+function resultCompare(ds,ss){
+ if(!ss.length)return '<div class="cmp-first">FIRST GAME — ここが基準になります</div>';
+ const sc=sum(ds),scores=ss.map(x=>sum(x.darts)),avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best=Math.max(...scores),rank=scores.filter(x=>x>sc).length+1,br=rate(ds),pbr=Math.round(ss.reduce((a,x)=>a+rate(x.darts),0)/ss.length*10)/10;
+ const d=(v,u)=>'<b class="'+(v>0?'up':v<0?'down':'')+'">'+(v>0?'▲ +':v<0?'▼ ':'± ')+(v<0?v:v===0?0:v)+(u||'')+'</b>';
+ const r=Math.round((br-pbr)*10)/10;
+ return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>BULL RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
 }
 function renderDetail(){let s=store.sessions.find(x=>x.id===viewId);if(!s){$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}$('sessiondetail').innerHTML='<div class="flex"><b>'+date(s.startedAt)+'</b><span class="pill">'+(s.status==='completed'?'完走':'途中終了')+'</span><strong class="accent">'+sum(s.darts)+' POINTS</strong></div><div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map(d=>'<tr><td>'+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+label(d.segment)+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
 function download(content,filename,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}

@@ -351,3 +351,17 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 .card-help{margin:10px 0 12px;padding:10px 12px;border-radius:10px;background:#0d2230;border:1px solid #2c4658;font-size:12.5px;line-height:1.7;color:#c4dbe3}
 .panel .card-help p{margin:0 0 6px;font-size:inherit;line-height:inherit;color:inherit}.panel .card-help p:last-child{margin:0}.card-help b{color:#ffd84a;margin-right:6px;font-size:11px;letter-spacing:.06em}.panel p.card-gloss{margin:2px 0 10px;font-size:12.5px;line-height:1.5;color:#9fc0cc;font-weight:400}
 .metric .card-help{margin:10px 0 0;font-size:12px;line-height:1.6}
+
+/* v0.5.32 result compare + focus */
+.cmp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.cmp-grid>div{background:#0d2230;border:1px solid #2c4658;border-radius:10px;padding:8px 10px}
+.cmp-grid span{display:block;font-size:10px;letter-spacing:.08em;color:#9fc0cc}
+.cmp-grid b{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums}
+.cmp-grid b.up{color:#7bf9da}.cmp-grid b.down{color:#ffb4a0}
+.cmp-new{text-align:center;font-weight:900;letter-spacing:.1em;color:#ffd84a;margin:4px 0 8px}
+.cmp-first{text-align:center;font-size:12px;letter-spacing:.08em;color:#9fc0cc;margin:8px 0}
+.focus-panel{border-color:#3b7777}
+.focus-line{font-size:18px;font-weight:800;line-height:1.5;color:#f6fbff}
+.focus-fact{margin-top:6px}
+/* v0.5.32: selected period must beat the generic .page button rule */
+.page .analysis-periods button.selected:not(.primary):not(.warn),.page .analysis-periods button.selected:not(.primary):not(.warn):hover,.page .aim-periods button.selected:not(.primary):not(.warn){background:#e7fb67;color:#091622;border-color:#e7fb67;box-shadow:0 0 18px #e7fb6755}
