@@ -104,6 +104,8 @@ function playSound(kind='hit'){
   const at=audioCtx.currentTime+.012,fx=soundLevel('fx');
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
+  if(kind==='cooldown'){retroNote(329.63,at,.12,.055);retroNote(261.63,at+.13,.18,.05);return}
+  if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
   if(kind==='double'){retroNote(523.25,at+.025,.13,.085);retroNote(783.99,at+.105,.19,.1);return}
   if(kind==='triple'){retroSpark(at+.02,.75);retroChord([392,587.33,783.99],at+.035,.22,.115);retroNote(1174.66,at+.18,.23,.08);return}
   if(kind==='bull'){
@@ -230,6 +232,7 @@ function drawCooldownPixels(score,darts){
 }
 function beginRoundBreak(round,score,darts=[]){
  finishRoundBreak();
+ playSound('cooldown');
  const duration=Math.max(1,Number(store.roundDelay)||8),ms=duration*1000;
  $('roundBreakLabel').textContent='ROUND '+round+' CLEAR';
  $('roundBreakScore').textContent='+'+score;
@@ -250,6 +253,7 @@ let achievementDelayTimer=null;
 function cancelAchievementDelay(){if(achievementDelayTimer!==null){clearTimeout(achievementDelayTimer);achievementDelayTimer=null}}
 function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||achievementDelayTimer!==null)return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;let hat=false;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,aim:curAim(),corrected:false});if(s.darts.length===24){hat=s.darts.slice(-3).every(isBull);showResult=false;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){if(!hat)gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){if(!hat)gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{if(!hat)gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
  const round=s.darts.slice(Math.floor(i/3)*3),score=sum(round),last=s.darts.at(-1),shot=shotPraise(last);
+ if(i===21)playSound('finalRound');
  const completeRound=round.length===3,award=completeRound?roundPraise(round,score):null;
  const bullStreak=round.length>=2&&round.every(isBull);hat=completeRound&&round.every(isBull);
  if(completeRound&&['HAT TRICK!','TON 80!','HIGH TON!','LOW TON!'].includes(award)){
