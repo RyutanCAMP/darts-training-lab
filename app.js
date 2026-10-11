@@ -69,9 +69,10 @@ function retroNoise(at,dur,vol,low=550,high=6000){
 }
 function retroHit(at,amount=1,pitch=1){
  const h=amount*soundLevel('hit');
- retroNoise(at,.052,.19*h,300,2400);
- retroVoice(145*pitch,at,.095,.26*h,'sine',59*pitch,1400);
- retroVoice(490*pitch,at,.034,.07*h,'triangle',210*pitch,3100);
+ retroNoise(at,.115,.46*h,420,7500);
+ retroNoise(at+.018,.085,.24*h,1100,9000);
+ retroVoice(185*pitch,at,.125,.33*h,'sine',65*pitch,1800);
+ retroVoice(640*pitch,at,.055,.13*h,'triangle',220*pitch,3900);
 }
 function retroNote(freq,at,dur,volume=.1){
  const v=volume*soundLevel('fx');
@@ -104,7 +105,12 @@ function playSound(kind='hit'){
   const at=audioCtx.currentTime+.012,fx=soundLevel('fx');
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
-  if(kind==='cooldown'){retroNote(329.63,at,.12,.055);retroNote(261.63,at+.13,.18,.05);return}
+  if(kind==='cooldown'){
+   const notes=[392,329.63,293.66,261.63,329.63,392,349.23,293.66,261.63,293.66,329.63,261.63,246.94,261.63,293.66,261.63];
+   notes.forEach((freq,i)=>{const t=at+i*.245;retroNote(freq,t,.21,.072);if(i%4===0)retroVoice(freq/2,t,.20,.055*fx,'sine')});
+   retroChord([261.63,392],at+3.72,.27,.055);
+   return;
+  }
   if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
   if(kind==='double'){retroNote(523.25,at+.025,.13,.085);retroNote(783.99,at+.105,.19,.1);return}
   if(kind==='triple'){retroSpark(at+.02,.75);retroChord([392,587.33,783.99],at+.035,.22,.115);retroNote(1174.66,at+.18,.23,.08);return}
