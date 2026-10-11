@@ -555,15 +555,14 @@ function playSound(kind='hit',delay=0){
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   // Gentle four-second taiko-like "don-chan, don-chan" rhythm.
-   // Keep this independent of the regular hit and achievement sound levels.
-   const beats=[0,.46,.92,1.38,1.84,2.30,2.76,3.22,3.68];
-   beats.forEach((offset,i)=>{
-    const t=at+offset,strong=i%2===0;
-    const volume=(strong?.062:.042)*fx;
-    retroVoice(strong?125:155,t,.26,volume,'sine',strong?62:83,650);
-    retroVoice(strong?185:210,t,.095,volume*.23,'triangle',strong?105:130,1000);
-    if(!strong)retroNoise(t,.035,.012*fx,280,1450);
+   // Soft low-pitched double drum beat ("don-don") for about three seconds.
+   const pairs=[0,.72,1.44,2.16];
+   pairs.forEach((offset)=>{
+    [0,.23].forEach((beat,j)=>{
+     const t=at+offset+beat;
+     retroVoice(j===0?100:91,t,.29,(j===0?.067:.054)*fx,'sine',j===0?48:43,500);
+     retroVoice(j===0?138:123,t,.09,.013*fx,'triangle',78,800);
+    });
    });
    return;
   }
