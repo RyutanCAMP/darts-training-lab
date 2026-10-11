@@ -106,9 +106,16 @@ function playSound(kind='hit'){
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   const notes=[392,329.63,293.66,261.63,329.63,392,349.23,293.66,261.63,293.66,329.63,261.63,246.94,261.63,293.66,261.63];
-   notes.forEach((freq,i)=>{const t=at+i*.245;retroNote(freq,t,.21,.072);if(i%4===0)retroVoice(freq/2,t,.20,.055*fx,'sine')});
-   retroChord([261.63,392],at+3.72,.27,.055);
+   // Four-second audible arcade countdown. The previous melody was too quiet
+   // (0.072 * FX volume) and lacked high-frequency presence on small speakers.
+   const notes=[523.25,659.25,783.99,659.25,523.25,659.25,880,783.99,587.33,698.46,880,698.46,587.33,523.25,440,523.25];
+   notes.forEach((freq,i)=>{
+    const t=at+i*.245;
+    retroVoice(freq,t,.225,.21*fx,'square',freq*.998,5500);
+    retroVoice(freq*2,t,.12,.065*fx,'triangle',freq*1.95,7500);
+    if(i%4===0){retroNoise(t,.065,.15*fx,1300,7800);retroVoice(130.81,t,.17,.15*fx,'sine',85,1700)}
+   });
+   retroChord([523.25,783.99],at+3.73,.24,.12);
    return;
   }
   if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
