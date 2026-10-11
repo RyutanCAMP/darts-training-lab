@@ -400,3 +400,13 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 #play .cool-round{font-size:11px;letter-spacing:.1em;opacity:.8}
 #play .cool-card{gap:8px;padding:22px 20px 20px}
 @media(max-width:560px){#play .cool-pixel{width:min(100%,250px)}#play .cool-score{font-size:18px!important}}
+
+/* Cooldown layout refinement: keep palette and artwork, prioritize the pixel scene. */
+#play .cool-card{width:min(92vw,390px);gap:7px;padding:20px 18px 18px}
+#play .cool-pixel{width:min(100%,310px);margin:0 auto;filter:drop-shadow(0 0 7px #69e9e344)}
+#play .cool-score{font-size:19px!important;line-height:1.1}
+#play .cool-round{font-size:11px}
+#play .cool-praise{font-size:clamp(19px,5vw,26px)}
+#play .cool-ring{width:126px;height:126px;margin:0 auto}
+#play .cool-ring>span{font-size:53px}
+@media(max-width:560px){#play .cool-pixel{width:min(100%,270px)}#play .cool-card{padding:17px 14px;gap:6px}}
