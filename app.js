@@ -97,12 +97,12 @@ function retroFanfare(at,kind){
  }
  retroNoise(at+.36,.32,.035*soundLevel('fx'),750,5000);
 }
-function playSound(kind='hit'){
+function playSound(kind='hit',delay=0){
  if(store.soundEnabled===false)return;
  try{
   if(!audioReady())return;
   retroInit();
-  const at=audioCtx.currentTime+.012,fx=soundLevel('fx');
+  const at=audioCtx.currentTime+.012+Math.max(0,delay),fx=soundLevel('fx');
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
@@ -245,7 +245,6 @@ function drawCooldownPixels(score,darts){
 }
 function beginRoundBreak(round,score,darts=[]){
  finishRoundBreak();
- playSound('cooldown');
  const duration=Math.max(1,Number(store.roundDelay)||8),ms=duration*1000;
  $('roundBreakLabel').textContent='ROUND '+round+' CLEAR';
  $('roundBreakScore').textContent='+'+score;
@@ -266,7 +265,7 @@ let achievementDelayTimer=null;
 function cancelAchievementDelay(){if(achievementDelayTimer!==null){clearTimeout(achievementDelayTimer);achievementDelayTimer=null}}
 function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||achievementDelayTimer!==null)return;let s=store.active;if(s.darts.length>=24){toast('結果確認後に保存してください');return}let i=s.darts.length;let hat=false;s.darts.push({id:id(),sessionId:s.id,roundIndex:Math.floor(i/3)+1,dartIndex:i%3+1,timestamp:new Date().toISOString(),segment,zone:zone||null,score:points(segment),inputSource:source,aim:curAim(),corrected:false});if(s.darts.length===24){hat=s.darts.slice(-3).every(isBull);showResult=false;const total=sum(s.darts),past=finished(),best=past.length?Math.max(...past.map(x=>sum(x.darts))):null;const first=best===null,record=best!==null&&total>best;playSound(record||first?'hat':'finish');if(record){if(!hat)gameEffect('NEW RECORD!',''+total+' POINTS  /  +'+(total-best)+' BEST','record',3800);toast('NEW RECORD!  '+total+' POINTS','award')}else if(first){if(!hat)gameEffect('FIRST CLEAR!',''+total+' POINTS','record',3100);toast('FIRST CLEAR!  '+total+' POINTS','award')}else{if(!hat)gameEffect('GAME COMPLETE','TOTAL '+total+' POINTS','finish',2000);toast('GAME COMPLETE!  '+total+' POINTS','award')}}else {
  const round=s.darts.slice(Math.floor(i/3)*3),score=sum(round),last=s.darts.at(-1),shot=shotPraise(last);
- if(i===21)playSound('finalRound');
+ 
  const completeRound=round.length===3,award=completeRound?roundPraise(round,score):null;
  const bullStreak=round.length>=2&&round.every(isBull);hat=completeRound&&round.every(isBull);
  if(completeRound&&['HAT TRICK!','TON 80!','HIGH TON!','LOW TON!'].includes(award)){
@@ -281,7 +280,9 @@ function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||a
   if(bullStreak&&!completeRound)gameEffect('DOUBLE BULL!','2 BULLS IN A ROW','bull',1500);
   else if(shot&&!completeRound)gameEffect(shot.title,'+'+points(segment)+' POINTS',shot.kind,850);
  }
- }persist();render();flashBoardHit(segment,zone);if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){const completedRound=s.darts.length/3;const rd=s.darts.slice(-3),rs=sum(rd);if(hat){achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;beginRoundBreak(completedRound,rs,rd)},3100)}else beginRoundBreak(completedRound,rs,rd)}if(s.darts.length===24){const showFinal=()=>{showResult=true;render();requestAnimationFrame(()=>{$('resultpanel').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'})})};if(hat){showResult=false;gameEffect('HAT TRICK!','3 BULLS IN A ROW','award',3000);achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;showFinal()},3100)}else requestAnimationFrame(showFinal)}}
+ }if(s.darts.length===21)playSound('finalRound',.25);
+ if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0)playSound('cooldown',hat?3.1:0);
+ persist();render();flashBoardHit(segment,zone);if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){const completedRound=s.darts.length/3;const rd=s.darts.slice(-3),rs=sum(rd);if(hat){achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;beginRoundBreak(completedRound,rs,rd)},3100)}else beginRoundBreak(completedRound,rs,rd)}if(s.darts.length===24){const showFinal=()=>{showResult=true;render();requestAnimationFrame(()=>{$('resultpanel').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'})})};if(hat){showResult=false;gameEffect('HAT TRICK!','3 BULLS IN A ROW','award',3000);achievementDelayTimer=setTimeout(()=>{achievementDelayTimer=null;showFinal()},3100)}else requestAnimationFrame(showFinal)}}
 function complete(status){let s=store.active;if(!s.darts.length)return false;const next=newSession();s.status=status;s.endedAt=new Date().toISOString();store.sessions.unshift(s);store.active=next;if(!persist()){store.active=s;store.sessions.shift();s.status='active';s.endedAt=null;return false}return true}
 function startNew(){cancelAchievementDelay();finishRoundBreak();if(store.active.darts.length===24){if(!confirm('現在の24投を完走として保存し、新しいゲームを始めますか？'))return;if(!complete('completed'))return}else if(store.active.darts.length){if(!confirm('進行中のゲームを途中終了として保存し、新しいゲームを始めますか？'))return;if(!complete('abandoned'))return}else store.active=newSession();showResult=false;persist();toast('NEW GAME — GOOD LUCK!');changeTab('play')}
 function undo(){cancelAchievementDelay();finishRoundBreak();if(!store.active.darts.length)return;store.active.darts.pop();showResult=false;persist();toast('直前の投球を取り消しました');render()}
