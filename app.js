@@ -287,7 +287,7 @@ function renderAnalysis(){
  $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
  $('allbull').innerHTML=bullBars(ds);
  $('analysischart').innerHTML=chart(ss);
- $('achievementTotals').innerHTML=achievementTotals();
+ $('achievementTotals').innerHTML=achievementTotals();$('personalRecords').innerHTML=personalRecords();
  renderAim();renderAdvanced();renderThrowOrder();renderMore(rounds,ds,prev);renderReportState();localizeAim();
 }
 const AIM_SKIP='#analysisAim,.card-help,.card-gloss,.help-btn,#achievementTotals,#advancedGoalBody,#advancedBestVsAvg,#advancedConditions,#advancedLog,#analysischart,#reportBody';
@@ -325,6 +325,30 @@ function renderAdvanced(){
  $('advancedStreak').innerHTML='<div class="advanced-big">'+best+'</div><div class="tiny muted">CONSECUTIVE BULLS</div>';
 }
 document.addEventListener('click',e=>{const sb=e.target.closest('[data-aim-sel]');if(sb){analysisAim=sb.dataset.aimSel;renderAnalysis();return}const b=e.target.closest('[data-aim-period]');if(b){aimPeriod=b.dataset.aimPeriod;renderAnalysis()}});
+/* Personal bests: completed COUNT-UP games only, all-time. */
+function personalRecords(){
+ const games=finished().filter(s=>Array.isArray(s.darts)&&s.darts.length===24);
+ const rows=games.map(s=>{
+  const ds=s.darts,rounds=Array.from({length:8},(_,i)=>ds.slice(i*3,i*3+3));
+  let run=0,longest=0;
+  for(const d of ds){run=isBull(d)?run+1:0;longest=Math.max(longest,run)}
+  return {score:sum(ds),bulls:ds.filter(isBull).length,inner:ds.filter(d=>d.segment==='IB').length,
+   round:Math.max(...rounds.map(sum)),streak:longest,hats:rounds.filter(r=>r.every(isBull)).length,
+   ton80:rounds.filter(r=>r.every(d=>d.segment==='T20')).length};
+ });
+ const best=k=>rows.length?Math.max(...rows.map(r=>r[k])):null;
+ const items=[
+  ['HIGH SCORE',best('score'),'PTS'],
+  ['BULL / GAME',best('bulls'),'HITS'],
+  ['BULL RATE',best('bulls')===null?null:Math.round(best('bulls')/24*1000)/10,'%'],
+  ['INNER / GAME',best('inner'),'HITS'],
+  ['BEST ROUND',best('round'),'PTS'],
+  ['BULL STREAK',best('streak'),'DARTS'],
+  ['HAT / GAME',best('hats'),'TIMES'],
+  ['TON 80 / GAME',best('ton80'),'TIMES']
+ ];
+ return items.map(([label,value,unit])=>'<div class="record-tile"><span>'+label+'</span><strong>'+(value===null?'—':value)+'</strong><small>'+unit+'</small></div>').join('');
+}
 function achievementTotals(){
  const games=finished(),darts=games.flatMap(s=>s.darts),rounds=games.flatMap(s=>Array.from({length:8},(_,i)=>s.darts.slice(i*3,i*3+3))).filter(a=>a.length===3);
  const bulls=darts.filter(isBull).length,inner=darts.filter(d=>d.segment==='IB').length,hats=rounds.filter(a=>a.every(isBull)).length,ton80=rounds.filter(a=>a.every(d=>d.segment==='T20')).length,high=rounds.filter(a=>{const n=sum(a);return n>=151&&n<180}).length;
