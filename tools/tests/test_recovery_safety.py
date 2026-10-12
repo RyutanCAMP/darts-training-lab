@@ -15,7 +15,7 @@ def run_case(browser,name,seed,expect_readonly):
     errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.on('dialog',lambda d:d.accept())
-    page.add_init_script('(seed)=>{for(const [k,v] of Object.entries(seed))localStorage.setItem(k,v)}',seed)
+    page.add_init_script('for(const [k,v] of Object.entries('+json.dumps(seed)+'))localStorage.setItem(k,v)')
     page.goto(URL)
     page.wait_for_timeout(450)
     assert not errors,(name,errors)
