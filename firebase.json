@@ -1,0 +1,21 @@
+{
+  "hosting": {
+    "site": "darts-training-lab",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "tools/**",
+      "dist/**",
+      "docs/**",
+      "*.md",
+      "firestore.rules",
+      "preview.html"
+    ],
+    "headers": [
+      { "source": "**/*.@(html|js|css|json)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  },
+  "firestore": { "rules": "firestore.rules" }
+}
