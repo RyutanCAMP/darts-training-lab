@@ -79,7 +79,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(300)
     page.locator('[data-tab="settings"]').click()
     page.locator('#recoveryRestore').click()
-    page.wait_for_timeout(500)
+    page.wait_for_function("() => { try { const saved = JSON.parse(localStorage.getItem('dtl-data-v1')); return saved && saved.schemaVersion === 1; } catch (_) { return false; } }", timeout=10000)
     assert page.evaluate("localStorage.getItem('dtl-data-v1-before-restore')")=='CORRUPTED'
     assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1')"))['schemaVersion']==1
     context.close()
