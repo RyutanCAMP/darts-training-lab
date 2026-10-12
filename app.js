@@ -4,7 +4,11 @@ try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.a
 const $=id=>document.getElementById(id),KEY='dtl-data-v1',nums=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 let audioCtx=null;
 let store={schemaVersion:1,sessions:[],active:null,bindings:{},roundDelay:8,soundEnabled:true},lastKey=null,keyLog=[],calibrationActive=false,calibrationIndex=0,calibrationLastIndex=-1,calibrationLastAt=0,viewId=null,showResult=false,lastBoardEvent=0,roundBreakTimer=null,roundBreakUntil=0,saveOK=null,savedAt=null,justSaved=false;
-function parseSavedState(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(!v||v.schemaVersion!==1||!Array.isArray(v.sessions)||v.sessions.some(s=>!s||typeof s!=='object'||!Array.isArray(s.darts))|| (v.active!==null&&v.active!==undefined&&(!v.active||typeof v.active!=='object'||!Array.isArray(v.active.darts))))return null;return v}catch(_){return null}}
+const DATA_SCHEMA_VERSION=1,ERROR_LOG_KEY='dtl-error-log-v1';
+function recordError(area,error){
+ try{const raw=JSON.parse(localStorage.getItem(ERROR_LOG_KEY)||'[]'),rows=Array.isArray(raw)?raw:[];rows.push({at:new Date().toISOString(),area:String(area).slice(0,48),message:String(error&&error.message||error).slice(0,160)});localStorage.setItem(ERROR_LOG_KEY,JSON.stringify(rows.slice(-30)))}catch(_){}
+}
+function parseSavedState(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(!v||v.schemaVersion!==DATA_SCHEMA_VERSION||!Array.isArray(v.sessions)||v.sessions.some(s=>!s||typeof s!=='object'||!Array.isArray(s.darts))|| (v.active!==null&&v.active!==undefined&&(!v.active||typeof v.active!=='object'||!Array.isArray(v.active.darts))))return null;return v}catch(_){return null}}
 let recoveryNotice=false,recoveryReadOnly=false;
 try{
  const primaryRaw=localStorage.getItem(KEY),primary=parseSavedState(primaryRaw);
@@ -31,7 +35,7 @@ function recoveryRender(){
 }
 function recoveryExport(){
  const data={format:'retro-darts-recovery-v1',createdAt:new Date().toISOString(),entries:{}};
- for(const key of [KEY,KEY+'-recovery',RECOVERY_HISTORY_KEY,MY_KEY,MY_KEY+'-recovery',SYNC_KEY,EXCLUDED_ROUNDS_KEY]){try{data.entries[key]=localStorage.getItem(key)}catch(_){}}
+ for(const key of [KEY,KEY+'-recovery',RECOVERY_HISTORY_KEY,MY_KEY,MY_KEY+'-recovery',SYNC_KEY,EXCLUDED_ROUNDS_KEY,ERROR_LOG_KEY]){try{data.entries[key]=localStorage.getItem(key)}catch(_){}}
  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='retro-darts-recovery-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function recoveryRestore(){
