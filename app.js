@@ -53,7 +53,7 @@ function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slic
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
 const SYNC_KEY='dtl-sync-v1';
 let syncMeta={pushed:[],myAt:0,myPushed:0,lastAt:0,on:false};try{const v=JSON.parse(localStorage.getItem(SYNC_KEY));if(v&&typeof v==='object')syncMeta={pushed:Array.isArray(v.pushed)?v.pushed.filter(x=>typeof x==='string'):[],myAt:+v.myAt||0,myPushed:+v.myPushed||0,lastAt:+v.lastAt||0,on:!!v.on}}catch(_){}
-let cloud={user:null,api:null,busy:false,timer:0,applying:false};
+let cloud={user:null,api:null,busy:false,timer:0,applying:false,pending:false,autoBusy:false};
 function profTouch(){if(cloud.applying)return;syncMeta.myAt=Date.now();syncMetaSave();try{cloudAuto()}catch(_){}}
 function syncMetaSave(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncMeta))}catch(_){}}
 const MY_KEY='retro-my-darts-v1';const MY_BRANDS=['未指定','TARGET','TRiNiDAD','DYNASTY','COSMO DARTS','TIGA','その他'];const MY_COLORS=['未指定','シルバー','ブラック','ホワイト','レッド','ブルー','ゴールド','パープル','グリーン','クリア','その他'];const MY_FIELDS=['SetupName','BarrelBrand','BarrelModel','BarrelShape','BarrelWeight','BarrelColor','FlightShape','FlightColor','Shaft','Tip','TipColor','TipLength','Memo'];
@@ -944,7 +944,9 @@ const CLOUD_CFG={apiKey:"AIzaSyCiPeb0A-_dCbRGSHtVM0yHLoNHray-iJ0",authDomain:"da
 const FB_BASE='https://www.gstatic.com/firebasejs/10.14.1/';
 const docId=x=>String(x).replace(/[\/\s]/g,'_').slice(0,120);
 function cloudStatus(t){const e=$('cloudStatus');if(e)e.textContent=t}
-function cloudUi(){const u=cloud.user,on=!!u;const ac=$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);$('cloudSync').classList.toggle('hidden',!on);$('cloudLogout').classList.toggle('hidden',!on);if(on&&!cloud.busy){const t=syncMeta.lastAt?new Date(syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · LAST SYNC '+t)}}
+function cloudPendingCount(){const pushed=new Set(syncMeta.pushed);return store.sessions.filter(s=>validSession(s)&&!pushed.has(s.id)).length+(syncMeta.myAt>syncMeta.myPushed?1:0)}
+function cloudQueue(){cloud.pending=true;clearTimeout(cloud.timer);cloud.timer=setTimeout(()=>{cloud.pending=false;if(cloud.user&&!cloud.busy&&!cloud.autoBusy)cloudAuto();else if(cloud.user)cloudQueue()},4500)}
+function cloudUi(){const u=cloud.user,on=!!u;const ac=$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);$('cloudSync').classList.toggle('hidden',!on);$('cloudLogout').classList.toggle('hidden',!on);if(on&&!cloud.busy){const t=syncMeta.lastAt?new Date(syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
 async function cloudLoadApi(){
  if(window.__DTL_CLOUD_FAKE)return window.__DTL_CLOUD_FAKE;
  const [a,au,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]);
@@ -980,7 +982,7 @@ function cloudMergeProfile(rp){cloud.applying=true;try{
  if(!validAim(store.aimTarget)&&validAim(rp.aimTarget))store.aimTarget=rp.aimTarget;
  persist()}finally{cloud.applying=false}}
 async function cloudSync(){
- if(!cloud.api||!cloud.user||cloud.busy)return;cloud.busy=true;cloudStatus('SYNCING…');
+ if(!cloud.api||!cloud.user)return;if(cloud.busy||cloud.autoBusy){cloudQueue();return}cloud.busy=true;cloudStatus('SYNCING…');
  try{
   const uid=cloud.user.uid,api=cloud.api;
   const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&validSession(s));
@@ -997,15 +999,26 @@ async function cloudSync(){
   else if(lAt>rAt)await cloudPushProfile(uid,api);
   if(!myDarts.nick&&cloud.user.name){myDarts.nick=String(cloud.user.name).slice(0,32);if(mySaveState()){myRender();await cloudPushProfile(uid,api)}}
   syncMeta.lastAt=Date.now();syncMetaSave();render();
-  cloud.busy=false;cloudUi();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
- }catch(e){cloud.busy=false;cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+  cloud.busy=false;cloudUi();if(cloud.pending)cloudQueue();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
+ }catch(e){cloud.busy=false;cloudQueue();cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
 function cloudAuto(){
- if(!cloud.user||!cloud.api||cloud.busy)return;clearTimeout(cloud.timer);
- cloud.timer=setTimeout(async()=>{try{
-  const uid=cloud.user&&cloud.user.uid;if(!uid||cloud.busy)return;const done=new Set(syncMeta.pushed);
-  const up=store.sessions.filter(s=>!done.has(s.id)&&validSession(s));for(const s of up){await cloud.api.putSession(uid,s);done.add(s.id)}
-  syncMeta.pushed=[...done];if(syncMeta.myAt>syncMeta.myPushed)await cloudPushProfile(uid,cloud.api);
-  syncMeta.lastAt=Date.now();syncMetaSave();cloudUi()}catch(e){cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}},4000)}
+ if(!cloud.user||!cloud.api)return;
+ if(cloud.busy||cloud.autoBusy){cloudQueue();return}
+ clearTimeout(cloud.timer);
+ cloud.timer=setTimeout(async()=>{
+  if(!cloud.user||cloud.busy||cloud.autoBusy){cloudQueue();return}
+  cloud.autoBusy=true;
+  try{
+   const uid=cloud.user.uid,api=cloud.api,done=new Set(syncMeta.pushed);
+   const up=store.sessions.filter(s=>!done.has(s.id)&&validSession(s));
+   for(const s of up){await api.putSession(uid,s);done.add(s.id)}
+   syncMeta.pushed=[...done];syncMetaSave();
+   if(syncMeta.myAt>syncMeta.myPushed)await cloudPushProfile(uid,api);
+   syncMeta.lastAt=Date.now();syncMetaSave();cloudUi();
+  }catch(e){cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60));cloud.pending=true}
+  finally{cloud.autoBusy=false;if(cloud.pending){cloud.pending=false;cloudQueue()}else cloudUi()}
+ },4000)
+}
 function setupCloud(){
  const b=$('cloudLogin');if(!b)return;
  if(location.protocol==='file:'&&!window.__DTL_CLOUD_FAKE){cloudStatus('公開URL(https)で使えます');b.disabled=true;return}
