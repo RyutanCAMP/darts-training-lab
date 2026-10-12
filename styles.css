@@ -410,3 +410,11 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 #play .cool-ring{width:126px;height:126px;margin:0 auto}
 #play .cool-ring>span{font-size:53px}
 @media(max-width:560px){#play .cool-pixel{width:min(100%,270px)}#play .cool-card{padding:17px 14px;gap:6px}}
+
+/* v0.5.34 larger score readouts */
+#play .bigscore{font-size:clamp(120px,34vw,190px)!important;line-height:1!important}
+@media(min-width:561px){#play .bigscore{font-size:clamp(130px,15vw,210px)!important}}
+#play .rounds div{font-size:12px!important;padding:8px 2px!important}
+#play .rounds div b{display:block;font-size:22px;line-height:1.25;color:#fff;font-variant-numeric:tabular-nums}
+#play .throw b{font-size:40px!important;line-height:1.1;color:#fff;font-variant-numeric:tabular-nums}
+#play .throw .tiny{font-size:11px}
