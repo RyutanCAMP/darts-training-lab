@@ -6,7 +6,7 @@ let audioCtx=null;
 let store={schemaVersion:1,sessions:[],active:null,bindings:{},roundDelay:8,soundEnabled:true},lastKey=null,keyLog=[],calibrationActive=false,calibrationIndex=0,calibrationLastIndex=-1,calibrationLastAt=0,viewId=null,showResult=false,lastBoardEvent=0,roundBreakTimer=null,roundBreakUntil=0,saveOK=null,savedAt=null,justSaved=false;
 try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.schemaVersion===1&&Array.isArray(v.sessions))store={...store,...v}}catch(e){console.warn('Saved data invalid',e)}
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+function persist(){try{const prior=localStorage.getItem(KEY);if(prior!==null){try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
@@ -969,7 +969,7 @@ function setupCloud(){
  if(location.protocol==='file:'&&!window.__DTL_CLOUD_FAKE){cloudStatus('公開URL(https)で使えます');b.disabled=true;return}
  b.onclick=async()=>{try{const api=await cloudConnect();cloudStatus('LOGIN…');await api.login();syncMeta.on=true;syncMetaSave()}catch(e){cloudStatus('LOGIN FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}};
  $('cloudSync').onclick=()=>cloudSync();
- $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。この端末の履歴とMY DARTSは、そのまま残ります。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
+ $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。未同期の記録はこの端末に残り、他の端末では見られません。共有端末ではブラウザのデータ管理にも注意してください。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
 setupMyDarts();setupCloud();drawBoard();render();renderCalibration();rawRender();specialRender();
