@@ -36,6 +36,7 @@ with sync_playwright() as p:
             pg.click(f'[data-aim-period="{per}"]'); pg.wait_for_timeout(60)
             t=pg.evaluate("document.getElementById('analysis').innerText"); empty=[i for i in ['advancedThrowOrder','advancedDrift','advancedAfter','advancedRoundScore','advancedBreakdown','advancedPace','advancedGoalBody','advancedBestVsAvg','advancedConditions','advancedLog'] if not pg.evaluate(f"document.getElementById('{i}').innerHTML.trim().length")]
             check(not any(x in t for x in ['NaN','undefined','Infinity']) and not empty,f'period {per}: clean, all cards rendered')
+        pg.evaluate("document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)"); pg.wait_for_timeout(100)
         rows=pg.evaluate("[...document.querySelectorAll('#allbull .barrow')].map(r=>[r.querySelector('span:last-child').innerText.trim(),r.querySelector('.fill').getBoundingClientRect().width,r.querySelector('.track').getBoundingClientRect().width])")
         check(all(abs(w-t*float((re.match(r'([\d.]+)%',x) or [0,0])[1])/100)<1.5 for x,w,t in rows),'BULL BY DART bar widths match rates')
         pg.evaluate("document.getElementById('calibrationStart').click()"); check(not errs,'calibration start: no ReferenceError')

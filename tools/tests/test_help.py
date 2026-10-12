@@ -42,17 +42,20 @@ with sync_playwright() as p:
         # each card's ? belongs to its own card: box sits right after its header (same panel)
         bad=pg.evaluate("[...document.querySelectorAll('h3 [data-help]')].filter(b=>{const g=b.closest('h3').nextElementSibling,box=g&&g.nextElementSibling;return !(g&&g.classList.contains('card-gloss')&&g.textContent.trim().length>8&&box&&box.dataset.helpFor===b.dataset.help)}).map(b=>b.dataset.help)")
         check(not bad,'caption + note sit directly under their own card header '+str(bad))
+        pg.evaluate("document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)")  # analysis cards are grouped in accordions
         # toggle each
         res=[]
         for k in EXPECT:
-            btn=pg.locator(f'[data-help="{k}"]').first; btn.scroll_into_view_if_needed(); btn.click(); pg.wait_for_timeout(30)
+            btn=pg.locator(f'[data-help="{k}"]').first; btn.evaluate("e=>{const d=e.closest('details');if(d)d.open=true}"); btn.scroll_into_view_if_needed(); btn.click(); pg.wait_for_timeout(30)
             open_=pg.evaluate(f"!document.querySelector('[data-help-for=\"{k}\"]').classList.contains('hidden') && document.querySelector('[data-help=\"{k}\"]').getAttribute('aria-expanded')==='true'")
             vis=pg.evaluate(f"document.querySelector('[data-help-for=\"{k}\"]').getBoundingClientRect().height>10")
             btn.click(); pg.wait_for_timeout(30)
             closed=pg.evaluate(f"document.querySelector('[data-help-for=\"{k}\"]').classList.contains('hidden') && document.querySelector('[data-help=\"{k}\"]').getAttribute('aria-expanded')==='false'")
             res.append((k,open_ and vis and closed))
         check(all(r for _,r in res),'open/close works for all: '+str([k for k,r in res if not r] or 'all ok'))
+        pg.evaluate("document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)")
         # opening several; no overflow
+        pg.evaluate("document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)")
         for k in EXPECT: pg.locator(f'[data-help="{k}"]').first.click()
         check(pg.evaluate("document.documentElement.scrollWidth<=innerWidth"),'all notes open: no horizontal overflow')
         wide=pg.evaluate("[...document.querySelectorAll('.page.active *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1&&getComputedStyle(e).position!=='fixed').slice(0,5).map(e=>e.tagName+'.'+e.className)")
@@ -72,6 +75,7 @@ with sync_playwright() as p:
         ctx,pg,errs=new(b,name,None); check(pg.evaluate("document.querySelectorAll('[data-help]').length")>=26 and not errs,'empty storage: help present, no errors'); ctx.close()
         for vp in [(375,667),(430,932),(820,1180)]:
             ctx,pg,errs=new(b,name,seed,vp)
+            pg.evaluate("document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)")
             for k in EXPECT: pg.locator(f'[data-help="{k}"]').first.click()
             check(pg.evaluate("document.documentElement.scrollWidth<=innerWidth") and not errs,f'viewport {vp}: all notes open, no overflow/errors'); ctx.close()
     b.close()
