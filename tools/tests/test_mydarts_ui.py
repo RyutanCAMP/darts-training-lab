@@ -11,7 +11,7 @@ FAKE="""(()=>{const cbs=[];window.__DTL_CLOUD_FAKE={onUser(cb){cbs.push(cb);retu
 with sync_playwright() as p:
     b=p.chromium.launch()
     for f in ['index.html','preview.html']:
-        c=b.new_context(viewport={'width':390,'height':844});pg=c.new_page();errs=[];msgs=[]
+        c=b.new_context(viewport={'width':390,'height':844});c.route('https://raw.githubusercontent.com/**/barrels.json',lambda r:r.fulfill(path=ROOT+'/data/barrels.json',content_type='application/json',headers={'Access-Control-Allow-Origin':'*'}));pg=c.new_page();errs=[];msgs=[]
         pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('dialog',lambda d:(msgs.append(d.message),d.accept()))
         pg.add_init_script(FAKE)
         pg.goto('file://'+ROOT+'/'+f);pg.evaluate("m=>localStorage.setItem('retro-my-darts-v1',JSON.stringify(m))",my);pg.reload();pg.wait_for_timeout(300)
