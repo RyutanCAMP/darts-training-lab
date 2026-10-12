@@ -454,3 +454,47 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .my-edit-title{margin:14px 0 6px;font-size:12px;letter-spacing:.1em;font-weight:800;color:#8dd9e6}
 .my-more,.my-adv{margin-top:12px;border:1px solid #31414B;border-radius:10px;padding:10px 12px}
 .my-more summary,.my-adv summary{cursor:pointer;font-size:13px;color:#A8B9C5}
+
+/* Phase 1: PLAY readability and safer touch targets. No game logic changes. */
+#play .play-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#play .play-heading strong{font-size:clamp(18px,2.2vw,24px);letter-spacing:.04em}
+#play .play-heading span{font-size:12px;color:#bdd2dc}
+#play .playmeta{align-items:center;gap:12px}
+#play .playmeta strong{font-size:clamp(16px,2vw,23px);color:#d9f3f9}
+#play #score{margin:10px 0 14px;line-height:1.05}
+#play .play-chips{gap:7px}
+#play .play-chips button{min-height:42px}
+#play .play-sidebar>.panel:first-child{border-top:3px solid #78d4e5}
+#play .play-sidebar h3{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#play .throw{min-height:88px;padding:12px 4px}
+#play .throw b{font-variant-numeric:tabular-nums}
+#play #miss,#play #undo{min-height:56px;font-size:16px;font-weight:800}
+#play #miss{border-color:#658994}
+#play #newgame,#play #endgame{min-height:46px}
+#play .play-extra{margin-top:0}
+#play .play-extra summary{min-height:42px;display:flex;align-items:center;font-size:15px}
+#play .play-extra:not([open]){padding-top:8px!important;padding-bottom:8px!important}
+@media(max-width:960px){
+  #play .playgrid{gap:12px}
+  #play .play-sidebar{gap:10px}
+  #play .play-sidebar>.panel:first-child{display:flex;flex-direction:column}
+  #play .throws{order:0}
+}
+@media(max-width:560px){
+  #play .play-heading{margin:4px 0 8px}
+  #play .play-heading span{font-size:11px}
+  #play .play-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  #play .play-chips button{min-height:40px;font-size:12px;padding:7px 10px}
+  #play .playgrid>.panel:first-child{padding:12px}
+  #play .playmeta .muted{font-size:11px}
+  #play .playmeta strong{font-size:16px}
+  #play #score{font-size:clamp(82px,25vw,126px)!important;margin:7px 0 10px}
+  #play .rounds{margin:10px 0;gap:3px}
+  #play .rounds div{font-size:11px;padding:8px 1px}
+  #play .play-sidebar>.panel:first-child{padding:14px}
+  #play .throw{min-height:82px;padding:10px 3px}
+  #play .throw b{font-size:clamp(26px,8vw,36px)}
+  #play .actions{gap:8px;margin-top:10px}
+  #play #miss,#play #undo{min-width:0;min-height:56px}
+  #play .play-extra summary{font-size:14px}
+}
