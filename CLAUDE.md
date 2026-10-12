@@ -91,3 +91,8 @@ This is a public repository. Do not commit user practice exports, credentials, p
 - Sync profile v2: `users/{uid}/meta/profile.json` = `{myDarts, excluded[], goalScore, aimTarget}` (last-writer-wins by `syncMeta.myAt`, bumped by `profTouch()`; first sync of a device with local data merges). "全履歴を削除" offers to delete the cloud copy too. 200S bindings are still not synced.
 - PWA basics: `manifest.webmanifest`, icons in `assets/`, apple-touch / standalone meta tags, `navigator.storage.persist()` requested at start. No service worker (no offline cache) on purpose.
 - CI: `.github/workflows/deploy.yml` runs `tools/run-tests.py` (all Playwright tests + `sync-preview --check`) on every push/PR; deploy to Hosting only if tests pass. `firestore.rules` is stricter (size/shape limits) but must be pasted into the Firebase console by hand; the app works with the old and new rules.
+
+## Barrel catalog (v0.5.40)
+- `BARREL_CATALOG` is no longer embedded: `loadCatalog()` fetches `data/barrels.json` (same origin) and falls back to the GitHub raw URL; `cleanCatalog()` validates it (https-only urls). States: loading / ok / error (error keeps free input working).
+- Data is built from official-page research tables by `tools/catalog/build_barrels.py` (see `tools/catalog/README.md`). 132 models; `verified` levels spec+date / spec / partial / unconfirmed are shown in the model info box.
+- Tests serve the raw URL from the local file via Playwright routing (`tools/tests/test_catalog.py`).
