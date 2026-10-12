@@ -1000,7 +1000,7 @@ async function cloudSync(){
   if(!myDarts.nick&&cloud.user.name){myDarts.nick=String(cloud.user.name).slice(0,32);if(mySaveState()){myRender();await cloudPushProfile(uid,api)}}
   syncMeta.lastAt=Date.now();syncMetaSave();render();
   cloud.busy=false;cloudUi();if(cloud.pending)cloudQueue();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
- }catch(e){cloud.busy=false;cloudQueue();cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+ }catch(e){cloud.busy=false;if(!String(e&&e.message||'').includes('PROFILE_CONFLICT'))cloudQueue();cloudStatus((String(e&&e.message||'').includes('PROFILE_CONFLICT')?'CONFLICT · ':'SYNC FAILED · ')+String(e&&(e.code||e.message)||e).slice(0,60))}}
 function cloudAuto(){
  if(!cloud.user||!cloud.api)return;
  if(cloud.busy||cloud.autoBusy){cloudQueue();return}
