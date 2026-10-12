@@ -368,12 +368,22 @@ function renderAim(){
  const stat=(label,num)=>'<div class="aim-stat"><span>'+label+'</span><strong>'+num+'%</strong></div>';
  root.innerHTML='<div class="aim-heat-key"><span>LOW</span><i></i><span>HIGH</span></div><div class="aim-layout"><div class="aim-visual">'+svg+'</div><div class="aim-results"><div class="aim-tendency">'+(direction==='中央'||direction==='—'?direction:direction+'寄り')+'</div><div class="tiny muted">'+rounds.length+'R · '+pts.length+'投 · AIM '+hitAim+' '+hitRate(darts)+'%'+(excluded.length?' · 除外 '+excluded.join(' / '):'')+'</div><div class="aim-stat-grid">'+stat('↑ 上',percent(p=>p.y<-.001))+stat('↓ 下',percent(p=>p.y>.001))+stat('← 左',percent(p=>p.x<-.001))+stat('→ 右',percent(p=>p.x>.001))+'</div></div></div><details class="aim-help"><summary>分析について</summary><p>色の濃さは内外シングル・T・D・BULL別の命中割合を最大エリア基準で表示。セグメント単位の推定であり、実際の着弾座標ではありません。MISSは位置不明として除外します。</p></details>';
 }
+const EXCLUDED_ROUNDS_KEY='dtl-excluded-rounds-v1';
+let excludedRounds=[];try{const v=JSON.parse(localStorage.getItem(EXCLUDED_ROUNDS_KEY));if(Array.isArray(v))excludedRounds=v.filter(x=>typeof x==='string')}catch(_){}
+const roundKey=(s,index)=>s.id+':'+index;
+function roundEntries(){const entries=[];for(const s of store.sessions.slice().reverse().concat([store.active])){if(!s||!Array.isArray(s.darts))continue;for(let i=0;i+3<=s.darts.length;i+=3){entries.push({key:roundKey(s,i/3),session:s,round:i/3+1,darts:s.darts.slice(i,i+3)})}}return entries}
+function renderRoundManager(){const el=$('roundManager');if(!el)return;const entries=roundEntries(),excluded=new Set(excludedRounds),valid=new Set(entries.map(x=>x.key));if(excludedRounds.some(x=>!valid.has(x))){excludedRounds=excludedRounds.filter(x=>valid.has(x));try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(excludedRounds))}catch(_){}}
+const used=entries.filter(x=>!excluded.has(x.key));$('roundTotal').textContent='記録 '+entries.length+'R ／ 分析対象 '+used.length+'R ／ 除外 '+(entries.length-used.length)+'R';
+el.innerHTML=entries.slice().reverse().map(x=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #31414B"><span style="font-size:12px">'+new Date(x.darts[0].timestamp).toLocaleString('ja-JP')+'　R'+x.round+'　'+x.darts.map(d=>label(d.segment)).join(' / ')+'　'+sum(x.darts)+'pt</span><button type="button" data-round-key="'+esc(x.key)+'" aria-pressed="'+excluded.has(x.key)+'">'+(excluded.has(x.key)?'元に戻す':'分析から除外')+'</button></div>').join('')||'<p class="muted">まだ3投そろったラウンドがありません。</p>';
+}
+function toggleRoundExclusion(key){const item=roundEntries().find(x=>x.key===key);if(!item)return;const was=excludedRounds.includes(key);if(!was&&!confirm('このラウンドを分析から除外しますか？\\n投球履歴は消えず、あとから元に戻せます。'))return;const next=was?excludedRounds.filter(x=>x!==key):excludedRounds.concat(key);try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(next));excludedRounds=next;renderAnalysis();renderRoundManager();toast(was?'分析対象に戻しました':'分析から除外しました')}catch(_){alert('変更を保存できませんでした')}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-round-key]');if(b)toggleRoundExclusion(b.dataset.roundKey)});
 function allRecordedRounds(raw){
  const blocks=[];
  const sessions=store.sessions.slice().reverse();
  /* Only complete 3-dart rounds count as a round (1R/10R/20R/ALL); an unfinished round never shrinks or skews the window. */
- for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
- for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length===3)blocks.push(round)}
+ for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3&&!excludedRounds.includes(roundKey(s,i/3)))blocks.push(round)}
+ for(let i=0;i<store.active.darts.length;i+=3){const round=store.active.darts.slice(i,i+3);if(round.length===3&&!excludedRounds.includes(roundKey(store.active,i/3)))blocks.push(round)}
  return raw?blocks:blocks.filter(r=>aimOf(r[0])===effectiveAim(blocks));
 }
 function effectiveAim(blocks){
@@ -390,6 +400,7 @@ function renderAnalysis(){
  document.querySelectorAll('[data-aim-period]').forEach(b=>{const active=b.dataset.aimPeriod===aimPeriod;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active))});
  const aimsIn=AIMS.filter(a=>rawBlocks.some(r=>aimOf(r[0])===a));
  $('analysisScope').textContent=rounds.length+'R · '+ds.length+' DARTS'+(hitAim!=='BULL'||aimsIn.length>1?' · AIM '+hitAim:'');
+ renderRoundManager();
  $('analysisAim').classList.toggle('hidden',aimsIn.length<2);
  $('analysisAim').innerHTML=aimsIn.length<2?'':'<span class="tiny muted">AIM</span>'+aimsIn.map(a=>'<button type="button" data-aim-sel="'+a+'" class="'+(a===hitAim?'selected':'')+'" aria-pressed="'+(a===hitAim)+'">'+a+'</button>').join('');
  $('metrics').innerHTML=scopeMetrics(ds,ss,prev);
