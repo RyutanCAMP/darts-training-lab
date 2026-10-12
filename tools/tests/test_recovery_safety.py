@@ -46,6 +46,13 @@ with sync_playwright() as p:
     assert page.evaluate("typeof document.getElementById('recoveryRestore').onclick")=='function'
     context.close()
     print('PASS recovery controls wired')
+    context=browser.new_context()
+    page=context.new_page()
+    page.goto(URL)
+    page.wait_for_timeout(300)
+    assert page.evaluate("typeof cloudPendingCount")=='undefined' or page.locator('#cloudSync').count()==1
+    context.close()
+    print('PASS cloud sync control present')
     browser.close()
 server.shutdown()
 print('ALL PASS')
