@@ -454,3 +454,13 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .my-edit-title{margin:14px 0 6px;font-size:12px;letter-spacing:.1em;font-weight:800;color:#8dd9e6}
 .my-more,.my-adv{margin-top:12px;border:1px solid #31414B;border-radius:10px;padding:10px 12px}
 .my-more summary,.my-adv summary{cursor:pointer;font-size:13px;color:#A8B9C5}
+
+/* v0.5.41 in-place sheets for PLAYER / AIM, simpler settings */
+.sheet .panel{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin-top:14px!important}
+.sheet .panel h3{font-size:14px;letter-spacing:.08em}
+.sheet .aim-settings select{width:100%}
+.page details.s200-group{padding:14px 18px}
+.page details.s200-group>summary{font-weight:800;color:#c7f3fb}
+.page details.s200-group[open]>summary{margin-bottom:12px}
+.tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+@media(max-width:560px){.tabs button{padding:9px 4px!important;font-size:12px!important}}

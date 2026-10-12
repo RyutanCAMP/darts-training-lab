@@ -23,7 +23,7 @@ def boot(b,f,sessions,my,remote=None,fail=False,extra=None,excluded=None):
     pg.goto('file://'+ROOT+'/'+f)
     pg.evaluate("([s,m,x,ex])=>{localStorage.setItem('dtl-data-v1',JSON.stringify(Object.assign({schemaVersion:1,sessions:s,active:null},x||{})));if(ex)localStorage.setItem('dtl-excluded-rounds-v1',JSON.stringify(ex));if(m)localStorage.setItem('retro-my-darts-v1',JSON.stringify(m))}",[sessions,my,extra,excluded]);pg.reload();pg.wait_for_timeout(300)
     pg.evaluate("document.getElementById('startupFx')&&(document.getElementById('startupFx').style.display='none')")
-    pg.click('[data-tab=settings]');return c,pg
+    pg.click('#authChip');return c,pg
 def rs(g):return {x['id']:json.dumps(x) for x in g}
 nl=lambda pg:pg.evaluate("JSON.parse(localStorage.getItem('dtl-data-v1')).sessions.map(s=>s.id).sort().join()")
 ml=lambda pg:pg.evaluate("(JSON.parse(localStorage.getItem('retro-my-darts-v1'))||{sets:[]}).sets.map(s=>s.id).sort().join()")
@@ -42,7 +42,7 @@ with sync_playwright() as p:
         chk(pg.evaluate("document.getElementById('cloudSync').offsetParent!==null && document.getElementById('cloudLogin').offsetParent===null"),f+' A: buttons switch after login')
         st=pg.evaluate("document.getElementById('cloudStatus').textContent");chk('Tester' in st,f+' A: status shows user: '+st)
         # auto push of a MY DARTS change
-        pg.fill('#mySetupName','NEW');pg.click('#mySave');pg.wait_for_timeout(4800)
+        pg.keyboard.press('Escape');pg.click('[data-tab=setups]');pg.fill('#mySetupName','NEW');pg.click('#mySave');pg.wait_for_timeout(4800)
         sets=[x['SetupName'] for x in json.loads(pg.evaluate("window.__remote")['meta']['json'])['myDarts']['sets']]
         chk('NEW' in sets,f+' A: MY DARTS change auto-pushed (debounced)')
         remoteA=pg.evaluate("window.__remote");c.close()
@@ -64,12 +64,13 @@ with sync_playwright() as p:
         c,pg=boot(b,f,[game(3)],{'nick':'N','sets':[S('a')],'current':'a'},None,fail=True);pg.click('#cloudLogin');pg.wait_for_timeout(600)
         st=pg.evaluate("document.getElementById('cloudStatus').textContent")
         chk('FAILED' in st and nl(pg)=='g3' and ml(pg)=='a' and not pg.errs,f+' E: cloud failure: local intact, status='+st)
+        pg.keyboard.press('Escape')
         for t in ['play','analysis','history','settings']:
             pg.click(f'[data-tab={t}]');pg.wait_for_timeout(80)
         chk(pg.evaluate("document.getElementById('settings').classList.contains('active')"),f+' E: tabs still work');c.close()
         # F: logout stops syncing, keeps data
         c,pg=boot(b,f,[game(4)],None);pg.click('#cloudLogin');pg.wait_for_timeout(500);pg.click('#cloudLogout');pg.wait_for_timeout(200)
-        n=pg.evaluate("window.__calls.length");pg.fill('#mySetupName','Z');pg.click('#mySave');pg.wait_for_timeout(4800)
+        n=pg.evaluate("window.__calls.length");pg.keyboard.press('Escape');pg.click('[data-tab=setups]');pg.fill('#mySetupName','Z');pg.click('#mySave');pg.wait_for_timeout(4800)
         chk(pg.evaluate("window.__calls.length")==n and nl(pg)=='g4',f+' F: after logout nothing is sent, data kept');c.close()
     for f in ['index.html','preview.html']:
         print('===== profile v2 / delete-all',f)
@@ -94,7 +95,7 @@ with sync_playwright() as p:
         chk(n0==2 and left==0 and nl(pg)=='' and not pg.errs,f+f' H: delete-all also deletes cloud copy (before {n0}, after {left}, local "{nl(pg)}") errs={pg.errs[:1]}');c.close()
     # file:// without fake -> login disabled, no crash
     c=b.new_context();pg=c.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.goto('file://'+ROOT+'/index.html');pg.wait_for_timeout(300)
-    pg.click('[data-tab=settings]')
+    pg.click('#authChip')
     chk(pg.evaluate("document.getElementById('cloudLogin').disabled")and not errs,'file:// without fake: login disabled, status="'+pg.evaluate("document.getElementById('cloudStatus').textContent")+'"')
     b.close()
 print('ALL PASS' if not fails else f'SOME FAIL ({fails})')

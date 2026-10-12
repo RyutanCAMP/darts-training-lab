@@ -66,13 +66,13 @@ with sync_playwright() as p:
         # settings: change aim, throw, record has aim
         st2={'schemaVersion':1,'sessions':[],'active':active(),'bindings':{},'roundDelay':0,'soundEnabled':False}
         c,pg,errs=boot(b,f,st2)
-        pg.click('[data-tab=settings]');pg.select_option('#aimSelect','D16');pg.click('#backFromSettings');pg.wait_for_timeout(100)
+        pg.click('nav.tabs [data-tab=play]');pg.click('#aimChip');pg.select_option('#aimSelect','D16');pg.wait_for_timeout(100)
         chk(pg.evaluate("document.getElementById('aimChip').textContent")=='AIM D16',f+' chip updates after settings change')
         pg.evaluate("document.getElementById('miss').click()")
         saved=pg.evaluate("JSON.parse(localStorage.getItem('dtl-data-v1'))")
         chk(saved.get('aimTarget')=='D16' and saved['active']['darts'][0].get('aim')=='D16',f+' aimTarget saved and dart records aim')
         # chip tap opens settings
-        pg.click('#aimChip');chk(pg.evaluate("document.getElementById('settings').classList.contains('active')"),f+' chip opens settings')
+        pg.click('#aimChip');chk(pg.evaluate("!document.getElementById('aimSheet').classList.contains('hidden') && document.getElementById('play').classList.contains('active')"),f+' chip opens aim sheet in place (no jump to settings)');pg.keyboard.press('Escape')
         # empty-data analysis with non-bull aim
         pg.click('[data-tab=analysis]');pg.wait_for_timeout(200)
         t=pg.evaluate("document.getElementById('analysis').innerText")

@@ -26,7 +26,7 @@ with sync_playwright() as p:
         pg.goto('file://'+ROOT+'/'+f)
         pg.evaluate("s=>localStorage.setItem('dtl-data-v1',JSON.stringify(s))",store);pg.reload();pg.wait_for_timeout(300)
         pg.evaluate("document.getElementById('startupFx')&&(document.getElementById('startupFx').style.display='none')")
-        chk(pg.evaluate("[...document.querySelectorAll('nav.tabs button')].map(b=>b.textContent).join(',')")=='PLAY,分析,履歴',f+' tabs PLAY,分析,履歴')
+        chk(pg.evaluate("[...document.querySelectorAll('nav.tabs button')].map(b=>b.textContent).join(',')")=='PLAY,分析,履歴,セット',f+' tabs PLAY,分析,履歴,セット')
         pg.click('nav.tabs [data-tab=analysis]');pg.wait_for_timeout(200)
         vis=pg.evaluate("!document.getElementById('focusPanel').classList.contains('hidden')"); print(' focus:',vis,pg.evaluate("document.getElementById('focusBody').innerText").replace('\n',' | ')[:100])
         chk(not vis or len(pg.evaluate("document.getElementById('focusBody').innerText"))>5,f+' focus panel consistent')
