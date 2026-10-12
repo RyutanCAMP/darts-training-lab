@@ -17,7 +17,37 @@ try{
 }catch(e){console.warn('Saved data unavailable',e)}
 if(recoveryNotice)window.addEventListener('load',()=>setTimeout(()=>alert('保存データに異常を検出しました。復旧用データがあれば読み込みました。元データを保護するため自動保存を停止しました。データを確認し、バックアップを保存してください。'),0),{once:true});
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
-function persist(){if(recoveryReadOnly){saveOK=false;alert('保存データの異常を検出したため、自動保存を停止しています。先にデータを確認してバックアップを取得してください。');return false}try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+const RECOVERY_HISTORY_KEY=KEY+'-history';
+function recoveryCandidates(){
+ const rows=[['現在の保存',KEY],['直前の保存',KEY+'-recovery']];
+ try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]');if(Array.isArray(h))h.forEach((v,i)=>{if(typeof v==='string')rows.push(['履歴 '+(i+1),null,v])})}catch(_){}
+ return rows.map(([name,key,raw])=>({name,raw:raw===undefined?localStorage.getItem(key):raw})).filter(x=>parseSavedState(x.raw));
+}
+function recoveryRender(){
+ const el=$('recoveryStatus');if(!el)return;
+ const rows=recoveryCandidates();
+ el.textContent=(recoveryReadOnly?'保存停止中。復旧操作を行ってください。':'通常モード。')+' 利用可能な正常データ: '+rows.map(x=>x.name).join(' / ');
+ const sel=$('recoveryChoice');if(sel){sel.innerHTML='';rows.forEach((x,i)=>{const opt=document.createElement('option');opt.value=String(i);opt.textContent=x.name;sel.appendChild(opt)})}
+}
+function recoveryExport(){
+ const data={format:'retro-darts-recovery-v1',createdAt:new Date().toISOString(),entries:{}};
+ for(const key of [KEY,KEY+'-recovery',RECOVERY_HISTORY_KEY,MY_KEY,SYNC_KEY]){try{data.entries[key]=localStorage.getItem(key)}catch(_){}}
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='retro-darts-recovery-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function recoveryRestore(){
+ const rows=recoveryCandidates(),sel=$('recoveryChoice'),item=rows[Number(sel&&sel.value)||0];
+ if(!item)return alert('復旧可能な正常データがありません');
+ if(!confirm(item.name+'から練習記録を復旧します。現在の保存データは復旧用ファイルに書き出してから操作してください。続けますか？'))return;
+ try{const previous=localStorage.getItem(KEY);if(previous!==null)localStorage.setItem(KEY+'-before-restore',previous);localStorage.setItem(KEY,item.raw);location.reload()}catch(e){alert('復旧に失敗しました。元データは保持されています。')}
+}
+function recoveryHistory(prior){
+ try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]'),list=Array.isArray(h)?h.filter(x=>typeof x==='string'&&parseSavedState(x)):[];if(list[0]!==prior)list.unshift(prior);localStorage.setItem(RECOVERY_HISTORY_KEY,JSON.stringify(list.slice(0,3)))}catch(_){}
+}
+function setupRecovery(){
+ if(!$('recoveryStatus'))return;
+ $('recoveryExport').onclick=recoveryExport;$('recoveryRestore').onclick=recoveryRestore;recoveryRender();
+}
+function persist(){if(recoveryReadOnly){saveOK=false;alert('保存データの異常を検出したため、自動保存を停止しています。先にデータを確認してバックアップを取得してください。');return false}try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){recoveryHistory(prior);try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
@@ -983,5 +1013,5 @@ function setupCloud(){
  $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。未同期の記録はこの端末に残り、他の端末では見られません。共有端末ではブラウザのデータ管理にも注意してください。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
-setupMyDarts();setupCloud();drawBoard();render();renderCalibration();rawRender();specialRender();
+setupMyDarts();setupCloud();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();
