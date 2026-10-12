@@ -4,9 +4,20 @@ try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.a
 const $=id=>document.getElementById(id),KEY='dtl-data-v1',nums=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 let audioCtx=null;
 let store={schemaVersion:1,sessions:[],active:null,bindings:{},roundDelay:8,soundEnabled:true},lastKey=null,keyLog=[],calibrationActive=false,calibrationIndex=0,calibrationLastIndex=-1,calibrationLastAt=0,viewId=null,showResult=false,lastBoardEvent=0,roundBreakTimer=null,roundBreakUntil=0,saveOK=null,savedAt=null,justSaved=false;
-try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.schemaVersion===1&&Array.isArray(v.sessions))store={...store,...v}}catch(e){console.warn('Saved data invalid',e)}
+function parseSavedState(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(!v||v.schemaVersion!==1||!Array.isArray(v.sessions)||v.sessions.some(s=>!s||typeof s!=='object'||!Array.isArray(s.darts))|| (v.active!==null&&v.active!==undefined&&(!v.active||typeof v.active!=='object'||!Array.isArray(v.active.darts))))return null;return v}catch(_){return null}}
+let recoveryNotice=false;
+try{
+ const primaryRaw=localStorage.getItem(KEY),primary=parseSavedState(primaryRaw);
+ if(primary)store={...store,...primary};
+ else if(primaryRaw!==null){
+  const recovered=parseSavedState(localStorage.getItem(KEY+'-recovery'));
+  if(recovered){store={...store,...recovered};recoveryNotice=true;console.warn('Primary save invalid; loaded recovery snapshot without overwriting either copy')}
+  else{recoveryNotice=true;console.error('Saved data invalid and no valid recovery snapshot; original data retained')}
+ }
+}catch(e){console.warn('Saved data unavailable',e)}
+if(recoveryNotice)window.addEventListener('load',()=>setTimeout(()=>alert('保存データに異常を検出しました。復旧用データがあれば読み込みました。元データは上書きしていません。データを確認し、バックアップを保存してください。'),0),{once:true});
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
-function persist(){try{const prior=localStorage.getItem(KEY);if(prior!==null){try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+function persist(){try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
