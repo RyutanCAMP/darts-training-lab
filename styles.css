@@ -435,3 +435,22 @@ body .page button.my-slot.empty{padding:8px;border:1px dashed #31414B;background
 body .page .my-slot .my-slot-use{min-height:40px;padding:8px;border:1px solid #31414B;border-radius:8px;background:#1C2A33;text-align:center;font-size:12px}
 .my-slot .my-slot-use.is{display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid #b4ed38;border-radius:8px;color:#b4ed38;font-size:12px;font-weight:800;letter-spacing:.08em}
 body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;min-height:62px}
+
+/* v0.5.38 play chips / set sheet / MY DARTS layout */
+.play-chips{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 12px}
+.page .play-chips button.aim-chip:not(.primary):not(.warn){margin-left:0;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page .play-chips button.chip-set:not(.primary):not(.warn){color:#8dd9e6;border-color:#2f6c78;background:#10252b}
+.page .play-chips button.chip-auth:not(.primary):not(.warn){color:#a8b9c5;border-color:#31414B;background:#15212B}
+.page .play-chips button.chip-auth.on:not(.primary):not(.warn){color:#b4ed38;border-color:#5f8a2a;background:#17240f}
+.sheet{position:fixed;inset:0;z-index:95;display:flex;align-items:flex-end;justify-content:center;background:#000b}
+.sheet.hidden{display:none}
+.sheet-box{width:min(100%,520px);max-height:80vh;overflow:auto;padding:16px 16px 22px;border:1px solid #31414B;border-radius:16px 16px 0 0;background:#15212B}
+.sheet-box h3{margin:0 0 8px}
+.sheet .sheet-item{display:block;width:100%;margin:6px 0;padding:14px;border:1px solid #31414B;border-radius:10px;background:#1C2A33;color:#E3E8EA;font:inherit;font-size:15px;text-align:left;cursor:pointer}
+.sheet .sheet-item span{font-size:10px;letter-spacing:.1em;color:#8AAEB0;margin-right:6px}
+.sheet .sheet-item.on{border-color:#b4ed38;color:#b4ed38}
+.sheet .sheet-edit{text-align:center;color:#8dd9e6}
+.sheet .sheet-close{text-align:center}
+.my-edit-title{margin:14px 0 6px;font-size:12px;letter-spacing:.1em;font-weight:800;color:#8dd9e6}
+.my-more,.my-adv{margin-top:12px;border:1px solid #31414B;border-radius:10px;padding:10px 12px}
+.my-more summary,.my-adv summary{cursor:pointer;font-size:13px;color:#A8B9C5}
