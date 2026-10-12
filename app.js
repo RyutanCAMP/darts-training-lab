@@ -18,7 +18,7 @@ try{
   if(recovered){store={...store,...recovered};recoveryNotice=true;recoveryReadOnly=true;console.warn('Primary save invalid; loaded recovery snapshot without overwriting either copy')}
   else{recoveryNotice=true;recoveryReadOnly=true;console.error('Saved data invalid and no valid recovery snapshot; original data retained')}
  }
-}catch(e){console.warn('Saved data unavailable',e)}
+}catch(e){recordError('loadSavedState',e);console.warn('Saved data unavailable',e)}
 if(recoveryNotice)window.addEventListener('load',()=>setTimeout(()=>alert('保存データに異常を検出しました。復旧用データがあれば読み込みました。元データを保護するため自動保存を停止しました。データを確認し、バックアップを保存してください。'),0),{once:true});
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
 const RECOVERY_HISTORY_KEY=KEY+'-history';
@@ -51,7 +51,7 @@ function setupRecovery(){
  if(!$('recoveryStatus'))return;
  $('recoveryExport').onclick=recoveryExport;$('recoveryRestore').onclick=recoveryRestore;recoveryRender();
 }
-function persist(){if(recoveryReadOnly){saveOK=false;alert('保存データの異常を検出したため、自動保存を停止しています。先にデータを確認してバックアップを取得してください。');return false}try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){recoveryHistory(prior);try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+function persist(){if(recoveryReadOnly){saveOK=false;alert('保存データの異常を検出したため、自動保存を停止しています。先にデータを確認してバックアップを取得してください。');return false}try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){recoveryHistory(prior);try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){recordError('persist',e);saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
