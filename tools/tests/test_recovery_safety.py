@@ -28,6 +28,9 @@ def run_case(browser,name,seed,expect_readonly):
     context.close()
 with sync_playwright() as p:
     browser=p.chromium.launch()
+    future=dict(valid,schemaVersion=999)
+    run_case(browser,'future schema is protected',{KEY:json.dumps(future)},True)
+    print('PASS unsupported schema stays protected')
     run_case(browser,'normal',{KEY:json.dumps(valid)},False)
     print('PASS normal data')
     run_case(browser,'corrupt primary with valid recovery',{KEY:'{bad',KEY+'-recovery':json.dumps(valid)},True)
