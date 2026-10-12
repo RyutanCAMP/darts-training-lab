@@ -56,6 +56,33 @@ with sync_playwright() as p:
     assert page.evaluate("typeof cloudPendingCount")=='undefined' or page.locator('#cloudSync').count()==1
     context.close()
     print('PASS cloud sync control present')
+    # Mobile layout and runtime smoke test
+    mobile=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+    mp=mobile.new_page()
+    mobile_errors=[]
+    mp.on('pageerror',lambda e:mobile_errors.append(str(e)))
+    mp.on('dialog',lambda d:d.accept())
+    mp.goto(URL)
+    mp.wait_for_timeout(500)
+    assert not mobile_errors,('mobile runtime',mobile_errors)
+    assert mp.locator('#recoveryPanel').count()==1
+    assert mp.locator('#recoveryExport').count()==1
+    assert mp.locator('#recoveryRestore').count()==1
+    mobile.close()
+    print('PASS mobile 390px recovery UI smoke')
+    # Restore must keep the damaged primary in a separate safety slot.
+    context=browser.new_context()
+    page=context.new_page()
+    page.on('dialog',lambda d:d.accept())
+    page.add_init_script('localStorage.setItem('+json.dumps(KEY)+',"CORRUPTED");localStorage.setItem('+json.dumps(KEY+'-recovery')+','+json.dumps(json.dumps(valid))+')')
+    page.goto(URL)
+    page.wait_for_timeout(300)
+    page.locator('#recoveryRestore').click()
+    page.wait_for_timeout(500)
+    assert page.evaluate("localStorage.getItem('dtl-data-v1-before-restore')")=='CORRUPTED'
+    assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1')"))['schemaVersion']==1
+    context.close()
+    print('PASS explicit restore preserves damaged original')
     browser.close()
 server.shutdown()
 print('ALL PASS')
