@@ -77,6 +77,7 @@ with sync_playwright() as p:
     page.add_init_script('localStorage.setItem('+json.dumps(KEY)+',"CORRUPTED");localStorage.setItem('+json.dumps(KEY+'-recovery')+','+json.dumps(json.dumps(valid))+')')
     page.goto(URL)
     page.wait_for_timeout(300)
+    page.locator('[data-tab="settings"]').click()
     page.locator('#recoveryRestore').click()
     page.wait_for_timeout(500)
     assert page.evaluate("localStorage.getItem('dtl-data-v1-before-restore')")=='CORRUPTED'
