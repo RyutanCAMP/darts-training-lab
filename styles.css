@@ -498,3 +498,24 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
   #play #miss,#play #undo{min-width:0;min-height:56px}
   #play .play-extra summary{font-size:14px}
 }
+
+/* Phase 1B: settings information hierarchy */
+#settings .settings-profile{border-top:3px solid #7ad5e4;margin-top:14px}
+#settings .settings-profile h3,#settings .settings-darts-head{margin-bottom:10px}
+#settings .settings-profile label{display:block;font-weight:700}
+#settings .settings-profile input{display:block;width:100%;margin-top:8px;min-height:48px;font-size:17px}
+#settings .settings-profile .tiny{margin:8px 0 0}
+#settings #myDartsPanel{margin-top:12px!important}
+#settings .settings-darts-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#settings .settings-darts-head h3{margin:0}
+#settings .settings-darts-head .tiny{font-size:12px}
+#settings .settings-editor{margin-top:16px;border:1px solid #415b69;border-radius:12px;padding:12px;background:#101f29}
+#settings .settings-editor>summary{cursor:pointer;font-size:16px;font-weight:800;color:#d6f1f7;min-height:42px;display:flex;align-items:center}
+#settings .settings-editor[open]>summary{margin-bottom:12px;border-bottom:1px solid #354d59;padding-bottom:8px}
+#settings .settings-editor input,#settings .settings-editor select{min-height:42px}
+#settings .settings-utilities{margin-top:20px}
+#settings .settings-utilities>summary{cursor:pointer;min-height:48px;font-size:17px;font-weight:800;padding:13px;background:#1a2a35;border:1px solid #3b5361;border-radius:12px}
+#settings .settings-utilities[open]>summary{margin-bottom:12px}
+#settings .settings-utilities>.panel{margin-top:12px}
+#settings #cloudPanel{margin-top:12px!important}
+@media(max-width:560px){#settings .settings-profile,#settings #myDartsPanel{padding:15px}#settings .settings-editor{padding:10px}#settings .settings-darts-head h3{font-size:18px}}
