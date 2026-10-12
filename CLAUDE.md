@@ -77,3 +77,7 @@ This is a public repository. Do not commit user practice exports, credentials, p
 - Merge: games are unioned by id (invalid ones ignored); MY DARTS is last-writer-wins by `syncMeta.myAt`, except the first sync of a device with local data, which unions sets by id. Local state: `dtl-sync-v1`.
 - Not synced: round exclusions, 200S bindings, goal/aim settings, deletions (a deleted game comes back on the next sync).
 - `tools/tests/test_cloud.py` tests the logic against an in-memory fake (`window.__DTL_CLOUD_FAKE`); the real SDK/popup/rules are NOT covered by it.
+
+## Hosting (v0.5.36+)
+- Production URL: https://darts-training-lab.web.app (Firebase Hosting, same Firebase project as the cloud sync). Pushing to `main` auto-deploys via `.github/workflows/deploy.yml` (secret `FIREBASE_SERVICE_ACCOUNT_DARTS_TRAINING_LAB`; never commit the key). `firebase.json` serves the repo root and ignores tools/docs/dist/preview.html/*.md.
+- localStorage is per origin: data on the old github.io URL does not carry over; use CLOUD SYNC (Google login) to move games and MY DARTS.
