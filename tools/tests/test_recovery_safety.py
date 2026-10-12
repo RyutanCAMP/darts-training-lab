@@ -36,6 +36,16 @@ with sync_playwright() as p:
     print('PASS corrupt primary retained without recovery')
     run_case(browser,'invalid recovery',{KEY:'{bad',KEY+'-recovery':'{also bad'},True)
     print('PASS corrupt recovery rejected')
+    context=browser.new_context()
+    page=context.new_page()
+    page.on('dialog',lambda d:d.accept())
+    page.goto(URL)
+    page.wait_for_timeout(200)
+    assert page.locator('#recoveryExport').count()==1
+    assert page.evaluate("typeof document.getElementById('recoveryExport').onclick")=='function'
+    assert page.evaluate("typeof document.getElementById('recoveryRestore').onclick")=='function'
+    context.close()
+    print('PASS recovery controls wired')
     browser.close()
 server.shutdown()
 print('ALL PASS')
