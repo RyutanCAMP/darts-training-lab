@@ -995,8 +995,8 @@ async function cloudSync(){
   const lAt=syncMeta.myAt;
   if(!rp)await cloudPushProfile(uid,api);
   else if(lAt===0){const hasLocal=myDarts.sets.length||myDarts.nick||excludedRounds.length||store.goalScore>0||store.aimTarget;if(hasLocal){cloudMergeProfile(rp);syncMeta.myAt=Date.now();await cloudPushProfile(uid,api)}else cloudApplyProfile(rp,rAt||1)}
-  else if(rAt>lAt)cloudApplyProfile(rp,rAt);
-  else if(lAt>rAt)await cloudPushProfile(uid,api);
+  else if(rAt>lAt){if(syncMeta.myAt>syncMeta.myPushed){cloudStatus('CONFLICT · 別端末の変更を検出。同期を停止しました');throw Error('PROFILE_CONFLICT: 未同期の端末データを保護しました')}cloudApplyProfile(rp,rAt)}
+  else if(lAt>rAt){if(rAt>syncMeta.myPushed&&syncMeta.myPushed>0){cloudStatus('CONFLICT · 別端末の変更を検出。同期を停止しました');throw Error('PROFILE_CONFLICT: 別端末のデータを保護しました')}await cloudPushProfile(uid,api)}
   if(!myDarts.nick&&cloud.user.name){myDarts.nick=String(cloud.user.name).slice(0,32);if(mySaveState()){myRender();await cloudPushProfile(uid,api)}}
   syncMeta.lastAt=Date.now();syncMetaSave();render();
   cloud.busy=false;cloudUi();if(cloud.pending)cloudQueue();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
