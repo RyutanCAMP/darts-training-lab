@@ -15,13 +15,13 @@ def chk(c,m):
 FAKE="""(()=>{const st=%s,cbs=[];window.__remote=st;window.__calls=[];
 window.__DTL_CLOUD_FAKE={onUser(cb){cbs.push(cb);return()=>{}},login(){cbs.forEach(cb=>cb({uid:'u1',name:'Tester'}))},logout(){cbs.forEach(cb=>cb(null))},
 async listSessions(){window.__calls.push('list');if(%s)throw new Error('boom');return Object.values(st.sessions).map(x=>{try{return JSON.parse(x)}catch(_){return null}})},
-async putSession(u,s){window.__calls.push('put:'+s.id);st.sessions[s.id]=JSON.stringify(s)},async getMeta(){return st.meta},async putMeta(u,m){window.__calls.push('meta');st.meta=m}}})()"""
-def boot(b,f,sessions,my,remote=None,fail=False):
+async deleteSession(u,id){window.__calls.push('del:'+id);delete st.sessions[id]},async putSession(u,s){window.__calls.push('put:'+s.id);st.sessions[s.id]=JSON.stringify(s)},async getMeta(){return st.meta},async putMeta(u,m){window.__calls.push('meta');st.meta=m}}})()"""
+def boot(b,f,sessions,my,remote=None,fail=False,extra=None,excluded=None):
     c=b.new_context(viewport={'width':390,'height':844});pg=c.new_page();pg.errs=[];pg.on('pageerror',lambda e:pg.errs.append(str(e)));pg.on('dialog',lambda d:d.accept())
     st=remote or {'sessions':{},'meta':None}
     pg.add_init_script(FAKE%(json.dumps(st),'true' if fail else 'false'))
     pg.goto('file://'+ROOT+'/'+f)
-    pg.evaluate("([s,m])=>{localStorage.setItem('dtl-data-v1',JSON.stringify({schemaVersion:1,sessions:s,active:null}));if(m)localStorage.setItem('retro-my-darts-v1',JSON.stringify(m))}",[sessions,my]);pg.reload();pg.wait_for_timeout(300)
+    pg.evaluate("([s,m,x,ex])=>{localStorage.setItem('dtl-data-v1',JSON.stringify(Object.assign({schemaVersion:1,sessions:s,active:null},x||{})));if(ex)localStorage.setItem('dtl-excluded-rounds-v1',JSON.stringify(ex));if(m)localStorage.setItem('retro-my-darts-v1',JSON.stringify(m))}",[sessions,my,extra,excluded]);pg.reload();pg.wait_for_timeout(300)
     pg.evaluate("document.getElementById('startupFx')&&(document.getElementById('startupFx').style.display='none')")
     pg.click('[data-tab=settings]');return c,pg
 def rs(g):return {x['id']:json.dumps(x) for x in g}
@@ -71,6 +71,27 @@ with sync_playwright() as p:
         c,pg=boot(b,f,[game(4)],None);pg.click('#cloudLogin');pg.wait_for_timeout(500);pg.click('#cloudLogout');pg.wait_for_timeout(200)
         n=pg.evaluate("window.__calls.length");pg.fill('#mySetupName','Z');pg.click('#mySave');pg.wait_for_timeout(4800)
         chk(pg.evaluate("window.__calls.length")==n and nl(pg)=='g4',f+' F: after logout nothing is sent, data kept');c.close()
+    for f in ['index.html','preview.html']:
+        print('===== profile v2 / delete-all',f)
+        gs=lambda pg:pg.evaluate("JSON.parse(localStorage.getItem('dtl-data-v1')).goalScore")
+        ax=lambda pg:pg.evaluate("JSON.parse(localStorage.getItem('dtl-data-v1')).aimTarget")
+        ex=lambda pg:pg.evaluate("JSON.parse(localStorage.getItem('dtl-excluded-rounds-v1')||'[]').sort().join()")
+        # G1: push exclusions, goal, aim
+        c,pg=boot(b,f,[game(1)],None,None,False,{'goalScore':1000,'aimTarget':'T20'},['g1:2','g1:3']);pg.click('#cloudLogin');pg.wait_for_timeout(700)
+        meta=json.loads(pg.evaluate("window.__remote")['meta']['json'])
+        chk(meta.get('excluded')==['g1:2','g1:3'] and meta.get('goalScore')==1000 and meta.get('aimTarget')=='T20',f+' G1: exclusions + goal + aim pushed: '+str({k:meta.get(k) for k in ('excluded','goalScore','aimTarget')}))
+        remoteG=pg.evaluate("window.__remote");c.close()
+        # G2: empty device pulls them
+        c,pg=boot(b,f,[],None,remoteG);pg.click('#cloudLogin');pg.wait_for_timeout(700)
+        chk(gs(pg)==1000 and ax(pg)=='T20' and ex(pg)=='g1:2,g1:3',f+' G2: new device receives exclusions/goal/aim: '+str((gs(pg),ax(pg),ex(pg))));c.close()
+        # G3: first sync with local data: exclusions unioned, local goal kept
+        c,pg=boot(b,f,[game(2)],None,remoteG,False,{'goalScore':900},['g2:1']);pg.click('#cloudLogin');pg.wait_for_timeout(700)
+        chk(ex(pg)=='g1:2,g1:3,g2:1' and gs(pg)==900 and ax(pg)=='T20',f+' G3: first-sync merge (union exclusions, local goal wins, aim filled): '+str((gs(pg),ax(pg),ex(pg))));c.close()
+        # H: delete all history -> cloud copy removed on request
+        c,pg=boot(b,f,[game(1),game(2)],None);pg.click('#cloudLogin');pg.wait_for_timeout(700)
+        n0=len(pg.evaluate("window.__remote")['sessions']);pg.evaluate("document.getElementById('clearall').click()");pg.wait_for_timeout(600)
+        left=len(pg.evaluate("window.__remote")['sessions'])
+        chk(n0==2 and left==0 and nl(pg)=='' and not pg.errs,f+f' H: delete-all also deletes cloud copy (before {n0}, after {left}, local "{nl(pg)}") errs={pg.errs[:1]}');c.close()
     # file:// without fake -> login disabled, no crash
     c=b.new_context();pg=c.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.goto('file://'+ROOT+'/index.html');pg.wait_for_timeout(300)
     pg.click('[data-tab=settings]')

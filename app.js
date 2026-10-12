@@ -13,6 +13,7 @@ function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slic
 const SYNC_KEY='dtl-sync-v1';
 let syncMeta={pushed:[],myAt:0,myPushed:0,lastAt:0,on:false};try{const v=JSON.parse(localStorage.getItem(SYNC_KEY));if(v&&typeof v==='object')syncMeta={pushed:Array.isArray(v.pushed)?v.pushed.filter(x=>typeof x==='string'):[],myAt:+v.myAt||0,myPushed:+v.myPushed||0,lastAt:+v.lastAt||0,on:!!v.on}}catch(_){}
 let cloud={user:null,api:null,busy:false,timer:0,applying:false};
+function profTouch(){if(cloud.applying)return;syncMeta.myAt=Date.now();syncMetaSave();try{cloudAuto()}catch(_){}}
 function syncMetaSave(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncMeta))}catch(_){}}
 const MY_KEY='retro-my-darts-v1';const MY_BRANDS=['未指定','TARGET','TRiNiDAD','DYNASTY','COSMO DARTS','TIGA','その他'];const MY_COLORS=['未指定','シルバー','ブラック','ホワイト','レッド','ブルー','ゴールド','パープル','グリーン','クリア','その他'];const MY_FIELDS=['SetupName','BarrelBrand','BarrelModel','BarrelShape','BarrelWeight','BarrelColor','FlightShape','FlightColor','Shaft','Tip','TipColor','TipLength','Memo'];
 function sanitizeMyDarts(data){if(!data||typeof data!=='object'||Array.isArray(data))return {nick:'',sets:[],current:''};const seen=new Set();const sets=(Array.isArray(data.sets)?data.sets:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)&&typeof x.id==='string'&&x.id.length>0&&x.id.length<100&&!seen.has(x.id)&&seen.add(x.id)).slice(0,10).map(x=>{const clean={id:x.id};for(const f of MY_FIELDS)clean[f]=typeof x[f]==='string'?x[f].slice(0,f==='Memo'?2000:120):'';return clean});return {nick:typeof data.nick==='string'?data.nick.slice(0,32):'',sets,current:typeof data.current==='string'&&sets.some(x=>x.id===data.current)?data.current:''}}
@@ -403,7 +404,7 @@ function renderRoundManager(){const el=$('roundManager');if(!el)return;const ent
 const used=entries.filter(x=>!excluded.has(x.key));$('roundTotal').textContent='記録 '+entries.length+'R ／ 分析対象 '+used.length+'R ／ 除外 '+(entries.length-used.length)+'R';
 el.innerHTML=entries.slice().reverse().map(x=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #31414B"><span style="font-size:12px">'+new Date(x.darts[0].timestamp).toLocaleString('ja-JP')+'　R'+x.round+'　'+x.darts.map(d=>label(d.segment)).join(' / ')+'　'+sum(x.darts)+'pt</span><button type="button" data-round-key="'+esc(x.key)+'" aria-pressed="'+excluded.has(x.key)+'">'+(excluded.has(x.key)?'元に戻す':'分析から除外')+'</button></div>').join('')||'<p class="muted">まだ3投そろったラウンドがありません。</p>';
 }
-function toggleRoundExclusion(key){const item=roundEntries().find(x=>x.key===key);if(!item)return;const was=excludedRounds.includes(key);if(!was&&!confirm('このラウンドを分析から除外しますか？\\n投球履歴は消えず、あとから元に戻せます。'))return;const next=was?excludedRounds.filter(x=>x!==key):excludedRounds.concat(key);try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(next));excludedRounds=next;renderAnalysis();renderRoundManager();toast(was?'分析対象に戻しました':'分析から除外しました')}catch(_){alert('変更を保存できませんでした')}}
+function toggleRoundExclusion(key){const item=roundEntries().find(x=>x.key===key);if(!item)return;const was=excludedRounds.includes(key);if(!was&&!confirm('このラウンドを分析から除外しますか？\\n投球履歴は消えず、あとから元に戻せます。'))return;const next=was?excludedRounds.filter(x=>x!==key):excludedRounds.concat(key);try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(next));excludedRounds=next;profTouch();renderAnalysis();renderRoundManager();toast(was?'分析対象に戻しました':'分析から除外しました')}catch(_){alert('変更を保存できませんでした')}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-round-key]');if(b)toggleRoundExclusion(b.dataset.roundKey)});
 function allRecordedRounds(raw){
  const blocks=[];
@@ -652,7 +653,7 @@ function renderMore(rounds,ds,prev){
  renderGoal();renderBestVsAvg();renderConditions();renderLog();
  renderInsight({order,verdict,drift,after,rs});
 }
-document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();renderAnalysis()}});
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='goalInput'){const v=Math.round(Number(e.target.value));store.goalScore=v>0&&v<=1440?v:null;persist();profTouch();renderAnalysis()}});
 /* ===== Coach report (v0.5.30): rule-based text from the selected period; not an AI model. ===== */
 function buildReport(rounds,ds,prev){
  const R=rounds.length,N=ds.length,label=aimPeriod==='all'?'ALL':aimPeriod+'R',head=label+' · '+(aimPeriod!=='all'&&R===Number(aimPeriod)?'':R+'R / ')+N+'投';
@@ -814,8 +815,8 @@ function restoreSettings(st){
  return did;
 }
 $('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;const snapSessions=store.sessions,snapMy=JSON.stringify(myDarts);try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));let merged=null,addedSets=0,skippedSets=0;if(v.myDarts!==undefined&&v.myDarts!==null){const imp=sanitizeMyDarts(v.myDarts);if(imp.sets.length||imp.nick){merged=sanitizeMyDarts(myDarts);for(const x of imp.sets){const i=merged.sets.findIndex(y=>y.id===x.id);if(i>=0)merged.sets[i]=x;else if(merged.sets.length<10){merged.sets.push(x);addedSets++}else skippedSets++}if(!merged.nick)merged.nick=imp.nick;if(!merged.current&&imp.current&&merged.sets.some(y=>y.id===imp.current))merged.current=imp.current}}if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'+(merged?'\nMY DARTS：同じIDのセットは上書き、新規'+addedSets+'件を追加します（既存セットは残ります）。'+(skippedSets?'\n10セットを超える'+skippedSets+'件は取り込めません。':''):'')))return;store.sessions=[...store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);let myOk=true;if(merged){myDarts=merged;editingSetup='';myOk=mySaveState();myLoad('')}if(!persist()){store.sessions=snapSessions;if(merged&&myOk){myDarts=sanitizeMyDarts(JSON.parse(snapMy));mySaveState();myLoad('')}render();return}if(!myOk){render();return}render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':'')+(merged?'（MY DARTSも復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
-$('clearall').onclick=()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){store.sessions=[];viewId=null;persist();render()}};
-$('aimSelect').innerHTML='<option value="BULL">BULL（ブル）</option><optgroup label="TRIPLE">'+AIMS.filter(x=>x[0]==='T').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup><optgroup label="DOUBLE">'+AIMS.filter(x=>x[0]==='D').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup>';$('aimSelect').onchange=e=>{const v=e.target.value;if(!validAim(v))return;store.aimTarget=v;persist();render()};$('aimChip').onclick=()=>changeTab('settings');
+$('clearall').onclick=async()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){store.sessions=[];viewId=null;persist();render();if(cloud.user&&cloud.api&&confirm('クラウドの履歴も削除しますか？\n（削除しないと、次の同期で戻ります）')){try{cloudStatus('DELETING…');const uid=cloud.user.uid,l=await cloud.api.listSessions(uid);for(const x of l){if(x&&typeof x.id==='string')await cloud.api.deleteSession(uid,x.id)}syncMeta.pushed=[];syncMetaSave();cloudUi();toast('クラウドの履歴も削除しました')}catch(e){cloudStatus('DELETE FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}}};
+$('aimSelect').innerHTML='<option value="BULL">BULL（ブル）</option><optgroup label="TRIPLE">'+AIMS.filter(x=>x[0]==='T').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup><optgroup label="DOUBLE">'+AIMS.filter(x=>x[0]==='D').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup>';$('aimSelect').onchange=e=>{const v=e.target.value;if(!validAim(v))return;store.aimTarget=v;persist();profTouch();render()};$('aimChip').onclick=()=>changeTab('settings');
 $('miss').onclick=()=>add('MISS');$('undo').onclick=undo;$('newgame').onclick=startNew;$('startdash').onclick=()=>{changeTab('play')};$('endgame').onclick=finishEarly;$('saveResult').onclick=confirmResult;
 const calibrationTargets=[...nums.flatMap(n=>['S'+n+'O','S'+n+'I','T'+n,'D'+n]),'OB','IB'];
 function calibrationSegment(target){return target.endsWith('O')&&target.startsWith('S')?'S'+target.slice(1,-1):target.endsWith('I')&&target.startsWith('S')?'S'+target.slice(1,-1):target}
@@ -896,7 +897,7 @@ $('calibrationExport').onclick=()=>download(JSON.stringify({format:'dtl-200s-cal
 $('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};
 /* ===== CLOUD SYNC (Firebase Auth + Firestore, Google login) =====
    Syncs finished games and MY DARTS. localStorage stays the source of truth; nothing here runs unless the user signs in.
-   Not synced: round exclusions, 200S key bindings, goal/aim settings, deletions. */
+   Profile (MY DARTS, round exclusions, goal, aim) is last-writer-wins; 200S key bindings are not synced; 'delete all history' offers to delete the cloud copy too. */
 const CLOUD_CFG={apiKey:"AIzaSyCiPeb0A-_dCbRGSHtVM0yHLoNHray-iJ0",authDomain:"darts-training-lab.firebaseapp.com",projectId:"darts-training-lab",storageBucket:"darts-training-lab.firebasestorage.app",messagingSenderId:"99510735998",appId:"1:99510735998:web:a3f9046573e89cd031742f"};
 const FB_BASE='https://www.gstatic.com/firebasejs/10.14.1/';
 const docId=x=>String(x).replace(/[\/\s]/g,'_').slice(0,120);
@@ -911,6 +912,7 @@ async function cloudLoadApi(){
   login(){return au.signInWithPopup(auth,new au.GoogleAuthProvider())},
   logout(){return au.signOut(auth)},
   async listSessions(uid){const q=await fs.getDocs(fs.collection(db,'users',uid,'sessions'));return q.docs.map(d=>{try{return JSON.parse(d.data().json)}catch(_){return null}})},
+  deleteSession(uid,id){return fs.deleteDoc(fs.doc(db,'users',uid,'sessions',docId(id)))},
   putSession(uid,s){return fs.setDoc(fs.doc(db,'users',uid,'sessions',docId(s.id)),{json:JSON.stringify(s),startedAt:s.startedAt})},
   async getMeta(uid){const d=await fs.getDoc(fs.doc(db,'users',uid,'meta','profile'));return d.exists()?d.data():null},
   putMeta(uid,m){return fs.setDoc(fs.doc(db,'users',uid,'meta','profile'),m)}
@@ -921,8 +923,20 @@ async function cloudConnect(){
  cloud.api.onUser(u=>{cloud.user=u;cloudUi();if(u)cloudSync()});
  return cloud.api}
 function cloudMergeSets(local,remote){const m=sanitizeMyDarts(local);for(const x of sanitizeMyDarts(remote).sets){if(!m.sets.some(y=>y.id===x.id)&&m.sets.length<10)m.sets.push(x)}const r=sanitizeMyDarts(remote);if(!m.nick)m.nick=r.nick;if(!m.current&&r.current&&m.sets.some(y=>y.id===r.current))m.current=r.current;return m}
-async function cloudPushProfile(uid,api){const at=syncMeta.myAt||Date.now();await api.putMeta(uid,{json:JSON.stringify({myDarts:sanitizeMyDarts(myDarts)}),updatedAt:at});syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
-function cloudApplyMy(m,at){cloud.applying=true;try{myDarts=sanitizeMyDarts(m);editingSetup='';mySaveState();myLoad('')}finally{cloud.applying=false}syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
+async function cloudPushProfile(uid,api){const at=syncMeta.myAt||Date.now();await api.putMeta(uid,{json:JSON.stringify({myDarts:sanitizeMyDarts(myDarts),excluded:excludedRounds.slice(0,5000),goalScore:store.goalScore||null,aimTarget:curAim()}),updatedAt:at});syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
+function cloudApplyProfile(rp,at){cloud.applying=true;try{
+ if(rp.myDarts){myDarts=sanitizeMyDarts(rp.myDarts);editingSetup='';mySaveState();myLoad('')}
+ if(Array.isArray(rp.excluded)){const ex=rp.excluded.filter(x=>typeof x==='string').slice(0,5000);try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(ex));excludedRounds=ex}catch(_){}}
+ if('goalScore' in rp){const g=Math.round(Number(rp.goalScore));store.goalScore=g>0&&g<=1440?g:null}
+ if(validAim(rp.aimTarget))store.aimTarget=rp.aimTarget;
+ persist()}finally{cloud.applying=false}
+ syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
+function cloudMergeProfile(rp){cloud.applying=true;try{
+ myDarts=cloudMergeSets(myDarts,rp.myDarts||{});mySaveState();myLoad('');
+ const ex=[...new Set([...excludedRounds,...(Array.isArray(rp.excluded)?rp.excluded.filter(x=>typeof x==='string'):[])])].slice(0,5000);try{localStorage.setItem(EXCLUDED_ROUNDS_KEY,JSON.stringify(ex));excludedRounds=ex}catch(_){}
+ if(!(store.goalScore>0)){const g=Math.round(Number(rp.goalScore));if(g>0&&g<=1440)store.goalScore=g}
+ if(!validAim(store.aimTarget)&&validAim(rp.aimTarget))store.aimTarget=rp.aimTarget;
+ persist()}finally{cloud.applying=false}}
 async function cloudSync(){
  if(!cloud.api||!cloud.user||cloud.busy)return;cloud.busy=true;cloudStatus('SYNCING…');
  try{
@@ -933,11 +947,11 @@ async function cloudSync(){
   for(const s of up)await api.putSession(uid,s);
   if(add.length){const before=store.sessions;store.sessions=[...store.sessions,...add].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));if(!persist()){store.sessions=before;throw Error('local save failed')}}
   syncMeta.pushed=[...new Set([...syncMeta.pushed,...rids,...up.map(s=>s.id)])];
-  const m=await api.getMeta(uid);let rp=null,rAt=0;if(m){rAt=+m.updatedAt||0;try{rp=JSON.parse(m.json).myDarts}catch(_){}}
+  const m=await api.getMeta(uid);let rp=null,rAt=0;if(m){rAt=+m.updatedAt||0;try{rp=JSON.parse(m.json);if(!rp||typeof rp!=='object')rp=null}catch(_){rp=null}}
   const lAt=syncMeta.myAt;
   if(!rp)await cloudPushProfile(uid,api);
-  else if(lAt===0){const hasLocal=myDarts.sets.length||myDarts.nick;if(hasLocal){cloud.applying=true;try{myDarts=cloudMergeSets(myDarts,rp);mySaveState();myLoad('')}finally{cloud.applying=false}syncMeta.myAt=Date.now();await cloudPushProfile(uid,api)}else cloudApplyMy(rp,rAt||1)}
-  else if(rAt>lAt)cloudApplyMy(rp,rAt);
+  else if(lAt===0){const hasLocal=myDarts.sets.length||myDarts.nick||excludedRounds.length||store.goalScore>0||store.aimTarget;if(hasLocal){cloudMergeProfile(rp);syncMeta.myAt=Date.now();await cloudPushProfile(uid,api)}else cloudApplyProfile(rp,rAt||1)}
+  else if(rAt>lAt)cloudApplyProfile(rp,rAt);
   else if(lAt>rAt)await cloudPushProfile(uid,api);
   if(!myDarts.nick&&cloud.user.name){myDarts.nick=String(cloud.user.name).slice(0,32);if(mySaveState()){myRender();await cloudPushProfile(uid,api)}}
   syncMeta.lastAt=Date.now();syncMetaSave();render();
@@ -957,5 +971,6 @@ function setupCloud(){
  $('cloudSync').onclick=()=>cloudSync();
  $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。この端末の履歴とMY DARTSは、そのまま残ります。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
 setupMyDarts();setupCloud();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();

@@ -1,10 +1,28 @@
-name: Deploy to Firebase Hosting
+name: Test and deploy to Firebase Hosting
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser and Japanese fonts
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y fonts-noto-cjk
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Run all tests
+        run: python tools/run-tests.py
   deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
