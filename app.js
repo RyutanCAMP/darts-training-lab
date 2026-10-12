@@ -6,16 +6,21 @@ let audioCtx=null;
 let store={schemaVersion:1,sessions:[],active:null,bindings:{},roundDelay:8,soundEnabled:true},lastKey=null,keyLog=[],calibrationActive=false,calibrationIndex=0,calibrationLastIndex=-1,calibrationLastAt=0,viewId=null,showResult=false,lastBoardEvent=0,roundBreakTimer=null,roundBreakUntil=0,saveOK=null,savedAt=null,justSaved=false;
 try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.schemaVersion===1&&Array.isArray(v.sessions))store={...store,...v}}catch(e){console.warn('Saved data invalid',e)}
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
+/* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
+const SYNC_KEY='dtl-sync-v1';
+let syncMeta={pushed:[],myAt:0,myPushed:0,lastAt:0,on:false};try{const v=JSON.parse(localStorage.getItem(SYNC_KEY));if(v&&typeof v==='object')syncMeta={pushed:Array.isArray(v.pushed)?v.pushed.filter(x=>typeof x==='string'):[],myAt:+v.myAt||0,myPushed:+v.myPushed||0,lastAt:+v.lastAt||0,on:!!v.on}}catch(_){}
+let cloud={user:null,api:null,busy:false,timer:0,applying:false};
+function syncMetaSave(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncMeta))}catch(_){}}
 const MY_KEY='retro-my-darts-v1';const MY_BRANDS=['未指定','TARGET','TRiNiDAD','DYNASTY','COSMO DARTS','TIGA','その他'];const MY_COLORS=['未指定','シルバー','ブラック','ホワイト','レッド','ブルー','ゴールド','パープル','グリーン','クリア','その他'];const MY_FIELDS=['SetupName','BarrelBrand','BarrelModel','BarrelShape','BarrelWeight','BarrelColor','FlightShape','FlightColor','Shaft','Tip','TipColor','TipLength','Memo'];
 function sanitizeMyDarts(data){if(!data||typeof data!=='object'||Array.isArray(data))return {nick:'',sets:[],current:''};const seen=new Set();const sets=(Array.isArray(data.sets)?data.sets:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)&&typeof x.id==='string'&&x.id.length>0&&x.id.length<100&&!seen.has(x.id)&&seen.add(x.id)).slice(0,10).map(x=>{const clean={id:x.id};for(const f of MY_FIELDS)clean[f]=typeof x[f]==='string'?x[f].slice(0,f==='Memo'?2000:120):'';return clean});return {nick:typeof data.nick==='string'?data.nick.slice(0,32):'',sets,current:typeof data.current==='string'&&sets.some(x=>x.id===data.current)?data.current:''}}
 let myDarts={nick:'',sets:[],current:''};try{myDarts=sanitizeMyDarts(JSON.parse(localStorage.getItem(MY_KEY)))}catch(_){}
 
 let myLast=JSON.stringify(myDarts);
 function restampActive(){try{const a=store.active;if(!a||a.darts.length)return;const sid=myDarts.current||null,sn=myDarts.sets.find(x=>x.id===myDarts.current)?.SetupName||null,nk=myDarts.nick||null;if(a.setupId!==sid||a.setupName!==sn||a.nickname!==nk){a.setupId=sid;a.setupName=sn;a.nickname=nk;persist()}}catch(_){}}
-function mySaveState(){try{const t=JSON.stringify(myDarts);localStorage.setItem(MY_KEY,t);myLast=t;restampActive();return true}catch(_){try{myDarts=sanitizeMyDarts(JSON.parse(myLast))}catch(__){}alert('MY DARTSを保存できませんでした。変更は取り消しました');return false}}
+function mySaveState(){try{const t=JSON.stringify(myDarts);localStorage.setItem(MY_KEY,t);myLast=t;if(!cloud.applying){syncMeta.myAt=Date.now();syncMetaSave()}restampActive();try{cloudAuto()}catch(_){}return true}catch(_){try{myDarts=sanitizeMyDarts(JSON.parse(myLast))}catch(__){}alert('MY DARTSを保存できませんでした。変更は取り消しました');return false}}
 const myFields=MY_FIELDS;let editingSetup='';
 function myRender(){const current=$('myCurrent'),slot=$('mySlot');if(!current||!slot)return;const nick=$('myNick');if(document.activeElement!==nick)nick.value=myDarts.nick;const opts=myDarts.sets.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.SetupName||'無題')+'</option>').join('');current.innerHTML='<option value="">未設定（お試し）</option>'+opts;current.value=myDarts.current;slot.innerHTML='<option value="">新しいセットを作る</option>'+opts;slot.value=editingSetup;const label=$('myDartsStatus');if(label)label.textContent=(myDarts.nick||'ゲスト')+' ／ '+(myDarts.sets.find(x=>x.id===myDarts.current)?.SetupName||'セッティング未設定')}
 function myLoad(id){editingSetup=id;const x=myDarts.sets.find(s=>s.id===id)||{};for(const f of myFields){const el=$('my'+f);if(el)el.value=x[f]||((f==='BarrelBrand'||f.endsWith('Color'))?'未指定':'')}myRender()}
@@ -885,5 +890,68 @@ function editCalibrationAt(i){if(i<0||i>=calibrationTargets.length)return;const 
 $('calibrationBack').onclick=()=>editCalibrationAt(calibrationLastIndex);
 $('calibrationEdit').onclick=()=>{const input=prompt('修正する登録番号（1〜82）を入力してください。1=S20外側、2=S20内側、3=T20、4=D20。');if(input===null)return;const i=Number(input)-1;if(!Number.isInteger(i)||i<0||i>=calibrationTargets.length){alert('1〜82の番号を入力してください');return}if(!confirm(calibrationName(calibrationTargets[i])+' を修正しますか？'))return;editCalibrationAt(i)};
 $('calibrationExport').onclick=()=>download(JSON.stringify({format:'dtl-200s-calibration-v1',completedAt:store.calibrationCompletedAt||null,calibrationKeys:calibrationKeys(),bindings:store.bindings},null,2),'200s-keymap-backup.json','application/json');
-$('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};setupMyDarts();drawBoard();render();renderCalibration();rawRender();specialRender();
+$('board200sToggle').onchange=e=>{board200sEnabled=e.target.checked;board200sStatus(board200sEnabled?'200S自動得点 ON':'200S自動得点 OFF')};
+/* ===== CLOUD SYNC (Firebase Auth + Firestore, Google login) =====
+   Syncs finished games and MY DARTS. localStorage stays the source of truth; nothing here runs unless the user signs in.
+   Not synced: round exclusions, 200S key bindings, goal/aim settings, deletions. */
+const CLOUD_CFG={apiKey:"AIzaSyCiPeb0A-_dCbRGSHtVM0yHLoNHray-iJ0",authDomain:"darts-training-lab.firebaseapp.com",projectId:"darts-training-lab",storageBucket:"darts-training-lab.firebasestorage.app",messagingSenderId:"99510735998",appId:"1:99510735998:web:a3f9046573e89cd031742f"};
+const FB_BASE='https://www.gstatic.com/firebasejs/10.14.1/';
+const docId=x=>String(x).replace(/[\/\s]/g,'_').slice(0,120);
+function cloudStatus(t){const e=$('cloudStatus');if(e)e.textContent=t}
+function cloudUi(){const u=cloud.user,on=!!u;const b=$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);$('cloudSync').classList.toggle('hidden',!on);$('cloudLogout').classList.toggle('hidden',!on);if(on&&!cloud.busy){const t=syncMeta.lastAt?new Date(syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · LAST SYNC '+t)}}
+async function cloudLoadApi(){
+ if(window.__DTL_CLOUD_FAKE)return window.__DTL_CLOUD_FAKE;
+ const [a,au,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]);
+ const app=a.initializeApp(CLOUD_CFG),auth=au.getAuth(app),db=fs.getFirestore(app);
+ return{
+  onUser(cb){return au.onAuthStateChanged(auth,u=>cb(u?{uid:u.uid,name:u.displayName||u.email||''}:null))},
+  login(){return au.signInWithPopup(auth,new au.GoogleAuthProvider())},
+  logout(){return au.signOut(auth)},
+  async listSessions(uid){const q=await fs.getDocs(fs.collection(db,'users',uid,'sessions'));return q.docs.map(d=>{try{return JSON.parse(d.data().json)}catch(_){return null}})},
+  putSession(uid,s){return fs.setDoc(fs.doc(db,'users',uid,'sessions',docId(s.id)),{json:JSON.stringify(s),startedAt:s.startedAt})},
+  async getMeta(uid){const d=await fs.getDoc(fs.doc(db,'users',uid,'meta','profile'));return d.exists()?d.data():null},
+  putMeta(uid,m){return fs.setDoc(fs.doc(db,'users',uid,'meta','profile'),m)}
+ }}
+async function cloudConnect(){
+ if(cloud.api)return cloud.api;
+ cloudStatus('LOADING…');cloud.api=await cloudLoadApi();
+ cloud.api.onUser(u=>{cloud.user=u;cloudUi();if(u)cloudSync()});
+ return cloud.api}
+function cloudMergeSets(local,remote){const m=sanitizeMyDarts(local);for(const x of sanitizeMyDarts(remote).sets){if(!m.sets.some(y=>y.id===x.id)&&m.sets.length<10)m.sets.push(x)}const r=sanitizeMyDarts(remote);if(!m.nick)m.nick=r.nick;if(!m.current&&r.current&&m.sets.some(y=>y.id===r.current))m.current=r.current;return m}
+async function cloudPushProfile(uid,api){const at=syncMeta.myAt||Date.now();await api.putMeta(uid,{json:JSON.stringify({myDarts:sanitizeMyDarts(myDarts)}),updatedAt:at});syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
+function cloudApplyMy(m,at){cloud.applying=true;try{myDarts=sanitizeMyDarts(m);editingSetup='';mySaveState();myLoad('')}finally{cloud.applying=false}syncMeta.myAt=at;syncMeta.myPushed=at;syncMetaSave()}
+async function cloudSync(){
+ if(!cloud.api||!cloud.user||cloud.busy)return;cloud.busy=true;cloudStatus('SYNCING…');
+ try{
+  const uid=cloud.user.uid,api=cloud.api;
+  const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&validSession(s));
+  const rids=new Set(remote.map(s=>s.id)),lids=new Set(store.sessions.map(s=>s.id));
+  const add=remote.filter(s=>!lids.has(s.id)),up=store.sessions.filter(s=>!rids.has(s.id)&&validSession(s));
+  for(const s of up)await api.putSession(uid,s);
+  if(add.length){const before=store.sessions;store.sessions=[...store.sessions,...add].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));if(!persist()){store.sessions=before;throw Error('local save failed')}}
+  syncMeta.pushed=[...new Set([...syncMeta.pushed,...rids,...up.map(s=>s.id)])];
+  const m=await api.getMeta(uid);let rp=null,rAt=0;if(m){rAt=+m.updatedAt||0;try{rp=JSON.parse(m.json).myDarts}catch(_){}}
+  const lAt=syncMeta.myAt;
+  if(!rp)await cloudPushProfile(uid,api);
+  else if(lAt===0){const hasLocal=myDarts.sets.length||myDarts.nick;if(hasLocal){cloud.applying=true;try{myDarts=cloudMergeSets(myDarts,rp);mySaveState();myLoad('')}finally{cloud.applying=false}syncMeta.myAt=Date.now();await cloudPushProfile(uid,api)}else cloudApplyMy(rp,rAt||1)}
+  else if(rAt>lAt)cloudApplyMy(rp,rAt);
+  else if(lAt>rAt)await cloudPushProfile(uid,api);
+  syncMeta.lastAt=Date.now();syncMetaSave();render();
+  cloud.busy=false;cloudUi();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
+ }catch(e){cloud.busy=false;cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+function cloudAuto(){
+ if(!cloud.user||!cloud.api||cloud.busy)return;clearTimeout(cloud.timer);
+ cloud.timer=setTimeout(async()=>{try{
+  const uid=cloud.user&&cloud.user.uid;if(!uid||cloud.busy)return;const done=new Set(syncMeta.pushed);
+  const up=store.sessions.filter(s=>!done.has(s.id)&&validSession(s));for(const s of up){await cloud.api.putSession(uid,s);done.add(s.id)}
+  syncMeta.pushed=[...done];if(syncMeta.myAt>syncMeta.myPushed)await cloudPushProfile(uid,cloud.api);
+  syncMeta.lastAt=Date.now();syncMetaSave();cloudUi()}catch(e){cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}},4000)}
+function setupCloud(){
+ const b=$('cloudLogin');if(!b)return;
+ if(location.protocol==='file:'&&!window.__DTL_CLOUD_FAKE){cloudStatus('公開URL(https)で使えます');b.disabled=true;return}
+ b.onclick=async()=>{try{const api=await cloudConnect();cloudStatus('LOGIN…');await api.login();syncMeta.on=true;syncMetaSave()}catch(e){cloudStatus('LOGIN FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}};
+ $('cloudSync').onclick=()=>cloudSync();
+ $('cloudLogout').onclick=async()=>{try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
+ cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
+setupMyDarts();setupCloud();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();
