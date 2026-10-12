@@ -71,19 +71,45 @@ with sync_playwright() as p:
     mobile.close()
     print('PASS mobile 390px recovery UI smoke')
     # Restore must keep the damaged primary in a separate safety slot.
+    # NOTE: the damaged state is seeded ONCE (evaluate + reload), not with add_init_script.
+    # An init script re-runs on every navigation, including the location.reload() that a successful
+    # restore performs, so it would re-corrupt the freshly restored data and no test could ever see it.
+    def seeded_page(context,primary,recovery,dialogs):
+        page=context.new_page()
+        page.on('dialog',lambda d:(dialogs.append(d.message),d.accept()))
+        page.goto(URL)
+        page.evaluate("([k,p,r])=>{localStorage.setItem(k,p);localStorage.setItem(k+'-recovery',r)}",[KEY,primary,recovery])
+        page.reload()
+        page.wait_for_load_state('load')
+        page.locator('[data-tab="settings"]').click()
+        assert '保存停止中' in page.locator('#recoveryStatus').text_content(),'seeded page must start read-only'
+        return page
     context=browser.new_context()
-    page=context.new_page()
-    page.on('dialog',lambda d:d.accept())
-    page.add_init_script('localStorage.setItem('+json.dumps(KEY)+',"CORRUPTED");localStorage.setItem('+json.dumps(KEY+'-recovery')+','+json.dumps(json.dumps(valid))+')')
-    page.goto(URL)
-    page.wait_for_timeout(300)
-    page.locator('[data-tab="settings"]').click()
-    page.locator('#recoveryRestore').click()
-    page.wait_for_function("() => { try { const saved = JSON.parse(localStorage.getItem('dtl-data-v1')); return saved && saved.schemaVersion === 1; } catch (_) { return false; } }", timeout=10000)
-    assert page.evaluate("localStorage.getItem('dtl-data-v1-before-restore')")=='CORRUPTED'
-    assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1')"))['schemaVersion']==1
+    page=seeded_page(context,'CORRUPTED',json.dumps(valid),[])
+    with page.expect_navigation(timeout=10000):   # restore ends with location.reload()
+        page.locator('#recoveryRestore').click()
+    page.wait_for_load_state('load')
+    assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1')"))==valid,'primary must equal the restored snapshot'
+    assert page.evaluate("localStorage.getItem('dtl-data-v1-before-restore')")=='CORRUPTED','damaged original must be kept'
+    assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1-recovery')"))==valid,'recovery snapshot must stay untouched'
+    assert '通常モード' in page.locator('#recoveryStatus').text_content(),'app must leave read-only mode after restore'
+    assert page.evaluate("localStorage.getItem('dtl-error-log-v1')") is None,'successful restore must not log errors'
     context.close()
     print('PASS explicit restore preserves damaged original')
+    # If the restored write cannot be verified, nothing may be lost, the app stays read-only and the failure is logged.
+    context=browser.new_context()
+    dialogs=[]
+    page=seeded_page(context,'CORRUPTED',json.dumps(valid),dialogs)
+    page.evaluate("()=>{const set=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='dtl-data-v1')throw new Error('quota');return set.call(this,k,v)}}")
+    page.locator('#recoveryRestore').click()
+    page.wait_for_timeout(300)
+    assert any('復旧に失敗' in m for m in dialogs),dialogs
+    assert page.evaluate("localStorage.getItem('dtl-data-v1')")=='CORRUPTED','failed restore must leave the original untouched'
+    assert json.loads(page.evaluate("localStorage.getItem('dtl-data-v1-recovery')"))==valid
+    assert '保存停止中' in page.locator('#recoveryStatus').text_content(),'failed restore must keep read-only protection'
+    assert 'recoveryRestore' in page.evaluate("localStorage.getItem('dtl-error-log-v1')"),'failure must be logged'
+    context.close()
+    print('PASS failed restore keeps data and read-only protection')
     browser.close()
 server.shutdown()
 print('ALL PASS')

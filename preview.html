@@ -532,9 +532,16 @@ function recoveryExport(){
 }
 function recoveryRestore(){
  const rows=recoveryCandidates(),sel=$('recoveryChoice'),item=rows[Number(sel&&sel.value)||0];
- if(!item)return alert('復旧可能な正常データがありません');
+ if(!item||!parseSavedState(item.raw))return alert('復旧可能な正常データがありません');
  if(!confirm(item.name+'から練習記録を復旧します。現在の保存データは復旧用ファイルに書き出してから操作してください。続けますか？'))return;
- try{const previous=localStorage.getItem(KEY);if(previous!==null)localStorage.setItem(KEY+'-before-restore',previous);localStorage.setItem(KEY,item.raw);location.reload()}catch(e){alert('復旧に失敗しました。元データは保持されています。')}
+ try{
+  const previous=localStorage.getItem(KEY);
+  if(previous!==null)localStorage.setItem(KEY+'-before-restore',previous);
+  localStorage.setItem(KEY,item.raw);
+  if(!parseSavedState(localStorage.getItem(KEY)))throw Error('復旧データの書き込み確認に失敗しました');
+  recoveryReadOnly=false;
+  location.reload();
+ }catch(e){recordError('recoveryRestore',e);alert('復旧に失敗しました。元データを確認し、保存領域を確認してください。')}
 }
 function recoveryHistory(prior){
  try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]'),list=Array.isArray(h)?h.filter(x=>typeof x==='string'&&parseSavedState(x)):[];if(list[0]!==prior)list.unshift(prior);localStorage.setItem(RECOVERY_HISTORY_KEY,JSON.stringify(list.slice(0,3)))}catch(_){}
