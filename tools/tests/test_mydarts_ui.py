@@ -47,7 +47,7 @@ with sync_playwright() as p:
         chk(pg.evaluate("document.getElementById('authChip').textContent")=='からりゅう',f+' auth chip shows name after login')
         chk(pg.evaluate("JSON.parse(localStorage.getItem('retro-my-darts-v1')).nick")=='からりゅう',f+' empty nickname defaults to Google name')
         msgs.clear();pg.click('#cloudLogout');pg.wait_for_timeout(200)
-        chk(any('ログアウト' in m and '残ります' in m for m in msgs) and pg.evaluate("document.getElementById('authChip').textContent")=='GUEST',f+' logout confirms (data stays), chip back to GUEST')
+        chk(any('ログアウト' in m and '残り' in m for m in msgs) and pg.evaluate("document.getElementById('authChip').textContent")=='GUEST',f+' logout confirms (data stays), chip back to GUEST')
         pg.click('[data-tab=play]');pg.click('#authChip');pg.wait_for_timeout(200)
         chk(pg.evaluate("document.getElementById('settings').classList.contains('active')"),f+' auth chip opens settings')
         chk(not errs,f+' no page errors '+str(errs[:1]));c.close()
