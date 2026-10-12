@@ -418,3 +418,20 @@ body .page button.help-btn:not(.primary):not(.warn),body .page button.help-btn:n
 #play .rounds div b{display:block;font-size:22px;line-height:1.25;color:#fff;font-variant-numeric:tabular-nums}
 #play .throw b{font-size:40px!important;line-height:1.1;color:#fff;font-variant-numeric:tabular-nums}
 #play .throw .tiny{font-size:11px}
+
+/* v0.5.36 MY DARTS 10 slots */
+.my-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 14px}
+@media(min-width:700px){.my-slots{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.my-slot{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px;border:1px solid #31414B;border-radius:10px;background:#15212B}
+body .page .my-slot button{border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;cursor:pointer}
+.my-slot-main,.my-slot.empty{display:flex;flex-direction:column;gap:3px;min-width:0;min-height:62px}
+.my-slot.empty{align-items:flex-start;justify-content:flex-start;border-style:dashed;opacity:.62}
+body .page button.my-slot.empty{padding:8px;border:1px dashed #31414B;background:#15212B}
+.my-slot b{font-size:15px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.my-slot small{font-size:11px;color:#A8B9C5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.my-slot-no{font-size:10px;letter-spacing:.1em;color:#8AAEB0}
+.my-slot.on{border-color:#65d3e7;box-shadow:0 0 0 1px #65d3e74a}
+.my-slot.using{background:#183543}.my-slot.using .my-slot-no{color:#b4ed38}
+body .page .my-slot .my-slot-use{min-height:40px;padding:8px;border:1px solid #31414B;border-radius:8px;background:#1C2A33;text-align:center;font-size:12px}
+.my-slot .my-slot-use.is{display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid #b4ed38;border-radius:8px;color:#b4ed38;font-size:12px;font-weight:800;letter-spacing:.08em}
+body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;min-height:62px}
