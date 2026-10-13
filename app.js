@@ -201,6 +201,7 @@ preloadCooldownAudio();
 function playSound(kind='hit',delay=0){
  if(store.soundEnabled===false)return;
  try{
+  if(window.CustomDartSounds&&window.CustomDartSounds.play(kind,delay,Math.min(1,soundLevel(['hit','double','triple','bull','inner','miss'].includes(kind)?'hit':'fx'))))return;
   if(!audioReady())return;
   retroInit();
   const at=audioCtx.currentTime+.012+Math.max(0,delay),fx=soundLevel('fx');
