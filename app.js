@@ -185,37 +185,51 @@ function retroFanfare(at,kind){
  }
  retroNoise(at+.36,.32,.035*soundLevel('fx'),750,5000);
 }
-// The audio file must be committed separately at assets/cooldown.mp3.
-const cooldownAudioUrl='https://raw.githubusercontent.com/RyutanCAMP/darts-training-lab/main/assets/cooldown.mp3';
-let cooldownBuffer=null;
-async function preloadCooldownAudio(){
- try{
-  const res=await fetch(cooldownAudioUrl);
-  if(!res.ok)throw new Error('HTTP '+res.status);
-  if(!audioReady())return;
-  cooldownBuffer=await audioCtx.decodeAudioData(await res.arrayBuffer());
- }catch(err){console.warn('Cooldown audio load failed',err)}
+let cooldownBuffer=null,cooldownLoading=null;
+function preloadCooldownAudio(){
+ if(cooldownBuffer)return Promise.resolve(cooldownBuffer);
+ if(cooldownLoading)return cooldownLoading;
+ cooldownLoading=(async()=>{
+  try{
+   const res=await fetch('assets/cooldown.mp3');
+   if(!res.ok)throw new Error('HTTP '+res.status);
+   const ctx=audioReady();if(!ctx)return null;
+   cooldownBuffer=await ctx.decodeAudioData(await res.arrayBuffer());
+   return cooldownBuffer;
+  }catch(err){console.warn('Next-stage sound load failed',err);return null}
+  finally{cooldownLoading=null}
+ })();
+ return cooldownLoading;
 }
-window.addEventListener('pointerdown',()=>{if(!cooldownBuffer)preloadCooldownAudio()},{once:true});
+window.addEventListener('pointerdown',()=>{audioReady();preloadCooldownAudio()},{once:true});
 preloadCooldownAudio();
 function playSound(kind='hit',delay=0){
  if(store.soundEnabled===false)return;
  try{
-  if(window.CustomDartSounds&&window.CustomDartSounds.play(kind,delay,Math.min(1,soundLevel(['hit','double','triple','bull','inner','miss'].includes(kind)?'hit':'fx'))))return;
   if(!audioReady())return;
   retroInit();
   const at=audioCtx.currentTime+.012+Math.max(0,delay),fx=soundLevel('fx');
   if(['hit','double','triple','bull','inner','miss'].includes(kind))retroHit(at,kind==='miss'?.28:kind==='inner'?1.25:1,kind==='inner'?.78:1);
   if(kind==='miss'||kind==='hit')return;
   if(kind==='cooldown'){
-   // Play the user-selected Sound Effect Lab MP3 instead of synthesizing a tune.
    if(cooldownBuffer){
     const src=audioCtx.createBufferSource(),gain=audioCtx.createGain();
     src.buffer=cooldownBuffer;gain.gain.value=.30*fx;
-    src.connect(gain);gain.connect(retroBus);src.start(at);
-   }else{
-    console.warn('Cooldown MP3 not loaded yet; add assets/cooldown.mp3 to the repository');
+    src.connect(gain);gain.connect(retroBus);src.start(at);return;
    }
+   // Light, playful three-second "te-tte-re-tte-re" arcade lever-inspired cue.
+   // Original synthesis; no sampled machine audio.
+   const phrase=[
+    [659.25,0,.10],[783.99,.14,.10],[987.77,.28,.18],
+    [783.99,.60,.10],[659.25,.74,.10],[783.99,.88,.20],
+    [659.25,1.22,.10],[783.99,1.36,.10],[987.77,1.50,.18],
+    [783.99,1.82,.10],[880,1.96,.10],[1046.5,2.10,.22],
+    [987.77,2.47,.12],[1046.5,2.62,.23]
+   ];
+   phrase.forEach(([freq,offset,duration])=>{
+    retroVoice(freq,at+offset,duration,.052*fx,'triangle',freq*.998,5200);
+    retroVoice(freq*2,at+offset,duration*.55,.011*fx,'sine',freq*2,6500);
+   });
    return;
   }
   if(kind==='finalRound'){retroSpark(at,.52);retroNote(523.25,at+.03,.14,.1);retroNote(659.25,at+.17,.14,.11);retroChord([783.99,1046.5],at+.33,.38,.105);return}
@@ -380,7 +394,7 @@ function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||a
   if(bullStreak&&!completeRound)gameEffect('DOUBLE BULL!','2 BULLS IN A ROW','bull',1500);
   else if(shot&&!completeRound)gameEffect(shot.title,'+'+points(segment)+' POINTS',shot.kind,850);
  }
- }// Round 7 -> final round uses the normal cooldown cue below; avoid duplicate sound.
+ }
  if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){
   // Queue the jingle after BULL/INNER BULL or achievement fanfare.
   const cueDelay=hat?3.1:segment==='IB'?1.4:segment==='OB'?1.1:s.darts.length===21?1.15:segment.startsWith('T')?.65:.45;
@@ -942,7 +956,7 @@ function board200sInput(e){
 
 function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(board200sInput(e))return;if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{store.roundDelay=Number(b.dataset.delay);persist();render()});$('soundToggle').onclick=()=>{store.soundEnabled=store.soundEnabled===false;persist();render();if(store.soundEnabled)playSound('bull')};document.querySelectorAll('[data-sound-volume]').forEach(input=>{const k=input.dataset.soundVolume;input.value=Math.round(soundLevel(k)*100);const out=$(k+'VolumeValue');if(out)out.textContent=input.value+'%';input.oninput=()=>{store.soundVolumes={...(store.soundVolumes||{}),[k]:Number(input.value)};if(out)out.textContent=input.value+'%';persist()}});
-async function testAudio(kind){const status=$('soundStatus');if(store.soundEnabled===false){status.textContent='効果音がOFFです。ONにしてください';return}try{const ctx=audioReady();if(!ctx){status.textContent='このブラウザは音声機能に対応していません';return}if(ctx.state!=='running')await ctx.resume();if(ctx.state!=='running'){status.textContent='音声がブロックされています。プレビューではなく通常のHTTPSページで開いてください';return}playSound(kind);status.textContent='再生中：'+kind+'（聞こえない場合は音量・消音モード・ページの音声許可を確認）'}catch(e){status.textContent='音声を開始できません：'+e.message}}
+async function testAudio(kind){const status=$('soundStatus');if(store.soundEnabled===false){status.textContent='効果音がOFFです。ONにしてください';return}try{const ctx=audioReady();if(!ctx){status.textContent='このブラウザは音声機能に対応していません';return}if(ctx.state!=='running')await ctx.resume();if(ctx.state!=='running'){status.textContent='音声がブロックされています。プレビューではなく通常のHTTPSページで開いてください';return}if(kind==='cooldown')await preloadCooldownAudio();playSound(kind);status.textContent='再生中：'+kind+'（聞こえない場合は音量・消音モード・ページの音声許可を確認）'}catch(e){status.textContent='音声を開始できません：'+e.message}}
 document.querySelectorAll('[data-sound-test]').forEach(b=>b.onclick=()=>testAudio(b.dataset.soundTest));
 $('soundTest').onclick=()=>testAudio('inner');$('skipRoundBreak').onclick=finishRoundBreak;$('backFromSettings').onclick=()=>changeTab('play');$('againFromHistory').onclick=()=>changeTab('play');$('analyseFromHistory').onclick=()=>changeTab('analysis');
 const select=$('targetselect');['OB','IB','MISS',...nums.flatMap(n=>['S'+n,'D'+n,'T'+n])].forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=label(s);select.appendChild(o)});
