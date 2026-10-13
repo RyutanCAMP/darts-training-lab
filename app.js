@@ -4,27 +4,82 @@ try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.a
 const $=id=>document.getElementById(id),KEY='dtl-data-v1',nums=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
 let audioCtx=null;
 let store={schemaVersion:1,sessions:[],active:null,bindings:{},roundDelay:8,soundEnabled:true},lastKey=null,keyLog=[],calibrationActive=false,calibrationIndex=0,calibrationLastIndex=-1,calibrationLastAt=0,viewId=null,showResult=false,lastBoardEvent=0,roundBreakTimer=null,roundBreakUntil=0,saveOK=null,savedAt=null,justSaved=false;
-try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.schemaVersion===1&&Array.isArray(v.sessions))store={...store,...v}}catch(e){console.warn('Saved data invalid',e)}
+const DATA_SCHEMA_VERSION=1,ERROR_LOG_KEY='dtl-error-log-v1';
+function recordError(area,error){
+ try{const raw=JSON.parse(localStorage.getItem(ERROR_LOG_KEY)||'[]'),rows=Array.isArray(raw)?raw:[];rows.push({at:new Date().toISOString(),area:String(area).slice(0,48),message:String(error&&error.message||error).slice(0,160)});localStorage.setItem(ERROR_LOG_KEY,JSON.stringify(rows.slice(-30)))}catch(_){}
+}
+function parseSavedState(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(!v||v.schemaVersion!==DATA_SCHEMA_VERSION||!Array.isArray(v.sessions)||v.sessions.some(s=>!s||typeof s!=='object'||!Array.isArray(s.darts))|| (v.active!==null&&v.active!==undefined&&(!v.active||typeof v.active!=='object'||!Array.isArray(v.active.darts))))return null;return v}catch(_){return null}}
+let recoveryNotice=false,recoveryReadOnly=false;
+try{
+ const primaryRaw=localStorage.getItem(KEY),primary=parseSavedState(primaryRaw);
+ if(primary)store={...store,...primary};
+ else if(primaryRaw!==null){
+  const recovered=parseSavedState(localStorage.getItem(KEY+'-recovery'));
+  if(recovered){store={...store,...recovered};recoveryNotice=true;recoveryReadOnly=true;console.warn('Primary save invalid; loaded recovery snapshot without overwriting either copy')}
+  else{recoveryNotice=true;recoveryReadOnly=true;console.error('Saved data invalid and no valid recovery snapshot; original data retained')}
+ }
+}catch(e){recordError('loadSavedState',e);console.warn('Saved data unavailable',e)}
+if(recoveryNotice)window.addEventListener('load',()=>setTimeout(()=>alert('保存データに異常を検出しました。復旧用データがあれば読み込みました。元データを保護するため自動保存を停止しました。データを確認し、バックアップを保存してください。'),0),{once:true});
 function updateSaveIndicator(){const box=$('saveIndicator'),label=$('saveText');if(!box||!label)return;box.classList.toggle('save-error',saveOK===false);box.classList.toggle('save-pending',store.active.darts.length===24&&saveOK!==false);if(saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=savedAt?new Date(savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
+const RECOVERY_HISTORY_KEY=KEY+'-history';
+function recoveryCandidates(){
+ const rows=[['現在の保存',KEY],['直前の保存',KEY+'-recovery']];
+ try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]');if(Array.isArray(h))h.forEach((v,i)=>{if(typeof v==='string')rows.push(['履歴 '+(i+1),null,v])})}catch(_){}
+ return rows.map(([name,key,raw])=>({name,raw:raw===undefined?localStorage.getItem(key):raw})).filter(x=>parseSavedState(x.raw));
+}
+function recoveryRender(){
+ const el=$('recoveryStatus');if(!el)return;
+ const rows=recoveryCandidates();
+ el.textContent=(recoveryReadOnly?'保存停止中。復旧操作を行ってください。':'通常モード。')+' 利用可能な正常データ: '+rows.map(x=>x.name).join(' / ');
+ const sel=$('recoveryChoice');if(sel){sel.innerHTML='';rows.forEach((x,i)=>{const opt=document.createElement('option');opt.value=String(i);opt.textContent=x.name;sel.appendChild(opt)})}
+}
+function recoveryExport(){
+ const data={format:'retro-darts-recovery-v1',createdAt:new Date().toISOString(),entries:{}};
+ for(const key of [KEY,KEY+'-recovery',RECOVERY_HISTORY_KEY,MY_KEY,MY_KEY+'-recovery',SYNC_KEY,EXCLUDED_ROUNDS_KEY,ERROR_LOG_KEY]){try{data.entries[key]=localStorage.getItem(key)}catch(_){}}
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='retro-darts-recovery-'+Date.now()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function recoveryRestore(){
+ const rows=recoveryCandidates(),sel=$('recoveryChoice'),item=rows[Number(sel&&sel.value)||0];
+ if(!item||!parseSavedState(item.raw))return alert('復旧可能な正常データがありません');
+ if(!confirm(item.name+'から練習記録を復旧します。現在の保存データは復旧用ファイルに書き出してから操作してください。続けますか？'))return;
+ try{
+  const previous=localStorage.getItem(KEY);
+  if(previous!==null)localStorage.setItem(KEY+'-before-restore',previous);
+  localStorage.setItem(KEY,item.raw);
+  if(!parseSavedState(localStorage.getItem(KEY)))throw Error('復旧データの書き込み確認に失敗しました');
+  recoveryReadOnly=false;
+  location.reload();
+ }catch(e){recordError('recoveryRestore',e);alert('復旧に失敗しました。元データを確認し、保存領域を確認してください。')}
+}
+function recoveryHistory(prior){
+ try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]'),list=Array.isArray(h)?h.filter(x=>typeof x==='string'&&parseSavedState(x)):[];if(list[0]!==prior)list.unshift(prior);localStorage.setItem(RECOVERY_HISTORY_KEY,JSON.stringify(list.slice(0,3)))}catch(_){}
+}
+function setupRecovery(){
+ if(!$('recoveryStatus'))return;
+ $('recoveryExport').onclick=recoveryExport;$('recoveryRestore').onclick=recoveryRestore;recoveryRender();
+}
+function persist(){if(recoveryReadOnly){saveOK=false;alert('保存データの異常を検出したため、自動保存を停止しています。先にデータを確認してバックアップを取得してください。');return false}try{const prior=localStorage.getItem(KEY);if(prior!==null&&parseSavedState(prior)){recoveryHistory(prior);try{localStorage.setItem(KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(KEY,JSON.stringify(store));saveOK=true;savedAt=Date.now();updateSaveIndicator();try{cloudAuto()}catch(_){}return true}catch(e){recordError('persist',e);saveOK=false;updateSaveIndicator();alert('保存に失敗しました。ブラウザの保存領域を確認してください。');return false}}
 function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 
 /* ===== CLOUD SYNC state (optional; the app works fully without login) ===== */
 const SYNC_KEY='dtl-sync-v1';
 let syncMeta={pushed:[],myAt:0,myPushed:0,lastAt:0,on:false};try{const v=JSON.parse(localStorage.getItem(SYNC_KEY));if(v&&typeof v==='object')syncMeta={pushed:Array.isArray(v.pushed)?v.pushed.filter(x=>typeof x==='string'):[],myAt:+v.myAt||0,myPushed:+v.myPushed||0,lastAt:+v.lastAt||0,on:!!v.on}}catch(_){}
-let cloud={user:null,api:null,busy:false,timer:0,applying:false};
+let cloud={user:null,api:null,busy:false,timer:0,applying:false,pending:false,autoBusy:false};
 function profTouch(){if(cloud.applying)return;syncMeta.myAt=Date.now();syncMetaSave();try{cloudAuto()}catch(_){}}
 function syncMetaSave(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncMeta))}catch(_){}}
-const MY_KEY='retro-my-darts-v1';const MY_BRANDS=['未指定','TARGET','TRiNiDAD','DYNASTY','COSMO DARTS','TIGA','その他'];const MY_COLORS=['未指定','シルバー','ブラック','ホワイト','レッド','ブルー','ゴールド','パープル','グリーン','クリア','その他'];const MY_FIELDS=['SetupName','BarrelBrand','BarrelModel','BarrelShape','BarrelWeight','BarrelColor','FlightShape','FlightColor','Shaft','Tip','TipColor','TipLength','Memo'];
+const MY_KEY='retro-my-darts-v1';const MY_BRANDS=['未指定','TARGET','TRiNiDAD','DYNASTY','COSMO DARTS','TIGA','その他'];const MY_COLORS=['未指定','シルバー','ブラック','ホワイト','レッド','ブルー','ゴールド','パープル','グリーン','クリア','その他'];const MY_FIELDS=['SetupName','BarrelBrand','BarrelModel','BarrelShape','BarrelWeight','BarrelColor','FlightBrand','FlightModel','FlightShape','FlightColor','Shaft','TipBrand','TipModel','Tip','TipColor','TipLength','Memo'];
 function sanitizeMyDarts(data){if(!data||typeof data!=='object'||Array.isArray(data))return {nick:'',sets:[],current:''};const seen=new Set();const sets=(Array.isArray(data.sets)?data.sets:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)&&typeof x.id==='string'&&x.id.length>0&&x.id.length<100&&!seen.has(x.id)&&seen.add(x.id)).slice(0,10).map(x=>{const clean={id:x.id};for(const f of MY_FIELDS)clean[f]=typeof x[f]==='string'?x[f].slice(0,f==='Memo'?2000:120):'';return clean});return {nick:typeof data.nick==='string'?data.nick.slice(0,32):'',sets,current:typeof data.current==='string'&&sets.some(x=>x.id===data.current)?data.current:''}}
 let myDarts={nick:'',sets:[],current:''};try{myDarts=sanitizeMyDarts(JSON.parse(localStorage.getItem(MY_KEY)))}catch(_){}
 
+try{const raw=localStorage.getItem(MY_KEY);if(raw!==null){const data=JSON.parse(raw);if(!data||typeof data!=='object'||!Array.isArray(data.sets))throw Error('Invalid MY DARTS');} }catch(_){try{const backup=JSON.parse(localStorage.getItem(MY_KEY+'-recovery'));if(backup&&typeof backup==='object'&&Array.isArray(backup.sets))myDarts=sanitizeMyDarts(backup)}catch(__){}}
 let myLast=JSON.stringify(myDarts);
 function restampActive(){try{const a=store.active;if(!a||a.darts.length)return;const sid=myDarts.current||null,sn=myDarts.sets.find(x=>x.id===myDarts.current)?.SetupName||null,nk=myDarts.nick||null;if(a.setupId!==sid||a.setupName!==sn||a.nickname!==nk){a.setupId=sid;a.setupName=sn;a.nickname=nk;persist()}}catch(_){}}
-function mySaveState(){try{const t=JSON.stringify(myDarts);localStorage.setItem(MY_KEY,t);myLast=t;if(!cloud.applying){syncMeta.myAt=Date.now();syncMetaSave()}restampActive();try{cloudAuto()}catch(_){}return true}catch(_){try{myDarts=sanitizeMyDarts(JSON.parse(myLast))}catch(__){}alert('MY DARTSを保存できませんでした。変更は取り消しました');return false}}
+function mySaveState(){try{const t=JSON.stringify(myDarts);const prior=localStorage.getItem(MY_KEY);if(prior!==null){try{const parsed=JSON.parse(prior);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)&&Array.isArray(parsed.sets))localStorage.setItem(MY_KEY+'-recovery',prior)}catch(_){}}localStorage.setItem(MY_KEY,t);myLast=t;if(!cloud.applying){syncMeta.myAt=Date.now();syncMetaSave()}restampActive();try{cloudAuto()}catch(_){}return true}catch(_){try{myDarts=sanitizeMyDarts(JSON.parse(myLast))}catch(__){}alert('MY DARTSを保存できませんでした。変更は取り消しました');return false}}
 const myFields=MY_FIELDS;let editingSetup='';
 function myRender(){const current=$('myCurrent'),slot=$('mySlot');if(!current||!slot)return;const nick=$('myNick');if(document.activeElement!==nick)nick.value=myDarts.nick;const opts=myDarts.sets.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.SetupName||'無題')+'</option>').join('');current.innerHTML='<option value="">未設定（お試し）</option>'+opts;current.value=myDarts.current;slot.innerHTML='<option value="">新しいセットを作る</option>'+opts;slot.value=editingSetup;const label=$('myDartsStatus');if(label)label.textContent=(myDarts.nick||'ゲスト')+' ／ '+(myDarts.sets.find(x=>x.id===myDarts.current)?.SetupName||'セッティング未設定');mySlotsRender();myChipsRender()}
 function myChipsRender(){const cur=myDarts.sets.find(x=>x.id===myDarts.current);const c=$('setChip');if(c)c.textContent='SET '+(cur?(cur.SetupName||'無題'):'未設定');const t=$('myEditTitle');if(t){const i=myDarts.sets.findIndex(x=>x.id===editingSetup);t.textContent=i>=0?'SET '+(i+1)+' を編集中':'新しいセットを登録'}const l=$('setSheetList');if(l)l.innerHTML='<button type="button" data-use="" class="sheet-item'+(!cur?' on':'')+'">未設定（お試し）</button>'+myDarts.sets.map((x,i)=>'<button type="button" data-use="'+esc(x.id)+'" class="sheet-item'+(x.id===myDarts.current?' on':'')+'"><span>SET '+(i+1)+'</span> '+esc(x.SetupName||'無題')+'</button>').join('')}
+function openSheet(id){const el=$(id);if(!el)return;if(id==='setSheet')myChipsRender();document.querySelectorAll('.sheet').forEach(x=>x.classList.toggle('hidden',x!==el));el.classList.remove('hidden')}
+function closeSheets(){document.querySelectorAll('.sheet').forEach(x=>x.classList.add('hidden'))}
 function myUse(id){const c=$('myCurrent');c.value=id;c.onchange({target:c})}
 function mySlotsRender(){const box=$('mySlots');if(!box)return;let h='';for(let i=0;i<10;i++){const x=myDarts.sets[i];if(!x){h+='<button type="button" class="my-slot empty" data-slot-new="1"><span class="my-slot-no">SET '+(i+1)+'</span><b>未設定</b><small>タップで新規登録</small></button>';continue}const using=x.id===myDarts.current,editing=x.id===editingSetup;h+='<div class="my-slot'+(using?' using':'')+(editing?' on':'')+'"><button type="button" class="my-slot-main" data-slot-edit="'+esc(x.id)+'"><span class="my-slot-no">SET '+(i+1)+(using?' · 使用中':'')+'</span><b>'+esc(x.SetupName||'無題')+'</b><small>'+esc(x.BarrelModel||x.BarrelBrand||'—')+'</small></button>'+(using?'<span class="my-slot-use is">USING</span>':'<button type="button" class="my-slot-use" data-slot-use="'+esc(x.id)+'">これを使う</button>')+'</div>'}box.innerHTML=h}
 function myLoad(id){editingSetup=id;const x=myDarts.sets.find(s=>s.id===id)||{};for(const f of myFields){const el=$('my'+f);if(el)el.value=x[f]||((f==='BarrelBrand'||f.endsWith('Color'))?'未指定':'')}myRender()}
@@ -39,7 +94,7 @@ function catalogSpec(value,unit=''){return value===null||value===undefined||valu
 let brandFilterOn=true;
 function catalogSearch(){const brand=brandFilterOn?$('myBarrelBrand').value:'未指定',q=$('myModelSearch').value.trim().toLowerCase(),list=$('myModelResults');if(catalogState!=='ok'){list.innerHTML='<p class="tiny muted">'+(catalogState==='loading'?'カタログを読み込み中…':'カタログを読み込めませんでした。モデル名は自由入力できます。')+'</p>';return}const hits=BARREL_CATALOG.filter(x=>(brand==='未指定'||brand==='その他'||x.brand===brand)&&(!q||[x.name,x.brand,x.player||'',x.year??''].join(' ').toLowerCase().includes(q)));list.innerHTML='<p class="tiny muted">'+hits.length+'件 / 全'+BARREL_CATALOG.length+'モデル</p>'+hits.map(x=>'<button type="button" data-catalog-index="'+BARREL_CATALOG.indexOf(x)+'" style="text-align:left;padding:10px;border:1px solid #31414B;border-radius:9px;background:#1C2A33;color:#E3E8EA"><b>'+esc(x.name)+'</b><br><small>'+esc(x.brand)+' · '+catalogSpec(x.year,'年')+' · '+catalogSpec(x.weight,'g')+' · '+catalogSpec(x.material,'% タングステン')+'</small></button>').join('');if(!hits.length)list.innerHTML+='<p class="tiny muted">候補がありません。メーカーを「未指定」にするか自由入力してください。</p>'}
 function chooseCatalog(index){const x=BARREL_CATALOG[index];if(!x)return;$('myBarrelBrand').value=x.brand;$('myBarrelModel').value=x.name;if(!$('mySetupName').value.trim())$('mySetupName').value=String(x.name).slice(0,40);$('myBarrelWeight').value=x.weight??'';$('myBarrelShape').value=x.shape||'その他・不明';$('myBarrelColor').value=x.color||'未指定';$('myModelInfo').innerHTML='<b>'+esc(x.name)+'</b>（'+(x.release?esc(x.release.replace(/-/g,'/'))+' 発売':catalogSpec(x.year,'年'))+'）'+(x.player?'<br>'+esc(x.player):'')+'<br>タングステン：'+catalogSpec(x.material,'%')+' ／ 重量：'+catalogSpec(x.weight,'g')+' ／ 全長：'+catalogSpec(x.length,'mm')+' ／ 最大径：'+catalogSpec(x.diameter,'mm')+(x.note?'<br>'+esc(x.note):'')+'<br><small>'+esc(CATALOG_CHECK[x.verified]||'確認状況不明')+'</small>'+(x.url?'<br><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">公式の製品ページ ↗</a>':'');$('myModelSearch').value='';brandFilterOn=true;catalogSearch()}
-function setupMyDarts(){const brand=$('myBarrelBrand');if(!brand)return;brand.innerHTML=MY_BRANDS.map(x=>'<option>'+x+'</option>').join('');for(const id of ['BarrelColor','FlightColor','TipColor'])$('my'+id).innerHTML=MY_COLORS.map(x=>'<option>'+x+'</option>').join('');$('myModelSearch').oninput=()=>{brandFilterOn=!$('myModelSearch').value.trim();catalogSearch()};brand.addEventListener('change',()=>{brandFilterOn=true;catalogSearch()});$('myModelResults').addEventListener('click',e=>{const b=e.target.closest('[data-catalog-index]');if(b)chooseCatalog(Number(b.dataset.catalogIndex))});catalogSearch();$('setChip').onclick=()=>{myChipsRender();$('setSheet').classList.remove('hidden')};$('setSheetClose').onclick=()=>$('setSheet').classList.add('hidden');$('setSheet').addEventListener('click',e=>{if(e.target===$('setSheet'))$('setSheet').classList.add('hidden')});$('setSheetList').addEventListener('click',e=>{const b=e.target.closest('[data-use]');if(!b)return;$('setSheet').classList.add('hidden');myUse(b.dataset.use)});$('setSheetEdit').onclick=()=>{$('setSheet').classList.add('hidden');changeTab('settings');setTimeout(()=>{const p=$('myDartsPanel');p&&p.scrollIntoView({behavior:'smooth',block:'start'})},60)};$('authChip').onclick=()=>{changeTab('settings');setTimeout(()=>{const p=$('cloudPanel');p&&p.scrollIntoView({behavior:'smooth',block:'start'})},60)};$('myDuplicate').onclick=()=>{if(!editingSetup){alert('複製するセットを、先にカードから選んでください');return}if(myDarts.sets.length>=10){alert('登録できるのは10セットまでです');return}const x=myDarts.sets.find(y=>y.id===editingSetup);if(!x)return;myLoad(x.id);editingSetup='';$('mySetupName').value=(String(x.SetupName||'')+' コピー').slice(0,40);myRender();toast('複製しました。名前を変えて保存してください')};$('mySlots').addEventListener('click',e=>{const n=e.target.closest('[data-slot-new]'),ed=e.target.closest('[data-slot-edit]'),us=e.target.closest('[data-slot-use]');if(n)myLoad('');else if(ed)myLoad(ed.dataset.slotEdit);else if(us){const c=$('myCurrent');c.value=us.dataset.slotUse;c.onchange({target:c})}});$('myNick').onchange=e=>{myDarts.nick=e.target.value.trim().slice(0,32);mySaveState();myRender()};$('myCurrent').onchange=e=>{if(store.active&&store.active.darts.length&&!confirm('投球中のゲームは今のセッティングのまま記録します。次のゲームから切り替えますか？')){myRender();return}myDarts.current=e.target.value;mySaveState();myRender()};$('mySlot').onchange=e=>myLoad(e.target.value);$('myClear').onclick=()=>myLoad('');$('mySave').onclick=()=>{const x={id:editingSetup||id()};for(const f of myFields)x[f]=String($('my'+f).value||'').trim();if(!x.SetupName){alert('セット名を入力してください');return}if(!editingSetup&&myDarts.sets.length>=10){alert('登録できるのは10セットまでです');return}if(!confirm('「'+x.SetupName+'」を保存しますか？'))return;const i=myDarts.sets.findIndex(s=>s.id===x.id);if(i<0)myDarts.sets.push(x);else myDarts.sets[i]=x;const prevEdit=editingSetup;editingSetup=x.id;if(mySaveState()){myRender();toast('MY DARTSを保存しました')}else{editingSetup=prevEdit;myRender()}};$('myDelete').onclick=()=>{if(!editingSetup)return;if(!confirm('このセットを削除しますか？過去の投球記録は残ります。'))return;myDarts.sets=myDarts.sets.filter(x=>x.id!==editingSetup);if(myDarts.current===editingSetup)myDarts.current='';const prevEdit=editingSetup;editingSetup='';if(mySaveState())myLoad('');else{editingSetup=prevEdit;myRender()}};myLoad('')}
+function setupMyDarts(){const brand=$('myBarrelBrand');if(!brand)return;brand.innerHTML=MY_BRANDS.map(x=>'<option>'+x+'</option>').join('');for(const id of ['BarrelColor','FlightColor','TipColor'])$('my'+id).innerHTML=MY_COLORS.map(x=>'<option>'+x+'</option>').join('');$('myModelSearch').oninput=()=>{brandFilterOn=!$('myModelSearch').value.trim();catalogSearch()};brand.addEventListener('change',()=>{brandFilterOn=true;catalogSearch()});$('myModelResults').addEventListener('click',e=>{const b=e.target.closest('[data-catalog-index]');if(b)chooseCatalog(Number(b.dataset.catalogIndex))});catalogSearch();$('setChip').onclick=()=>openSheet('setSheet');document.querySelectorAll('.sheet').forEach(sh=>sh.addEventListener('click',e=>{if(e.target===sh||e.target.closest('[data-close-sheet]'))closeSheets()}));document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheets()});$('setSheetClose').onclick=()=>$('setSheet').classList.add('hidden');$('setSheet').addEventListener('click',e=>{if(e.target===$('setSheet'))$('setSheet').classList.add('hidden')});$('setSheetList').addEventListener('click',e=>{const b=e.target.closest('[data-use]');if(!b)return;$('setSheet').classList.add('hidden');myUse(b.dataset.use)});$('setSheetEdit').onclick=()=>{$('setSheet').classList.add('hidden');changeTab('setups');setTimeout(()=>{const p=$('myDartsPanel');p&&p.scrollIntoView({behavior:'smooth',block:'start'})},60)};$('authChip').onclick=()=>openSheet('accountSheet');$('myDuplicate').onclick=()=>{if(!editingSetup){alert('複製するセットを、先にカードから選んでください');return}if(myDarts.sets.length>=10){alert('登録できるのは10セットまでです');return}const x=myDarts.sets.find(y=>y.id===editingSetup);if(!x)return;myLoad(x.id);editingSetup='';$('mySetupName').value=(String(x.SetupName||'')+' コピー').slice(0,40);myRender();toast('複製しました。名前を変えて保存してください')};$('mySlots').addEventListener('click',e=>{const n=e.target.closest('[data-slot-new]'),ed=e.target.closest('[data-slot-edit]'),us=e.target.closest('[data-slot-use]');if(n)myLoad('');else if(ed)myLoad(ed.dataset.slotEdit);else if(us){const c=$('myCurrent');c.value=us.dataset.slotUse;c.onchange({target:c})}});$('myNick').onchange=e=>{myDarts.nick=e.target.value.trim().slice(0,32);mySaveState();myRender()};$('myCurrent').onchange=e=>{if(store.active&&store.active.darts.length&&!confirm('投球中のゲームは今のセッティングのまま記録します。次のゲームから切り替えますか？')){myRender();return}myDarts.current=e.target.value;mySaveState();myRender()};$('mySlot').onchange=e=>myLoad(e.target.value);$('myClear').onclick=()=>myLoad('');$('mySave').onclick=()=>{const x={id:editingSetup||id()};for(const f of myFields)x[f]=String($('my'+f).value||'').trim();if(!x.SetupName){alert('セット名を入力してください');return}if(!editingSetup&&myDarts.sets.length>=10){alert('登録できるのは10セットまでです');return}if(!confirm('「'+x.SetupName+'」を保存しますか？'))return;const i=myDarts.sets.findIndex(s=>s.id===x.id);if(i<0)myDarts.sets.push(x);else myDarts.sets[i]=x;const prevEdit=editingSetup;editingSetup=x.id;if(mySaveState()){myRender();toast('MY DARTSを保存しました')}else{editingSetup=prevEdit;myRender()}};$('myDelete').onclick=()=>{if(!editingSetup)return;if(!confirm('このセットを削除しますか？過去の投球記録は残ります。'))return;myDarts.sets=myDarts.sets.filter(x=>x.id!==editingSetup);if(myDarts.current===editingSetup)myDarts.current='';const prevEdit=editingSetup;editingSetup='';if(mySaveState())myLoad('');else{editingSetup=prevEdit;myRender()}};myLoad('')}
 
 function newSession(){return {id:id(),schemaVersion:1,gameType:'countup',startedAt:new Date().toISOString(),endedAt:null,status:'active',setupId:myDarts.current||null,setupName:myDarts.sets.find(x=>x.id===myDarts.current)?.SetupName||null,nickname:myDarts.nick||null,darts:[]}}
 if(![5,8,10,15].includes(Number(store.roundDelay)))store.roundDelay=8;
@@ -302,7 +357,7 @@ function beginRoundBreak(round,score,darts=[]){
  tick();roundBreakTicker=setInterval(tick,50);roundBreakTimer=setTimeout(finishRoundBreak,ms);
 }
 function toast(s,type=''){const t=$('toast');t.textContent=s;t.classList.remove('award','bull','miss');if(type)t.classList.add(type)}
-function changeTab(name){cancelAchievementDelay();finishRoundBreak();if(name==='analysis'){aimPeriod='10';analysisAim=null;reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
+function changeTab(name){try{closeSheets()}catch(_){}cancelAchievementDelay();finishRoundBreak();if(name==='analysis'){aimPeriod='10';analysisAim=null;reportOn=false}if(name!=='history')justSaved=false;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));render()}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
 let achievementDelayTimer=null;
@@ -821,7 +876,7 @@ function restoreSettings(st){
 }
 $('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;const snapSessions=store.sessions,snapMy=JSON.stringify(myDarts);try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));let merged=null,addedSets=0,skippedSets=0;if(v.myDarts!==undefined&&v.myDarts!==null){const imp=sanitizeMyDarts(v.myDarts);if(imp.sets.length||imp.nick){merged=sanitizeMyDarts(myDarts);for(const x of imp.sets){const i=merged.sets.findIndex(y=>y.id===x.id);if(i>=0)merged.sets[i]=x;else if(merged.sets.length<10){merged.sets.push(x);addedSets++}else skippedSets++}if(!merged.nick)merged.nick=imp.nick;if(!merged.current&&imp.current&&merged.sets.some(y=>y.id===imp.current))merged.current=imp.current}}if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'+(merged?'\nMY DARTS：同じIDのセットは上書き、新規'+addedSets+'件を追加します（既存セットは残ります）。'+(skippedSets?'\n10セットを超える'+skippedSets+'件は取り込めません。':''):'')))return;store.sessions=[...store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);let myOk=true;if(merged){myDarts=merged;editingSetup='';myOk=mySaveState();myLoad('')}if(!persist()){store.sessions=snapSessions;if(merged&&myOk){myDarts=sanitizeMyDarts(JSON.parse(snapMy));mySaveState();myLoad('')}render();return}if(!myOk){render();return}render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':'')+(merged?'（MY DARTSも復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
 $('clearall').onclick=async()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){store.sessions=[];viewId=null;persist();render();if(cloud.user&&cloud.api&&confirm('クラウドの履歴も削除しますか？\n（削除しないと、次の同期で戻ります）')){try{cloudStatus('DELETING…');const uid=cloud.user.uid,l=await cloud.api.listSessions(uid);for(const x of l){if(x&&typeof x.id==='string')await cloud.api.deleteSession(uid,x.id)}syncMeta.pushed=[];syncMetaSave();cloudUi();toast('クラウドの履歴も削除しました')}catch(e){cloudStatus('DELETE FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}}};
-$('aimSelect').innerHTML='<option value="BULL">BULL（ブル）</option><optgroup label="TRIPLE">'+AIMS.filter(x=>x[0]==='T').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup><optgroup label="DOUBLE">'+AIMS.filter(x=>x[0]==='D').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup>';$('aimSelect').onchange=e=>{const v=e.target.value;if(!validAim(v))return;store.aimTarget=v;persist();profTouch();render()};$('aimChip').onclick=()=>changeTab('settings');
+$('aimSelect').innerHTML='<option value="BULL">BULL（ブル）</option><optgroup label="TRIPLE">'+AIMS.filter(x=>x[0]==='T').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup><optgroup label="DOUBLE">'+AIMS.filter(x=>x[0]==='D').map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</optgroup>';$('aimSelect').onchange=e=>{const v=e.target.value;if(!validAim(v))return;store.aimTarget=v;persist();profTouch();render();closeSheets()};$('aimChip').onclick=()=>openSheet('aimSheet');
 $('miss').onclick=()=>add('MISS');$('undo').onclick=undo;$('newgame').onclick=startNew;$('startdash').onclick=()=>{changeTab('play')};$('endgame').onclick=finishEarly;$('saveResult').onclick=confirmResult;
 const calibrationTargets=[...nums.flatMap(n=>['S'+n+'O','S'+n+'I','T'+n,'D'+n]),'OB','IB'];
 function calibrationSegment(target){return target.endsWith('O')&&target.startsWith('S')?'S'+target.slice(1,-1):target.endsWith('I')&&target.startsWith('S')?'S'+target.slice(1,-1):target}
@@ -907,7 +962,9 @@ const CLOUD_CFG={apiKey:"AIzaSyCiPeb0A-_dCbRGSHtVM0yHLoNHray-iJ0",authDomain:"da
 const FB_BASE='https://www.gstatic.com/firebasejs/10.14.1/';
 const docId=x=>String(x).replace(/[\/\s]/g,'_').slice(0,120);
 function cloudStatus(t){const e=$('cloudStatus');if(e)e.textContent=t}
-function cloudUi(){const u=cloud.user,on=!!u;const ac=$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);$('cloudSync').classList.toggle('hidden',!on);$('cloudLogout').classList.toggle('hidden',!on);if(on&&!cloud.busy){const t=syncMeta.lastAt?new Date(syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · LAST SYNC '+t)}}
+function cloudPendingCount(){const pushed=new Set(syncMeta.pushed);return store.sessions.filter(s=>validSession(s)&&!pushed.has(s.id)).length+(syncMeta.myAt>syncMeta.myPushed?1:0)}
+function cloudQueue(){cloud.pending=true;clearTimeout(cloud.timer);cloud.timer=setTimeout(()=>{cloud.pending=false;if(cloud.user&&!cloud.busy&&!cloud.autoBusy)cloudAuto();else if(cloud.user)cloudQueue()},4500)}
+function cloudUi(){const u=cloud.user,on=!!u;const ac=$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);$('cloudSync').classList.toggle('hidden',!on);$('cloudLogout').classList.toggle('hidden',!on);if(on&&!cloud.busy){const t=syncMeta.lastAt?new Date(syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
 async function cloudLoadApi(){
  if(window.__DTL_CLOUD_FAKE)return window.__DTL_CLOUD_FAKE;
  const [a,au,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]);
@@ -943,7 +1000,7 @@ function cloudMergeProfile(rp){cloud.applying=true;try{
  if(!validAim(store.aimTarget)&&validAim(rp.aimTarget))store.aimTarget=rp.aimTarget;
  persist()}finally{cloud.applying=false}}
 async function cloudSync(){
- if(!cloud.api||!cloud.user||cloud.busy)return;cloud.busy=true;cloudStatus('SYNCING…');
+ if(!cloud.api||!cloud.user)return;if(cloud.busy||cloud.autoBusy){cloudQueue();return}cloud.busy=true;cloudStatus('SYNCING…');
  try{
   const uid=cloud.user.uid,api=cloud.api;
   const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&validSession(s));
@@ -956,26 +1013,37 @@ async function cloudSync(){
   const lAt=syncMeta.myAt;
   if(!rp)await cloudPushProfile(uid,api);
   else if(lAt===0){const hasLocal=myDarts.sets.length||myDarts.nick||excludedRounds.length||store.goalScore>0||store.aimTarget;if(hasLocal){cloudMergeProfile(rp);syncMeta.myAt=Date.now();await cloudPushProfile(uid,api)}else cloudApplyProfile(rp,rAt||1)}
-  else if(rAt>lAt)cloudApplyProfile(rp,rAt);
-  else if(lAt>rAt)await cloudPushProfile(uid,api);
+  else if(rAt>lAt){if(syncMeta.myAt>syncMeta.myPushed){cloudStatus('CONFLICT · 別端末の変更を検出。同期を停止しました');throw Error('PROFILE_CONFLICT: 未同期の端末データを保護しました')}cloudApplyProfile(rp,rAt)}
+  else if(lAt>rAt){if(rAt>syncMeta.myPushed&&syncMeta.myPushed>0){cloudStatus('CONFLICT · 別端末の変更を検出。同期を停止しました');throw Error('PROFILE_CONFLICT: 別端末のデータを保護しました')}await cloudPushProfile(uid,api)}
   if(!myDarts.nick&&cloud.user.name){myDarts.nick=String(cloud.user.name).slice(0,32);if(mySaveState()){myRender();await cloudPushProfile(uid,api)}}
   syncMeta.lastAt=Date.now();syncMetaSave();render();
-  cloud.busy=false;cloudUi();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
- }catch(e){cloud.busy=false;cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+  cloud.busy=false;cloudUi();if(cloud.pending)cloudQueue();toast('CLOUD SYNC OK'+(add.length?' · +'+add.length+'G':''))
+ }catch(e){cloud.busy=false;if(!String(e&&e.message||'').includes('PROFILE_CONFLICT'))cloudQueue();cloudStatus((String(e&&e.message||'').includes('PROFILE_CONFLICT')?'CONFLICT · ':'SYNC FAILED · ')+String(e&&(e.code||e.message)||e).slice(0,60))}}
 function cloudAuto(){
- if(!cloud.user||!cloud.api||cloud.busy)return;clearTimeout(cloud.timer);
- cloud.timer=setTimeout(async()=>{try{
-  const uid=cloud.user&&cloud.user.uid;if(!uid||cloud.busy)return;const done=new Set(syncMeta.pushed);
-  const up=store.sessions.filter(s=>!done.has(s.id)&&validSession(s));for(const s of up){await cloud.api.putSession(uid,s);done.add(s.id)}
-  syncMeta.pushed=[...done];if(syncMeta.myAt>syncMeta.myPushed)await cloudPushProfile(uid,cloud.api);
-  syncMeta.lastAt=Date.now();syncMetaSave();cloudUi()}catch(e){cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}},4000)}
+ if(!cloud.user||!cloud.api)return;
+ if(cloud.busy||cloud.autoBusy){cloudQueue();return}
+ clearTimeout(cloud.timer);
+ cloud.timer=setTimeout(async()=>{
+  if(!cloud.user||cloud.busy||cloud.autoBusy){cloudQueue();return}
+  cloud.autoBusy=true;
+  try{
+   const uid=cloud.user.uid,api=cloud.api,done=new Set(syncMeta.pushed);
+   const up=store.sessions.filter(s=>!done.has(s.id)&&validSession(s));
+   for(const s of up){await api.putSession(uid,s);done.add(s.id)}
+   syncMeta.pushed=[...done];syncMetaSave();
+   if(syncMeta.myAt>syncMeta.myPushed)await cloudPushProfile(uid,api);
+   syncMeta.lastAt=Date.now();syncMetaSave();cloudUi();
+  }catch(e){cloudStatus('SYNC FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60));cloud.pending=true}
+  finally{cloud.autoBusy=false;if(cloud.pending){cloud.pending=false;cloudQueue()}else cloudUi()}
+ },4000)
+}
 function setupCloud(){
  const b=$('cloudLogin');if(!b)return;
  if(location.protocol==='file:'&&!window.__DTL_CLOUD_FAKE){cloudStatus('公開URL(https)で使えます');b.disabled=true;return}
  b.onclick=async()=>{try{const api=await cloudConnect();cloudStatus('LOGIN…');await api.login();syncMeta.on=true;syncMetaSave()}catch(e){cloudStatus('LOGIN FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}};
  $('cloudSync').onclick=()=>cloudSync();
- $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。この端末の履歴とMY DARTSは、そのまま残ります。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
+ $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。未同期の記録はこの端末に残り、他の端末では見られません。共有端末ではブラウザのデータ管理にも注意してください。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
-setupMyDarts();loadCatalog();setupCloud();drawBoard();render();renderCalibration();rawRender();specialRender();
+setupMyDarts();loadCatalog();setupCloud();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();

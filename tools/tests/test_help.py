@@ -33,7 +33,7 @@ with sync_playwright() as p:
     for name in ['index','preview']:
         print('\n#####',name)
         ctx,pg,errs=new(b,name,seed)
-        check(pg.evaluate("document.getElementById('analysisHelp')===null"),'grouped HELP block is gone'); check(pg.evaluate("[...document.querySelectorAll('nav.tabs button')].map(b=>b.dataset.tab).join()")=='play,analysis,history','tab order is PLAY / ANALYSIS / RESULT')
+        check(pg.evaluate("document.getElementById('analysisHelp')===null"),'grouped HELP block is gone'); check(pg.evaluate("[...document.querySelectorAll('nav.tabs button')].map(b=>b.dataset.tab).join()")=='play,analysis,history,setups','tab order is PLAY / ANALYSIS / RESULT / SET')
         keys=pg.evaluate("[...new Set([...document.querySelectorAll('[data-help]')].map(b=>b.dataset.help))]")
         check(sorted(keys)==sorted(EXPECT),f'every card has its own ? ({len(keys)} keys)'+('' if sorted(keys)==sorted(EXPECT) else ' missing/extra: '+str(set(EXPECT)^set(keys))))
         check(pg.evaluate("[...document.querySelectorAll('[data-help]')].every(b=>{const k=b.dataset.help;const box=document.querySelector('[data-help-for=\"'+k+'\"]');return box&&box.textContent.trim().length>10&&box.classList.contains('hidden')})"),'each ? has a non-empty note, closed by default')

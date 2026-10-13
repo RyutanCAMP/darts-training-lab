@@ -96,3 +96,7 @@ This is a public repository. Do not commit user practice exports, credentials, p
 - `BARREL_CATALOG` is no longer embedded: `loadCatalog()` fetches `data/barrels.json` (same origin) and falls back to the GitHub raw URL; `cleanCatalog()` validates it (https-only urls). States: loading / ok / error (error keeps free input working).
 - Data is built from official-page research tables by `tools/catalog/build_barrels.py` (see `tools/catalog/README.md`). 132 models; `verified` levels spec+date / spec / partial / unconfirmed are shown in the model info box.
 - Tests serve the raw URL from the local file via Playwright routing (`tools/tests/test_catalog.py`).
+
+## Navigation (v0.5.41)
+- Bottom tabs: PLAY / 分析 / 履歴 / セット (MY DARTS lives in the セット tab, `#setups`). ⚙ settings only holds 効果音, ラウンド間の待ち時間, データ管理, 200S (collapsed `#s200Group`), データ保護・復旧.
+- PLAY chips open bottom sheets in place instead of jumping to settings: `AIM` → `#aimSheet` (aim select, closes on change), `SET` → `#setSheet` (switch set; "MY DARTSを編集する" → セット tab), `GUEST`/name → `#accountSheet` (nickname + CLOUD SYNC). `openSheet(id)` / `closeSheets()`; backdrop, 閉じる and Esc close; `changeTab()` closes sheets. The sheets live inside `#play` so `.page` styles apply.
