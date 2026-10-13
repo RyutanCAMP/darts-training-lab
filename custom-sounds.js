@@ -5,9 +5,24 @@ const urls=new Map();let dbPromise;
 function db(){return dbPromise||(dbPromise=new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}))}
 async function read(k){const d=await db();return new Promise((ok,no)=>{const t=d.transaction(STORE,'readonly').objectStore(STORE).get(k);t.onsuccess=()=>ok(t.result);t.onerror=()=>no(t.error)})}
 async function write(k,value){const d=await db();return new Promise((ok,no)=>{const t=d.transaction(STORE,'readwrite').objectStore(STORE);const r=value?t.put(value,k):t.delete(k);r.onsuccess=()=>ok();r.onerror=()=>no(r.error)})}
-function setUrl(k,blob){if(urls.has(k))URL.revokeObjectURL(urls.get(k));urls.delete(k);if(blob)urls.set(k,URL.createObjectURL(blob))}
+function setUrl(k,blob){if(urls.has(k))URL.revokeObjectURL(urls.get(k));urls.delete(k);if(blob)urls.set(k,URL.createObjectURL(blob));decoded.delete(k);if(blob)decode(k,blob)}
 const ready=Promise.all(kinds.map(async ([k])=>{try{setUrl(k,await read(k))}catch(e){console.warn('Custom sound load',e)}}));
-function play(kind,delay=0,volume=1){if(kind==='cooldown')kind='round';const u=urls.get(kind);if(!u)return false;const audio=new Audio(u);audio.volume=Math.max(0,Math.min(1,volume));const go=()=>audio.play().catch(e=>console.warn('Custom sound playback',e));if(delay>0)setTimeout(go,delay*1000);else go();return true}
+const decoded=new Map();let soundCtx=null;
+function context(){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;return soundCtx||(soundCtx=new A())}
+async function decode(k,blob){const ctx=context();if(!ctx||!blob)return;try{const buffer=await ctx.decodeAudioData(await blob.arrayBuffer());if(urls.has(k))decoded.set(k,buffer)}catch(e){console.warn('Custom sound decode',k,e)}}
+function play(kind,delay=0,volume=1){
+ if(kind==='cooldown')kind='round';
+ const u=urls.get(kind);if(!u)return false;
+ const ctx=context(),buffer=decoded.get(kind);
+ if(ctx&&buffer){
+  if(ctx.state==='suspended')ctx.resume().catch(e=>console.warn('Audio resume',e));
+  const src=ctx.createBufferSource(),gain=ctx.createGain();src.buffer=buffer;gain.gain.value=Math.max(0,Math.min(1,volume));src.connect(gain);gain.connect(ctx.destination);
+  src.start(ctx.currentTime+Math.max(0,delay));return true;
+ }
+ // Never defer HTMLAudioElement.play() with setTimeout on iOS: it loses user activation.
+ const audio=new Audio(u);audio.volume=Math.max(0,Math.min(1,volume));
+ audio.play().catch(e=>console.warn('Custom sound playback',e));return true;
+}
 window.CustomDartSounds={play,ready};
 document.addEventListener('DOMContentLoaded',()=>{
 const panel=document.querySelector('#settings .sound-settings');if(!panel)return;
