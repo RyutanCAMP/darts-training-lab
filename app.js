@@ -380,7 +380,7 @@ function add(segment,source='manual',zone=null){if(roundBreakUntil>Date.now()||a
   if(bullStreak&&!completeRound)gameEffect('DOUBLE BULL!','2 BULLS IN A ROW','bull',1500);
   else if(shot&&!completeRound)gameEffect(shot.title,'+'+points(segment)+' POINTS',shot.kind,850);
  }
- }if(s.darts.length===21)playSound('finalRound',.25);
+ }// Round 7 -> final round uses the normal cooldown cue below; avoid duplicate sound.
  if(s.darts.length>0&&s.darts.length<24&&s.darts.length%3===0){
   // Queue the jingle after BULL/INNER BULL or achievement fanfare.
   const cueDelay=hat?3.1:segment==='IB'?1.4:segment==='OB'?1.1:s.darts.length===21?1.15:segment.startsWith('T')?.65:.45;

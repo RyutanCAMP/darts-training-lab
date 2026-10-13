@@ -7,7 +7,7 @@ async function read(k){const d=await db();return new Promise((ok,no)=>{const t=d
 async function write(k,value){const d=await db();return new Promise((ok,no)=>{const t=d.transaction(STORE,'readwrite').objectStore(STORE);const r=value?t.put(value,k):t.delete(k);r.onsuccess=()=>ok();r.onerror=()=>no(r.error)})}
 function setUrl(k,blob){if(urls.has(k))URL.revokeObjectURL(urls.get(k));urls.delete(k);if(blob)urls.set(k,URL.createObjectURL(blob))}
 const ready=Promise.all(kinds.map(async ([k])=>{try{setUrl(k,await read(k))}catch(e){console.warn('Custom sound load',e)}}));
-function play(kind,delay=0,volume=1){const u=urls.get(kind);if(!u)return false;const audio=new Audio(u);audio.volume=Math.max(0,Math.min(1,volume));const go=()=>audio.play().catch(e=>console.warn('Custom sound playback',e));if(delay>0)setTimeout(go,delay*1000);else go();return true}
+function play(kind,delay=0,volume=1){if(kind==='cooldown')kind='round';const u=urls.get(kind);if(!u)return false;const audio=new Audio(u);audio.volume=Math.max(0,Math.min(1,volume));const go=()=>audio.play().catch(e=>console.warn('Custom sound playback',e));if(delay>0)setTimeout(go,delay*1000);else go();return true}
 window.CustomDartSounds={play,ready};
 document.addEventListener('DOMContentLoaded',()=>{
 const panel=document.querySelector('#settings .sound-settings');if(!panel)return;
