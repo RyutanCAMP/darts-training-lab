@@ -1,0 +1,32 @@
+// storage/backup: existing behavior extracted from app.js.
+// Register functions first; app.js runs initializers in the original order.
+(()=>{'use strict';
+function connectBackup(runtime){
+function download(content,filename,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function validDart(d){return d&&typeof d==='object'&&typeof d.id==='string'&&Number.isInteger(d.roundIndex)&&d.roundIndex>=1&&d.roundIndex<=8&&Number.isInteger(d.dartIndex)&&d.dartIndex>=1&&d.dartIndex<=3&&typeof d.segment==='string'&&/^(S|D|T)([1-9]|1[0-9]|20)$|^(OB|IB|MISS)$/.test(d.segment)&&d.score===runtime.points(d.segment)}
+function validSession(s){return s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
+function restoreSettings(st){
+ if(!st||typeof st!=='object')return false;
+ let did=false;
+ const segOK=s=>typeof s==='string'&&/^(S|D|T)([1-9]|1[0-9]|20)$|^(OB|IB|MISS)$/.test(s);
+ const b=st.bindings;
+ if(b&&typeof b==='object'&&!Array.isArray(b)&&!Object.keys(runtime.store.bindings||{}).length){const clean=Object.fromEntries(Object.entries(b).filter(([k,v])=>k.length<64&&segOK(v)));if(Object.keys(clean).length){runtime.store.bindings=clean;did=true}}
+ const ck=st.calibrationKeys;
+ if(ck&&typeof ck==='object'&&!Array.isArray(ck)&&!Object.keys(runtime.calibrationKeys()).length){const clean=Object.fromEntries(Object.entries(ck).filter(([t,k])=>/^(S\d+[OI]|T\d+|D\d+|OB|IB)$/.test(t)&&typeof k==='string'&&k.length<64));if(Object.keys(clean).length){runtime.store.calibrationKeys=clean;runtime.store.calibrationCompletedAt=typeof st.calibrationCompletedAt==='string'?st.calibrationCompletedAt:null;did=true}}
+ const g=Math.round(Number(st.goalScore));
+ if(!(runtime.store.goalScore>0)&&g>0&&g<=1440){runtime.store.goalScore=g;did=true}
+ if(!runtime.validAim(runtime.store.aimTarget)&&runtime.validAim(st.aimTarget)&&st.aimTarget!=='BULL'){runtime.store.aimTarget=st.aimTarget;did=true}
+ return did;
+}
+Object.assign(runtime,{download,validSession});
+function initialize(){
+runtime.$('exportjson').onclick=()=>download(JSON.stringify({schemaVersion:1,sessions:runtime.store.sessions,active:runtime.store.active,settings:{bindings:runtime.store.bindings,calibrationKeys:runtime.calibrationKeys(),calibrationCompletedAt:runtime.store.calibrationCompletedAt||null,goalScore:runtime.store.goalScore||null,aimTarget:runtime.curAim()},myDarts:runtime.sanitizeMyDarts(runtime.myDarts)},null,2),'darts-training-lab-backup.json','application/json');
+runtime.$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim'],...runtime.store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',runtime.aimOf(d)]))];download('\ufeff'+rows.map(r=>r.join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
+runtime.$('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;const snapSessions=runtime.store.sessions,snapMy=JSON.stringify(runtime.myDarts);try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(runtime.store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));let merged=null,addedSets=0,skippedSets=0;if(v.myDarts!==undefined&&v.myDarts!==null){const imp=runtime.sanitizeMyDarts(v.myDarts);if(imp.sets.length||imp.nick){merged=runtime.sanitizeMyDarts(runtime.myDarts);for(const x of imp.sets){const i=merged.sets.findIndex(y=>y.id===x.id);if(i>=0)merged.sets[i]=x;else if(merged.sets.length<10){merged.sets.push(x);addedSets++}else skippedSets++}if(!merged.nick)merged.nick=imp.nick;if(!merged.current&&imp.current&&merged.sets.some(y=>y.id===imp.current))merged.current=imp.current}}if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'+(merged?'\nMY DARTS：同じIDのセットは上書き、新規'+addedSets+'件を追加します（既存セットは残ります）。'+(skippedSets?'\n10セットを超える'+skippedSets+'件は取り込めません。':''):'')))return;runtime.store.sessions=[...runtime.store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);let myOk=true;if(merged){runtime.myDarts=merged;runtime.editingSetup='';myOk=runtime.mySaveState();runtime.myLoad('')}if(!runtime.persist()){runtime.store.sessions=snapSessions;if(merged&&myOk){runtime.myDarts=runtime.sanitizeMyDarts(JSON.parse(snapMy));runtime.mySaveState();runtime.myLoad('')}runtime.render();return}if(!myOk){runtime.render();return}runtime.render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':'')+(merged?'（MY DARTSも復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
+runtime.$('clearall').onclick=async()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){runtime.store.sessions=[];runtime.viewId=null;runtime.persist();runtime.render();if(runtime.cloud.user&&runtime.cloud.api&&confirm('クラウドの履歴も削除しますか？\n（削除しないと、次の同期で戻ります）')){try{runtime.cloudStatus('DELETING…');const uid=runtime.cloud.user.uid,l=await runtime.cloud.api.listSessions(uid);for(const x of l){if(x&&typeof x.id==='string')await runtime.cloud.api.deleteSession(uid,x.id)}runtime.syncMeta.pushed=[];runtime.syncMetaSave();runtime.cloudUi();runtime.toast('クラウドの履歴も削除しました')}catch(e){runtime.cloudStatus('DELETE FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}}};
+}
+return {initialize};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectBackup=connectBackup;
+})();

@@ -21,7 +21,13 @@ A retro arcade-style COUNT-UP practice and analytics app for darts, including DA
 ## Source files
 - `index.html`: markup
 - `styles.css`: styles
-- `app.js`: logic
+- `app.js`: private shared context, feature connections, initialization order
+- `core/`: initial state; `game/`: COUNT-UP rules, progress and round breaks
+- `board/`: SVG board, keyboard input and 200S calibration
+- `audio/`: sounds, music and visual effects
+- `storage/`: local recovery, backup/restore, round exclusions and Firebase sync
+- `analysis/`: statistics, heatmap, periods and coach report
+- `ui/`: rendering, navigation, settings, help, MY DARTS and catalog
 - `preview.html`: standalone preview with embedded styles and script — **keep in sync**
 - `data/200s-keymap.json`: keyboard mapping data
 - `CLAUDE.md`: development handoff, detailed rules, regression checklist
@@ -35,3 +41,7 @@ A retro arcade-style COUNT-UP practice and analytics app for darts, including DA
 
 ## Development
 See [CLAUDE.md](CLAUDE.md) before editing. Test runtime rendering and the standalone mobile preview before reporting completion.
+
+Run `python tools/sync-preview.py` after source changes; `index.html` lists all feature scripts in loading order and `app.js` runs last. Each script registers a private connector. The temporary `RETRO_DARTS_MODULES` registry is removed at startup; application state stays private. There are no framework or runtime dependencies.
+
+Run `python tools/serve-preview.py` for a local preview, or `python tools/serve-preview.py --lan` to print URLs for a phone on the same network (the PC must remain running and allow inbound access). `preview.html` also works directly as a single file. Run `python tools/run-tests.py` for browser tests and preview consistency. See [the refactoring report](docs/module-refactor.md) for responsibilities, verification and limitations.

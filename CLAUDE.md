@@ -5,8 +5,8 @@ Continue development of the existing retro-styled darts practice app, **not a re
 
 ## Repository / architecture
 - GitHub: https://github.com/RyutanCAMP/darts-training-lab
-- `index.html`: page structure; `styles.css`: styling; `app.js`: all application logic.
-- `preview.html`: **standalone, self-contained** preview for iPhone. It embeds the entire stylesheet in `<style>` and app script in the final `<script>`. **Every UI/code change must also be mirrored into this file**. Do not edit only `index.html` or `app.js`.
+- `index.html`: page structure and ordered deferred feature scripts; `styles.css`: styling; `app.js`: private context, connector registration and initialization only. Feature code is in `core/`, `game/`, `board/`, `audio/`, `storage/`, `analysis/`, and `ui/`. See `docs/module-refactor.md` for ownership.
+- `preview.html`: **standalone, self-contained** preview for iPhone. It embeds the entire stylesheet in `<style>` and every feature script plus app.js in the final `<script>`. **Every UI/code change must also be mirrored into this file** with `python tools/sync-preview.py`. The tool reads script order from index.html. Do not edit only source files.
 - `data/200s-keymap.json`: board input mapping.
 - No framework/bundler. Vanilla HTML/CSS/JS; browser localStorage.
 - Current UI version at handoff: v0.5.32. Check the default branch for later changes before editing.
@@ -30,6 +30,7 @@ Continue development of the existing retro-styled darts practice app, **not a re
 - Expandable ADVANCED ANALYTICS / A CLASS: THROW ORDER (BULL rate + 95% range, IB share, average score for DART 1/2/3, REF/EVEN/CLEAR DIFF verdict), DRIFT BY DART (median offset, direction, spread per dart), DIRECTION (8-way), CONSISTENCY, AFTER HIT / MISS, BULL TREND, ROUND ANALYSIS (bull rate by round), ROUND SCORE (avg per round, R1-4 vs R5-8, distribution), SCORE BREAKDOWN, PACE, BEST STREAK. ALL TIME cards: SCORE & GOAL, BEST GAME vs AVG, CONDITIONS (time of day / game of the day), PRACTICE LOG.
 
 ## Important implementation details
+- After the module split, function names below retain their behavior but live in the feature directories. `runtime` is an internal context passed to connectors, not a window global. Connectors register functions before any initializers execute; preserve the initializer order in app.js. Feature-private variables stay in their connector closure. Do not add direct feature-to-feature imports or global state. Normal scripts intentionally preserve file:// support for both entry points.
 - `app.js`: `aimPeriod='10'`; `changeTab('analysis')` resets `aimPeriod` to `'10'`; `renderAnalysis()` updates period buttons and metrics; `allRecordedRounds()` includes saved sessions and the active session, **completed 3-dart rounds only** (a partial round never counts toward 1R/10R/20R/ALL); `selectedRounds()` selects most recent N rounds; `renderAim()` draws SVG; `renderAdvanced()` and `renderThrowOrder()` populate advanced cards.
 - Per-dart record fields include `sessionId`, `roundIndex`, `dartIndex`, `timestamp`, `segment`, `zone`, `score`. Respect the recorded segment and zone for ring detection.
 - Storage key: `dtl-data-v1`. Do **not** reset/migrate destructively or alter its shape without backward compatibility.

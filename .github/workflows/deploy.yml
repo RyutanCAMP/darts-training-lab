@@ -22,7 +22,7 @@ jobs:
         run: python tools/run-tests.py
   deploy:
     needs: test
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,8 @@ jobs:
 
   preview:
     needs: test
-    if: github.event_name == 'pull_request'
+    # This branch is for source review only; do not create a Hosting preview.
+    if: github.event_name == 'pull_request' && github.head_ref != 'refactor/split-app-modules'
     runs-on: ubuntu-latest
     permissions:
       contents: read

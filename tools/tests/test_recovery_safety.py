@@ -4,7 +4,8 @@ ROOT=pathlib.Path(__file__).resolve().parents[2]
 class Handler(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*args): pass
 socketserver.TCPServer.allow_reuse_address=True
-server=socketserver.TCPServer(('127.0.0.1',0),functools.partial(Handler,directory=str(ROOT)))
+socketserver.ThreadingTCPServer.request_queue_size=128
+server=socketserver.ThreadingTCPServer(('127.0.0.1',0),functools.partial(Handler,directory=str(ROOT)))
 threading.Thread(target=server.serve_forever,daemon=True).start()
 URL='http://127.0.0.1:%d/index.html'%server.server_address[1]
 KEY='dtl-data-v1'
