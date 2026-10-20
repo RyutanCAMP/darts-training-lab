@@ -116,12 +116,28 @@ try:
                 key(page,'Tab','Tab');assert len(state(page)['active']['darts'])==3
                 page.click('#undo');page.click('#undo');page.click('#undo')
 
-                # Calibration uses an unmapped key; legacy bindings remain intact.
+                # A default 200S signal must register without recording a dart.
+                before_calibration=state(page)
                 page.click('.settings-icon');activate(page,'calibrationStart')
+                key(page,'KeyA','A')
+                calibrated=state(page)
+                assert calibrated['bindings']['KeyA | A']=='S20'
+                assert calibrated['calibrationKeys']['S20O']=='KeyA | A'
+                assert calibrated['active']==before_calibration['active']
+                assert calibrated['sessions']==before_calibration['sessions']
+                assert page.locator('#settings').evaluate("e=>e.classList.contains('active')")
+                # Unmapped signals still register; modifier-only keys do not.
+                page.wait_for_timeout(360)
+                key(page,'ShiftLeft','Shift')
                 key(page,'F8','F8')
                 assert state(page)['bindings']['F8 | F8']=='S20'
-                assert state(page)['calibrationKeys']['S20O']=='F8 | F8'
+                assert state(page)['calibrationKeys']['S20I']=='F8 | F8'
+                assert state(page)['active']==before_calibration['active']
                 activate(page,'calibrationStop')
+                # Stopping calibration restores the normal default-map scorer.
+                page.click('#backFromSettings');key(page,'KeyA','A')
+                assert [(d['segment'],d['inputSource']) for d in state(page)['active']['darts']]==[('S20','board')]
+                page.click('#undo');page.click('.settings-icon')
                 page.locator('[data-sound-volume=hit]').evaluate("e=>e.value='37'")
                 page.locator('[data-sound-volume=hit]').dispatch_event('input')
                 assert state(page)['soundVolumes']['hit']==37
