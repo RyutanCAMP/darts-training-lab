@@ -34,7 +34,8 @@ jobs:
 
   preview:
     needs: test
-    if: github.event_name == 'pull_request'
+    # This branch is for source review only; do not create a Hosting preview.
+    if: github.event_name == 'pull_request' && github.head_ref != 'refactor/split-app-modules'
     runs-on: ubuntu-latest
     permissions:
       contents: read

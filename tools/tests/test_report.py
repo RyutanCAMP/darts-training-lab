@@ -5,7 +5,8 @@ from playwright.sync_api import sync_playwright
 class Q(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*a): pass
 socketserver.TCPServer.allow_reuse_address=True
-srv=socketserver.TCPServer(('127.0.0.1',8813),functools.partial(Q,directory=ROOT)); threading.Thread(target=srv.serve_forever,daemon=True).start()
+socketserver.ThreadingTCPServer.request_queue_size=128
+srv=socketserver.ThreadingTCPServer(('127.0.0.1',8813),functools.partial(Q,directory=ROOT)); threading.Thread(target=srv.serve_forever,daemon=True).start()
 pts=lambda s:50 if s in('IB','OB') else 0 if s=='MISS' else int(s[1:])*{'S':1,'D':2,'T':3}[s[0]]
 random.seed(5)
 def game(k,start,n=24,status='completed'):

@@ -1,1 +1,5 @@
 dist/
+.venv/
+.refactor-tools/
+.test-artifacts/
+__pycache__/

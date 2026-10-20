@@ -6,7 +6,8 @@ S=os.environ.get('S') or tempfile.mkdtemp()
 class Q(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*a): pass
 socketserver.TCPServer.allow_reuse_address=True
-srv=socketserver.TCPServer(('127.0.0.1',8821),functools.partial(Q,directory=ROOT)); threading.Thread(target=srv.serve_forever,daemon=True).start()
+socketserver.ThreadingTCPServer.request_queue_size=128
+srv=socketserver.ThreadingTCPServer(('127.0.0.1',8821),functools.partial(Q,directory=ROOT)); threading.Thread(target=srv.serve_forever,daemon=True).start()
 pts=lambda s:50 if s in('IB','OB') else 0 if s=='MISS' else int(s[1:])*{'S':1,'D':2,'T':3}[s[0]]
 random.seed(3)
 def game(k,start,n=24,zone=True):
@@ -30,7 +31,7 @@ with sync_playwright() as p:
         pg.on('pageerror',lambda e:errs.append(str(e))); pg.on('dialog',lambda d:(pg.msgs.append(d.message),d.accept()))
         pg.add_init_script("if(!localStorage.getItem('seeded')){localStorage.setItem('dtl-data-v1',%s);localStorage.setItem('seeded','1')}"%json.dumps(json.dumps(seed)))
         pg.goto(f'http://127.0.0.1:8821/{name}.html'); pg.wait_for_timeout(350); pg.evaluate("document.getElementById('startupFx').style.display='none'")
-        pg.click('nav.tabs [data-tab=analysis]'); pg.evaluate("document.querySelector('details.analysis-extra').open=true"); pg.wait_for_timeout(120)
+        pg.click('nav.tabs [data-tab=analysis]'); pg.evaluate("document.querySelector('details.analysis-extra').open=true; document.querySelectorAll('#analysisGroups details').forEach(d=>d.open=true)"); pg.wait_for_timeout(120)
         check(pg.evaluate("document.querySelector('[data-aim-period].selected').dataset.aimPeriod")=='10','10R default')
         for per in ['1','20','all','10']:
             pg.click(f'[data-aim-period="{per}"]'); pg.wait_for_timeout(60)
@@ -50,7 +51,7 @@ with sync_playwright() as p:
         pg.click('#saveResult'); pg.wait_for_timeout(200)
         st=json.loads(pg.evaluate("localStorage.getItem('dtl-data-v1')"))
         check(len(st['sessions'])==9 and st['sessions'][0]['status']=='completed' and len(st['sessions'][0]['darts'])==24 and st.get('goalScore')==600 and st['bindings']=={'KeyZ | z':'S20'},'24-dart game saved; goal/bindings/older sessions untouched')
-        check('内側' in pg.inner_text('#sessiondetail') or True,'history detail renders')
+        check(pg.locator('#sessiondetail tbody tr').count()==24,'history detail renders all 24 darts')
         pg.click('nav.tabs [data-tab=analysis]'); pg.wait_for_timeout(100); check(pg.evaluate("document.querySelector('[data-aim-period].selected').dataset.aimPeriod")=='10','10R on return')
         # backup export
         pg.click('.settings-icon')
