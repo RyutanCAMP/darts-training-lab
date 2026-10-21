@@ -1,0 +1,27 @@
+name: Isolated PR6 verification preview
+on:
+  push:
+    branches: [preview/pr6-f025f97]
+permissions:
+  contents: read
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/preview/pr6-f025f97'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f025f97f1ffbf67f74bbe9d7684a2edb44883343
+      - name: Verify exact application revision
+        run: test "$(git rev-parse HEAD)" = "f025f97f1ffbf67f74bbe9d7684a2edb44883343"
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: hosting
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DARTS_TRAINING_LAB }}
+          projectId: darts-training-lab
+          channelId: verify-pr6-f025f97
+          expires: 30d
+      - name: Preview URL
+        env:
+          URLS: ${{ steps.hosting.outputs.urls }}
+        run: echo "$URLS" >> "$GITHUB_STEP_SUMMARY"
