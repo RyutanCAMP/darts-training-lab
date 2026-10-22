@@ -139,7 +139,7 @@ function renderPace(rounds){
 }
 function renderLog(){
  const byDay=new Map();
- for(const d of runtime.all().concat(runtime.store.active.darts)){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
+ for(const d of runtime.all().concat(runtime.isCountup(runtime.store.active)?runtime.store.active.darts:[])){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
  const today=new Date(),cells=[];
  for(let i=34;i>=0;i--){const t=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i),k=dayKey(t),n=byDay.get(k)||0;cells.push({k,n,t,today:i===0})}
  const level=n=>n===0?0:n<24?1:n<72?2:n<144?3:4;

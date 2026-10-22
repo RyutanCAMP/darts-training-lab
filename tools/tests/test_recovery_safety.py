@@ -82,7 +82,7 @@ with sync_playwright() as p:
         page.evaluate("([k,p,r])=>{localStorage.setItem(k,p);localStorage.setItem(k+'-recovery',r)}",[KEY,primary,recovery])
         page.reload()
         page.wait_for_load_state('load')
-        page.locator('[data-tab="settings"]').click()
+        page.locator('.settings-icon').click()
         assert '保存停止中' in page.locator('#recoveryStatus').text_content(),'seeded page must start read-only'
         return page
     context=browser.new_context()

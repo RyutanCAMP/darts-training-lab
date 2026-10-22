@@ -5,10 +5,10 @@ function connectPeriod(runtime){
 let AIM_SKIP;
 function allRecordedRounds(raw){
  const blocks=[];
- const sessions=runtime.store.sessions.slice().reverse();
+ const sessions=runtime.store.sessions.filter(runtime.isCountup).slice().reverse();
  /* Only complete 3-dart rounds count as a round (1R/10R/20R/ALL); an unfinished round never shrinks or skews the window. */
  for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(s,i/3)))blocks.push(round)}
- for(let i=0;i<runtime.store.active.darts.length;i+=3){const round=runtime.store.active.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(runtime.store.active,i/3)))blocks.push(round)}
+ for(let i=0;runtime.isCountup(runtime.store.active)&&i<runtime.store.active.darts.length;i+=3){const round=runtime.store.active.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(runtime.store.active,i/3)))blocks.push(round)}
  return raw?blocks:blocks.filter(r=>runtime.aimOf(r[0])===effectiveAim(blocks));
 }
 function effectiveAim(blocks){

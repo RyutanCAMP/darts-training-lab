@@ -13,6 +13,7 @@ runtime.$('newgame').onclick=runtime.startNew;
 runtime.$('startdash').onclick=()=>{runtime.changeTab('play')};
 runtime.$('endgame').onclick=runtime.finishEarly;
 runtime.$('saveResult').onclick=runtime.confirmResult;
+runtime.$('toggleRounds').onclick=()=>{runtime.$('rounds').classList.toggle('show-all');runtime.render()};
 }
 function initializeSettings(){
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{runtime.store.roundDelay=Number(b.dataset.delay);runtime.persist();runtime.render()});

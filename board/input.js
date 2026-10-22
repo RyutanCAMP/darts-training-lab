@@ -23,8 +23,8 @@ function board200sInput(e){
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
- if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.store.active.darts.length===24){board200sStatus('START：結果確定');runtime.confirmResult()}else if(runtime.store.active.darts.length===0){board200sStatus('START：投球待機');runtime.toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
- if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.roundBreakUntil>Date.now()){runtime.finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');runtime.toast('NEXT ROUND — READY')}else if(runtime.store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');runtime.toast('GAME COMPLETE — 結果を確認してください')}else if(runtime.store.active.darts.length%3===0&&runtime.store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');runtime.toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.sessionDone(runtime.store.active)){board200sStatus('START：結果確定');runtime.confirmResult()}else if(runtime.store.active.darts.length===0){board200sStatus('START：投球待機');runtime.toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(runtime.awaitingPlayer(runtime.store.active)){if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');runtime.confirmPlayerChange();board200sStatus('CHANGE：プレイヤー交代');return true}if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.roundBreakUntil>Date.now()){runtime.finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');runtime.toast('NEXT ROUND — READY')}else if(runtime.sessionDone(runtime.store.active)){board200sStatus('CHANGE：ゲーム終了（結果確認）');runtime.toast('GAME COMPLETE — 結果を確認してください')}else if(runtime.roundReady(runtime.store.active)){board200sStatus('CHANGE：次のラウンド待機中');runtime.toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
  if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
  const zone=board200sMap[k];if(!zone)return false;const segment=zone.startsWith('S')?zone.slice(0,-1):zone;
  e.preventDefault();
@@ -32,8 +32,9 @@ function board200sInput(e){
  if(k===board200sLastKey&&now-board200sLastAt<180)return true;
  if(now-board200sLastAt<90)return true;
  board200sLastKey=k;board200sLastAt=now;
+ if(runtime.awaitingPlayer(runtime.store.active)){board200sStatus('交代待ち：CHANGEで次のプレイヤーへ');return true}
  if(runtime.roundBreakUntil>Date.now()){board200sStatus('ラウンド切替待ち：CHANGEで進めます');return true}
- if(runtime.store.active.darts.length>=24){board200sStatus('24投完了：STARTで結果確定');return true}
+ if(runtime.sessionDone(runtime.store.active)){board200sStatus('ゲーム終了：STARTで結果確定');return true}
  runtime.add(segment,'board',zone);
  board200sStatus('受信：'+runtime.label(segment)+' / '+runtime.points(segment)+'点');
  return true;

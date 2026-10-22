@@ -1,7 +1,7 @@
 {
   "name": "DARTS TRAINING LAB",
   "short_name": "DARTS LAB",
-  "description": "COUNT-UP practice with throw-by-throw analysis",
+  "description": "COUNT-UP and 301 / 501 / 701 darts practice",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -7,18 +7,40 @@ function renderAimSetting(){
  const chip=runtime.$('aimChip');if(chip)chip.textContent='AIM '+runtime.curAim();
 }
 function render(){renderAimSetting();runtime.$('soundToggle').textContent=runtime.store.soundEnabled===false?'効果音 OFF':'効果音 ON';runtime.$('soundToggle').setAttribute('aria-pressed',String(runtime.store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(runtime.store.roundDelay))});runtime.updateSaveIndicator();runtime.$('savedNotice').classList.toggle('hidden',!runtime.justSaved);const s=runtime.store.active,ds=s.darts,n=ds.length,ss=runtime.finished(),a=runtime.completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+runtime.sum(x.darts),0)/ss.length):0,bulls=a.filter(runtime.isBull).length;
+const zero=runtime.isZero(s);
+runtime.$('play').classList.toggle('is-match',runtime.isMatch(s));
+runtime.$('matchPlayers').classList.add('hidden');runtime.$('turnChange').classList.add('hidden');runtime.$('soloMode').classList.toggle('hidden',!runtime.isMatch(s));
+runtime.$('checkoutGuide').classList.add('hidden');
+runtime.$('gameSelect').value=zero?String(s.rules.startScore):'countup';
+runtime.$('gameRules').textContent=zero?'BULL 50 / OPEN OUT / 20 ROUND':'8 ROUND / 24 DARTS';
+runtime.$('scoreCaption').textContent=zero?'REMAINING':'TOTAL SCORE';
+runtime.$('rounds').classList.toggle('zero-rounds',zero);
+runtime.$('resultCaption').textContent='24投完了。スコアを確認して記録を確定してください。';
 runtime.renderAnalysis();runtime.$('livebull').innerHTML=runtime.bullBars(ds,runtime.curAim());
+if(!zero){
 runtime.$('score').textContent=runtime.sum(ds);runtime.$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';runtime.$('progress').textContent=n+' / 24';
 runtime.$('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?runtime.sum(d):'—')+'</b></div>'}).join('');
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):'READY')+'</span></div>'}).join('');
 runtime.$('throwlog').innerHTML=ds.slice().reverse().map((d,i)=>'<tr><td>'+(n-i)+' (R'+d.roundIndex+'-'+d.dartIndex+')</td><td>'+runtime.dartLabel(d)+'</td><td class="num">'+d.score+'</td></tr>').join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
-runtime.$('undo').disabled=!n;runtime.$('endgame').disabled=!n;
 runtime.$('resultpanel').classList.toggle('hidden',n!==24||!runtime.showResult);runtime.$('resultCompare').innerHTML=n===24?resultCompare(ds,ss):'';runtime.$('resultscore').textContent=runtime.sum(ds);runtime.$('resultbull').textContent=ds.filter(runtime.isBull).length+' / 24';runtime.$('saveResult').disabled=n!==24;
 runtime.$('miss').disabled=n===24;
-const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.sum(latest.darts)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+(latest.status==='completed'?'24投 完走':'途中終了 '+latest.darts.length+'投')+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
-runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+(x.status==='completed'?'完走':'途中終了')+'</td><td>'+runtime.sum(x.darts)+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
+}else runtime.renderZero();
+runtime.$('undo').disabled=!n;runtime.$('endgame').disabled=!n;
+const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.gameScore(latest)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+runtime.esc(runtime.gameName(latest))+' · '+runtime.gameOutcome(latest)+(runtime.isMatch(latest)?'<br>'+runtime.esc(runtime.matchSummary(latest)):'')+(runtime.isZero(latest)?' · 残点':'')+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
+runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+runtime.esc(runtime.gameName(x))+' · '+runtime.gameOutcome(x)+'</td><td>'+runtime.gameScore(x)+(runtime.isZero(x)?' 残り':'')+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{runtime.viewId=b.dataset.detail;renderDetail()});if(runtime.store.sessions.length&&!runtime.store.sessions.some(x=>x.id===runtime.viewId))runtime.viewId=runtime.store.sessions[0].id;renderDetail();
 runtime.$('bindinglog').textContent=Object.entries(runtime.store.bindings).map(([k,v])=>k+' → '+runtime.label(v)).join('\n')||'割当なし';
+renderArena(s);
+}
+function renderArena(s){
+ const q=runtime.isZero(s)?runtime.evaluateZero(s):null,round=q?.round||Math.min(8,Math.floor(s.darts.length/3)+1);
+ runtime.$('arenaGameTitle').textContent=runtime.gameName(s);
+ runtime.$('arenaTurnName').textContent=runtime.isMatch(s)?'P'+(q.playerIndex+1)+' · '+s.players[q.playerIndex].name:runtime.myDarts.nick||'SOLO PRACTICE';
+ runtime.$('soloPlayerName').textContent=runtime.myDarts.nick||'PLAYER 1';
+ const rows=runtime.$('rounds');[...rows.children].forEach((row,i)=>row.classList.toggle('arena-recent',i>=Math.max(0,round-3)&&i<round));
+ runtime.$('toggleRounds').textContent=rows.classList.contains('show-all')?'直近ラウンド':'全ラウンド';
+ runtime.$('toggleRounds').setAttribute('aria-expanded',String(rows.classList.contains('show-all')));
+ document.body.classList.toggle('arena-playing',runtime.$('play').classList.contains('active'));
 }
 function resultCompare(ds,ss){
  if(!ss.length)return '<div class="cmp-first">FIRST GAME — ここが基準になります</div>';
@@ -27,7 +49,7 @@ function resultCompare(ds,ss){
  const r=Math.round((br-pbr)*10)/10;
  return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>'+A+' RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
 }
-function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+(s.status==='completed'?'完走':'途中終了')+'</span><strong class="accent">'+runtime.sum(s.darts)+' POINTS</strong></div><div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map(d=>'<tr><td>'+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.label(d.segment)+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
+function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+runtime.esc(runtime.gameName(s))+' · '+runtime.gameOutcome(s)+'</span><strong class="accent">'+runtime.gameScore(s)+(runtime.isZero(s)?' REMAINING':' POINTS')+'</strong></div>'+(runtime.isMatch(s)?'<p class="tiny">'+runtime.esc(runtime.matchSummary(s))+'</p>':'')+'<div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map((d,i)=>'<tr><td>'+(runtime.isMatch(s)?'P'+(d.playerIndex+1)+' · ':'')+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+(runtime.isZero(s)&&runtime.evaluateZero(s).frames?.[i]?.bust?' · BUST':'')+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
 Object.assign(runtime,{render});
 
 return {};

@@ -1,5 +1,31 @@
 # Claude development handoff — DARTS TRAINING LAB
 
+## 01 checkpoint (2026-10-23)
+
+Read `docs/ai-handoff-2026-10-23.md` first for the current branch, landscape layout, verification, and remaining work. This checkpoint includes the 01 solo/local-match implementation and the landscape-first arena on top of the unmerged module refactor. `docs/zero-one-preparation.md` is historical design material, not the current implementation status.
+
+## Latest: v0.8.0-beta.1 (2026-10-23 checkpoint)
+
+- Landscape-first arena with central board, side panels, bottom score dock, recent/all-round toggle, and collapsible details. Layout/rotation/input coverage: `tools/tests/test_arena_layout.py`. Read the checkpoint handoff for verification and remaining work.
+
+- Match form defaults to `プレーヤー1` / `プレーヤー2`. `ui/match-accounts.js` owns guest/current-account selection and is registered before any initializers; its initializer runs after zeroOne and before event wiring. `cloudUi` refreshes its options on auth changes.
+- At most one participant may have optional `account: {provider:'google',uid}`. Name is a snapshot separate from account UID; metadata is not proof of authentication and grants no access. Guest name edits are restored when toggling back from account selection. Existing match records are never rewritten by login/logout.
+- The account selector only offers the current signed-in user; no other account directory or multi-user login is fetched. All matches remain local and excluded from cloud sync. See `docs/release-0.7.0-beta.2.md`.
+
+- Local 2-player 01 starts with the names form (`matchSheet` / `matchForm`). Sessions have `players: [{id:'p1',name}, {id:'p2',name}]`; every match dart has `playerIndex: 0|1`.
+- `evaluateZero` delegates to match replay for sessions with players. Round N contains P1's turn and then P2's; never derive match round/player from dart array position (bust skips darts).
+- `readyTurn` persists acknowledgement of a player change. `awaitingPlayer` blocks all throw entry after a turn until `confirmPlayerChange`; 200S CHANGE also acknowledges. Undo replays and restores the correct player.
+- 2-player matches stay local and are excluded from cloud push/pull/pending counts as well as COUNT-UP analysis. JSON/CSV retain match history; CSV names are quoted.
+- `tools/tests/test_local_match.py` covers both winners, busts, final-round draw, names-first UI, persistence, undo, isolation, backup, and single-file preview with the browser offline. See `docs/release-0.7.0-beta.1.md`.
+
+- CHECKOUT guide in PLAY shows up to three shortest open-out routes for the remaining darts; prefers singles, then bull, double and triple among equal-length routes. Pure `checkoutRoutes` in `game/zero-one.js`, UI in `ui/zero-one.js`. See `docs/release-0.6.0-beta.2.md`.
+
+- 01 (solo 301/501/701, fat bull, straight in/open out, 20 rounds) is implemented. See `docs/release-0.6.0-beta.1.md` for current behavior and compatibility; older sections below describe the COUNT-UP baseline.
+- `game/zero-one.js` supplies pure replay, validation, session helpers and operation routing; its initializer runs AFTER countup initialization and BEFORE event wiring. Both connectors must register before rules initialize.
+- `ui/zero-one.js` renders 01. `game/rules.js` creates either game type from `store.gameChoice`.
+- COUNT-UP analysis helpers must filter by `isCountup`. Never aggregate 01 into COUNT-UP score/best/achievement/period data. A bust can end a round before 3 darts; never slice 01 history into groups of three.
+- `tools/tests/test_zero_one.py` covers 01 rules and integration using synthetic data/board keys and a fake cloud. No real-device verification or deployment is implied.
+
 ## Mission
 Continue development of the existing retro-styled darts practice app, **not a rewrite**. Preserve saved data and all existing working features. The user wants a stylish, instantly readable interface: big numbers, graphics, short English labels, very little explanatory prose. The user communicates in Japanese.
 

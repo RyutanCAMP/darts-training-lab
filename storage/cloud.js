@@ -6,9 +6,9 @@ let CLOUD_CFG,FB_BASE,docId;
 function profTouch(){if(runtime.cloud.applying)return;runtime.syncMeta.myAt=Date.now();syncMetaSave();try{cloudAuto()}catch(_){}}
 function syncMetaSave(){try{localStorage.setItem(runtime.SYNC_KEY,JSON.stringify(runtime.syncMeta))}catch(_){}}
 function cloudStatus(t){const e=runtime.$('cloudStatus');if(e)e.textContent=t}
-function cloudPendingCount(){const pushed=new Set(runtime.syncMeta.pushed);return runtime.store.sessions.filter(s=>runtime.validSession(s)&&!pushed.has(s.id)).length+(runtime.syncMeta.myAt>runtime.syncMeta.myPushed?1:0)}
+function cloudPendingCount(){const pushed=new Set(runtime.syncMeta.pushed);return runtime.store.sessions.filter(s=>(runtime.validSession(s)&&!runtime.isMatch(s))&&!pushed.has(s.id)).length+(runtime.syncMeta.myAt>runtime.syncMeta.myPushed?1:0)}
 function cloudQueue(){runtime.cloud.pending=true;clearTimeout(runtime.cloud.timer);runtime.cloud.timer=setTimeout(()=>{runtime.cloud.pending=false;if(runtime.cloud.user&&!runtime.cloud.busy&&!runtime.cloud.autoBusy)cloudAuto();else if(runtime.cloud.user)cloudQueue()},4500)}
-function cloudUi(){const u=runtime.cloud.user,on=!!u;const ac=runtime.$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=runtime.$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);runtime.$('cloudSync').classList.toggle('hidden',!on);runtime.$('cloudLogout').classList.toggle('hidden',!on);if(on&&!runtime.cloud.busy){const t=runtime.syncMeta.lastAt?new Date(runtime.syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
+function cloudUi(){runtime.renderMatchAccounts();const u=runtime.cloud.user,on=!!u;const ac=runtime.$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=runtime.$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);runtime.$('cloudSync').classList.toggle('hidden',!on);runtime.$('cloudLogout').classList.toggle('hidden',!on);if(on&&!runtime.cloud.busy){const t=runtime.syncMeta.lastAt?new Date(runtime.syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
 async function cloudLoadApi(){
  if(window.__DTL_CLOUD_FAKE)return window.__DTL_CLOUD_FAKE;
  const [a,au,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]);
@@ -47,9 +47,9 @@ async function cloudSync(){
  if(!runtime.cloud.api||!runtime.cloud.user)return;if(runtime.cloud.busy||runtime.cloud.autoBusy){cloudQueue();return}runtime.cloud.busy=true;cloudStatus('SYNCING…');
  try{
   const uid=runtime.cloud.user.uid,api=runtime.cloud.api;
-  const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&runtime.validSession(s));
+  const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&(runtime.validSession(s)&&!runtime.isMatch(s)));
   const rids=new Set(remote.map(s=>s.id)),lids=new Set(runtime.store.sessions.map(s=>s.id));
-  const add=remote.filter(s=>!lids.has(s.id)),up=runtime.store.sessions.filter(s=>!rids.has(s.id)&&runtime.validSession(s));
+  const add=remote.filter(s=>!lids.has(s.id)),up=runtime.store.sessions.filter(s=>!rids.has(s.id)&&(runtime.validSession(s)&&!runtime.isMatch(s)));
   for(const s of up)await api.putSession(uid,s);
   if(add.length){const before=runtime.store.sessions;runtime.store.sessions=[...runtime.store.sessions,...add].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));if(!runtime.persist()){runtime.store.sessions=before;throw Error('local save failed')}}
   runtime.syncMeta.pushed=[...new Set([...runtime.syncMeta.pushed,...rids,...up.map(s=>s.id)])];
@@ -72,7 +72,7 @@ function cloudAuto(){
   runtime.cloud.autoBusy=true;
   try{
    const uid=runtime.cloud.user.uid,api=runtime.cloud.api,done=new Set(runtime.syncMeta.pushed);
-   const up=runtime.store.sessions.filter(s=>!done.has(s.id)&&runtime.validSession(s));
+   const up=runtime.store.sessions.filter(s=>!done.has(s.id)&&(runtime.validSession(s)&&!runtime.isMatch(s)));
    for(const s of up){await api.putSession(uid,s);done.add(s.id)}
    runtime.syncMeta.pushed=[...done];syncMetaSave();
    if(runtime.syncMeta.myAt>runtime.syncMeta.myPushed)await cloudPushProfile(uid,api);

@@ -463,4 +463,132 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .page details.s200-group>summary{font-weight:800;color:#c7f3fb}
 .page details.s200-group[open]>summary{margin-bottom:12px}
 .tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.game-picker{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.08em;min-width:0}
+.game-picker select{font-weight:800;letter-spacing:.03em}
+.play-heading .match-setup{padding:6px 10px;font-size:11px;min-height:32px}
+.match-players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.match-player{display:flex;flex-direction:column;min-width:0;border:1px solid #314b5a;border-radius:10px;padding:10px 12px;background:#101e28;color:#9cb3bf}
+.match-player.current{border-color:#78c6cc;background:#173841;color:#d8f7fa;box-shadow:inset 0 0 0 1px #78c6cc33}
+.match-player span{font-size:12px;overflow-wrap:anywhere}
+.match-player strong{font-size:32px;font-variant-numeric:tabular-nums;line-height:1.2}
+.match-player small{min-height:16px;font-size:10px;letter-spacing:.06em}
+.turn-change{display:flex;flex-direction:column;align-items:center;gap:10px;margin:12px 0;padding:16px;border:1px solid #79bfc5;border-radius:12px;background:#183d48;text-align:center}
+.turn-change strong{font-size:17px;overflow-wrap:anywhere}
+#matchForm label{display:flex;flex-direction:column;gap:5px;font-size:12px}
+#matchForm input{width:100%;min-width:0}
+#matchForm .match-start{margin-top:16px;max-width:180px}
+.score-stage{display:grid}
+.checkout-guide{justify-self:end;max-width:100%;margin:8px 0 0;text-align:right;color:#91afbb}
+#play .checkout-guide h3{font-size:10px;margin:0;color:inherit;font-weight:500;letter-spacing:.03em}
+.checkout-routes{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px 0;font-size:12px;line-height:1.6;color:#c4e9f1}
+.checkout-route{color:inherit;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.checkout-route:not(:last-child)::after{content:' / ';margin:0 7px;opacity:.6}
+.play-heading{flex-wrap:wrap;gap:8px}
+#play .rounds.zero-rounds{grid-template-columns:repeat(10,minmax(0,1fr))}
+@media(max-width:560px){#play .rounds.zero-rounds{grid-template-columns:repeat(5,minmax(0,1fr))}.play-heading #gameRules{font-size:10px}}
 @media(max-width:560px){.tabs button{padding:9px 4px!important;font-size:12px!important}}
+
+/* v0.8: landscape play arena, score dock and compact turn controls. */
+#play.arena-page .arena-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin:12px 0}
+#play.arena-page .play-heading,#play.arena-page .play-chips{margin:0;gap:6px}
+#play.arena-page .game-picker{font-size:10px;gap:6px}
+#play.arena-page .game-picker select{padding:5px 8px;font-size:12px}
+#play.arena-page .play-chips .aim-chip{padding:5px 9px;font-size:10px;min-height:30px}
+#play.arena-page .arena-settings{display:none}
+#play.arena-page .arena-stage{--arena-board:clamp(260px,calc(100dvh - 420px),520px);padding:16px 20px;border-radius:14px;background:radial-gradient(ellipse at 50% 35%,#19364588,transparent 60%),#0d1b26;overflow:hidden}
+.arena-topline{display:flex;align-items:center;gap:18px;padding:0 0 12px;border-bottom:1px solid #314753;margin-bottom:12px}
+.arena-topline #arenaGameTitle{font-size:16px;letter-spacing:.08em;color:#c5eff3}
+.arena-topline #roundlabel{font-size:12px;font-weight:600;color:#9fb9c7}
+.arena-topline #arenaTurnName{margin-left:auto;font-size:12px;color:#c4e9f1;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arena-layout{display:grid;grid-template-columns:150px minmax(0,1fr) 210px;gap:18px;align-items:center}
+.arena-layout>aside{min-width:0}
+#play.arena-page .arena-layout h3{font-size:11px;margin:0 0 10px;color:#8cabb9;letter-spacing:.08em}
+.arena-rounds{align-self:start;padding-top:8px}
+#play.arena-page #rounds{display:flex;flex-direction:column;gap:6px;margin:0 0 8px;max-height:280px;overflow:auto}
+#play.arena-page #rounds:not(.show-all)>div:not(.arena-recent){display:none}
+#play.arena-page #rounds>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;padding:8px 12px!important;border-radius:5px;font-size:12px;background:#101f2b}
+#play.arena-page #rounds>div br{display:none}
+#play.arena-page #rounds>div b{font-size:20px;color:#ceeaf2}
+#play.arena-page #toggleRounds{font-size:10px;min-height:28px;padding:4px 8px;width:100%;color:#a7c1cf}
+#play.arena-page #saveIndicator{font-size:9px;line-height:1.5;margin:10px 0 0;padding:0;min-height:0;gap:5px;word-break:normal;overflow-wrap:anywhere}
+.arena-board{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0}
+#play.arena-page .arena-board #board{width:min(100%,var(--arena-board));max-width:520px;margin:0}
+#play.arena-page .arena-board #toast{font-size:11px;min-height:22px;line-height:1.6;margin:4px 0 0;padding:0 4px;border:0;background:none;box-shadow:none;width:100%}
+#play.arena-page #turnChange{position:absolute;inset:0;z-index:4;justify-content:center;background:#0a202ddd;border:1px solid #67bbc3;margin:0;padding:20px;backdrop-filter:blur(5px)}
+#play.arena-page #turnChange strong{font-size:18px;color:#d5fbff}
+#play.arena-page #confirmTurn{min-height:44px;font-size:14px}
+.arena-turn{align-self:start;padding-top:8px}
+#play.arena-page .arena-turn #progress{display:block;margin-top:2px;font-size:9px;letter-spacing:.03em}
+#play.arena-page #throws{grid-template-columns:1fr;gap:7px}
+#play.arena-page #throws .throw{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px;padding:8px 10px;min-height:57px;text-align:left;border-radius:6px}
+#play.arena-page #throws .throw>span:first-child{font-size:9px}
+#play.arena-page #throws .throw>span:last-child{grid-column:1;font-size:10px}
+#play.arena-page #throws .throw>b{grid-column:2;grid-row:1/3;font-size:27px!important;line-height:1.2}
+.arena-main-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.arena-game-actions{display:grid;gap:6px;margin-top:8px}
+#play.arena-page .arena-main-actions button{padding:7px 4px;min-height:36px;font-size:11px;min-width:0}
+#play.arena-page .arena-game-actions button{padding:5px 7px;min-height:30px;font-size:10px;min-width:0;color:#9fb6c4}
+#play.arena-page .arena-game-actions button.warn{color:#dc9fa5}
+.arena-score-dock{margin-top:14px;border-top:1px solid #354e5c;padding-top:12px}
+#play.arena-page .score-stage{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:108px;padding:16px 20px;border:1px solid #427f8c;border-left:4px solid #75d5db;border-radius:8px;background:linear-gradient(110deg,#163f4b,#122936)}
+.solo-player{display:flex;flex-direction:column;gap:4px;max-width:50%;overflow-wrap:anywhere}
+#soloPlayerName{font-size:18px;font-weight:800;color:#c9f2f7}
+#play.arena-page #scoreCaption{font-size:10px;letter-spacing:.08em}
+#play.arena-page .bigscore{font-size:76px!important;line-height:1!important;margin:10px 0 0;color:#efff8a!important}
+#play.arena-page #checkoutHome .checkout-guide{position:absolute;right:20px;top:5px;margin:0;max-width:75%}
+#play.arena-page.is-match .score-stage{display:none}
+#play.arena-page #matchPlayers{gap:12px;margin:0}
+#play.arena-page .match-player{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr auto;gap:0 12px;min-height:118px;padding:32px 16px 12px;border-radius:8px;opacity:.7;border-left-width:4px}
+#play.arena-page .match-player.p1{border-color:#c35b67;background:linear-gradient(110deg,#482833,#18232d)}
+#play.arena-page .match-player.p2{border-color:#4299c4;background:linear-gradient(110deg,#173e58,#162632)}
+#play.arena-page .match-player.current{opacity:1;box-shadow:inset 0 0 0 1px #c8f5ff55,0 0 22px #63b5d51a}
+#play.arena-page .match-player>span{font-size:16px;align-self:end;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#play.arena-page .match-player>strong{grid-row:1/3;grid-column:2;align-self:center;font-size:68px;line-height:1;font-weight:900;color:#e8f6ff}
+#play.arena-page .match-player.current>strong{color:#efff8a}
+#play.arena-page .match-player>small{font-size:10px;min-height:15px;letter-spacing:.13em}
+#play.arena-page .match-player .checkout-guide{position:absolute;right:14px;top:5px;margin:0;max-width:94%;text-align:right}
+#play.arena-page .checkout-guide h3{font-size:9px;margin:0;color:#91afbb}
+#play.arena-page .checkout-routes{font-size:11px;line-height:1.4}
+.arena-extras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+#play.arena-page .arena-extras details.play-extra{padding:10px 14px!important;min-width:0}
+#play.arena-page .arena-extras summary{font-size:11px;min-height:20px}
+.arena-playing .tabs{position:static;margin:10px 0 0;max-width:none;padding:4px;box-shadow:none}
+.arena-playing .tabs button{min-height:34px;font-size:12px;padding:6px 8px}
+@media(max-width:1050px){.arena-layout{grid-template-columns:112px minmax(0,1fr) 165px;gap:12px}#play.arena-page .arena-stage{padding:12px;--arena-board:clamp(240px,calc(100dvh - 390px),440px)}}
+@media(max-width:600px) and (orientation:portrait){
+ #play.arena-page .arena-stage{display:grid;grid-template-columns:1fr 1fr;gap:12px}.arena-layout{display:contents}.arena-topline{grid-column:1/-1;grid-row:1}.arena-board{grid-column:1/-1;grid-row:2}.arena-score-dock{grid-column:1/-1;grid-row:3;margin-top:0}.arena-rounds{grid-column:1;grid-row:4}.arena-turn{grid-column:2;grid-row:4}
+ #play.arena-page .arena-stage{--arena-board:min(80vw,360px);padding:12px}
+ .arena-topline{gap:8px;flex-wrap:wrap}.arena-topline #arenaGameTitle{font-size:13px}.arena-topline #arenaTurnName{font-size:10px;max-width:100%}.arena-topline #roundlabel{font-size:10px}
+ .arena-rounds,.arena-turn{padding-top:0}#play.arena-page #rounds>div{min-height:35px;padding:5px 8px!important}#play.arena-page #throws .throw{min-height:42px;padding:5px 8px}
+ #play.arena-page .match-player{padding:30px 10px 10px;min-height:105px;column-gap:4px}#play.arena-page .match-player>span{font-size:11px}#play.arena-page .match-player>strong{font-size:39px}
+ #play.arena-page .match-player .checkout-guide{right:8px;top:4px}.arena-extras{grid-template-columns:1fr}.arena-toolbar #gameRules{display:none}
+}
+@media(orientation:landscape) and (max-height:560px){
+ .arena-playing .top{display:none!important}.arena-playing .shell{padding-top:4px!important}
+ #play.arena-page .arena-settings{display:block;font-size:16px;line-height:1;min-height:24px;min-width:26px;padding:3px 5px}
+ #play.arena-page .arena-toolbar{margin:2px 0 6px;gap:5px;flex-wrap:nowrap}#play.arena-page .play-heading{gap:4px}#play.arena-page #gameRules{display:none}
+ #play.arena-page .play-heading .match-setup,#play.arena-page .play-chips .aim-chip{font-size:9px;padding:3px 6px;min-height:24px}
+ #play.arena-page .game-picker select{font-size:10px;padding:3px 5px}.game-picker{gap:3px}
+ #play.arena-page .arena-stage{padding:6px 10px;--arena-board:clamp(135px,calc(100dvh - 190px),370px)}
+ .arena-topline{padding-bottom:4px;margin-bottom:4px;gap:12px}.arena-topline #arenaGameTitle{font-size:11px}.arena-topline #roundlabel,.arena-topline #arenaTurnName{font-size:10px}
+ .arena-layout{grid-template-columns:100px minmax(0,1fr) 146px;gap:8px;align-items:center}.arena-rounds,.arena-turn{padding-top:0}
+ #play.arena-page .arena-layout h3{font-size:9px;margin-bottom:4px}#play.arena-page #rounds{gap:3px;max-height:115px;margin-bottom:4px}#play.arena-page #rounds>div{min-height:27px;padding:3px 7px!important;font-size:10px!important}#play.arena-page #rounds>div b{font-size:15px}
+ #play.arena-page #toggleRounds{font-size:9px;min-height:22px;padding:2px 5px}#play.arena-page #saveIndicator{font-size:8px;margin-top:4px}
+ #play.arena-page #throws{gap:4px}#play.arena-page #throws .throw{min-height:34px;padding:3px 7px}#play.arena-page #throws .throw>b{font-size:19px!important}#play.arena-page #throws .throw>span:last-child{font-size:8px}
+ #play.arena-page .arena-turn #progress{display:inline;margin-left:3px;font-size:8px}.arena-main-actions,.arena-game-actions{margin-top:5px;gap:4px}
+ #play.arena-page .arena-main-actions button{min-height:26px;padding:3px;font-size:9px}.arena-game-actions{grid-template-columns:1fr 1fr}#play.arena-page .arena-game-actions button{min-height:23px;padding:2px;font-size:8px}
+ #play.arena-page .arena-board #toast{font-size:9px;min-height:15px;margin-top:0}
+ .arena-score-dock{margin-top:5px;padding-top:5px}#play.arena-page #matchPlayers{gap:8px}#play.arena-page .match-player{min-height:72px;padding:24px 12px 7px}
+ #play.arena-page .match-player>span{font-size:12px}#play.arena-page .match-player>strong{font-size:43px}#play.arena-page .match-player>small{font-size:8px;min-height:10px}
+ #play.arena-page .checkout-guide h3{font-size:8px}#play.arena-page .checkout-routes{font-size:9px}#play.arena-page .match-player .checkout-guide{top:3px;right:10px}
+ #play.arena-page .score-stage{min-height:70px;padding:10px 14px}#play.arena-page .bigscore{font-size:47px!important;margin-top:9px}#soloPlayerName{font-size:14px}#play.arena-page #scoreCaption{font-size:8px}
+ #play.arena-page #checkoutHome .checkout-guide{right:14px;top:3px}
+ .arena-extras{margin-top:5px;gap:6px}#play.arena-page .arena-extras details.play-extra{padding:5px 10px!important}#play.arena-page .arena-extras summary{font-size:9px;min-height:14px}
+ .arena-playing .tabs{margin-top:5px}.arena-playing .tabs button{min-height:26px;padding:3px!important;font-size:10px!important}
+ #play.arena-page #turnChange{padding:10px;gap:6px}#play.arena-page #turnChange strong{font-size:14px}#play.arena-page #confirmTurn{min-height:34px;font-size:12px}
+ #play.arena-page .round-break .cool-card{max-height:calc(100dvh - 20px);overflow:auto;padding:12px 18px;gap:4px}
+ #play.arena-page .cool-pixel{height:40px;width:auto;max-width:100%}
+ #play.arena-page .cool-ring{width:68px;height:68px}
+ #play.arena-page .cool-praise{font-size:20px!important}
+ #play.arena-page .cool-card button{min-height:30px;margin-top:3px}
+}

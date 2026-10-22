@@ -466,14 +466,158 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .page details.s200-group>summary{font-weight:800;color:#c7f3fb}
 .page details.s200-group[open]>summary{margin-bottom:12px}
 .tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.game-picker{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.08em;min-width:0}
+.game-picker select{font-weight:800;letter-spacing:.03em}
+.play-heading .match-setup{padding:6px 10px;font-size:11px;min-height:32px}
+.match-players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.match-player{display:flex;flex-direction:column;min-width:0;border:1px solid #314b5a;border-radius:10px;padding:10px 12px;background:#101e28;color:#9cb3bf}
+.match-player.current{border-color:#78c6cc;background:#173841;color:#d8f7fa;box-shadow:inset 0 0 0 1px #78c6cc33}
+.match-player span{font-size:12px;overflow-wrap:anywhere}
+.match-player strong{font-size:32px;font-variant-numeric:tabular-nums;line-height:1.2}
+.match-player small{min-height:16px;font-size:10px;letter-spacing:.06em}
+.turn-change{display:flex;flex-direction:column;align-items:center;gap:10px;margin:12px 0;padding:16px;border:1px solid #79bfc5;border-radius:12px;background:#183d48;text-align:center}
+.turn-change strong{font-size:17px;overflow-wrap:anywhere}
+#matchForm label{display:flex;flex-direction:column;gap:5px;font-size:12px}
+#matchForm input{width:100%;min-width:0}
+#matchForm .match-start{margin-top:16px;max-width:180px}
+.score-stage{display:grid}
+.checkout-guide{justify-self:end;max-width:100%;margin:8px 0 0;text-align:right;color:#91afbb}
+#play .checkout-guide h3{font-size:10px;margin:0;color:inherit;font-weight:500;letter-spacing:.03em}
+.checkout-routes{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px 0;font-size:12px;line-height:1.6;color:#c4e9f1}
+.checkout-route{color:inherit;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.checkout-route:not(:last-child)::after{content:' / ';margin:0 7px;opacity:.6}
+.play-heading{flex-wrap:wrap;gap:8px}
+#play .rounds.zero-rounds{grid-template-columns:repeat(10,minmax(0,1fr))}
+@media(max-width:560px){#play .rounds.zero-rounds{grid-template-columns:repeat(5,minmax(0,1fr))}.play-heading #gameRules{font-size:10px}}
 @media(max-width:560px){.tabs button{padding:9px 4px!important;font-size:12px!important}}
+
+/* v0.8: landscape play arena, score dock and compact turn controls. */
+#play.arena-page .arena-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin:12px 0}
+#play.arena-page .play-heading,#play.arena-page .play-chips{margin:0;gap:6px}
+#play.arena-page .game-picker{font-size:10px;gap:6px}
+#play.arena-page .game-picker select{padding:5px 8px;font-size:12px}
+#play.arena-page .play-chips .aim-chip{padding:5px 9px;font-size:10px;min-height:30px}
+#play.arena-page .arena-settings{display:none}
+#play.arena-page .arena-stage{--arena-board:clamp(260px,calc(100dvh - 420px),520px);padding:16px 20px;border-radius:14px;background:radial-gradient(ellipse at 50% 35%,#19364588,transparent 60%),#0d1b26;overflow:hidden}
+.arena-topline{display:flex;align-items:center;gap:18px;padding:0 0 12px;border-bottom:1px solid #314753;margin-bottom:12px}
+.arena-topline #arenaGameTitle{font-size:16px;letter-spacing:.08em;color:#c5eff3}
+.arena-topline #roundlabel{font-size:12px;font-weight:600;color:#9fb9c7}
+.arena-topline #arenaTurnName{margin-left:auto;font-size:12px;color:#c4e9f1;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arena-layout{display:grid;grid-template-columns:150px minmax(0,1fr) 210px;gap:18px;align-items:center}
+.arena-layout>aside{min-width:0}
+#play.arena-page .arena-layout h3{font-size:11px;margin:0 0 10px;color:#8cabb9;letter-spacing:.08em}
+.arena-rounds{align-self:start;padding-top:8px}
+#play.arena-page #rounds{display:flex;flex-direction:column;gap:6px;margin:0 0 8px;max-height:280px;overflow:auto}
+#play.arena-page #rounds:not(.show-all)>div:not(.arena-recent){display:none}
+#play.arena-page #rounds>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;padding:8px 12px!important;border-radius:5px;font-size:12px;background:#101f2b}
+#play.arena-page #rounds>div br{display:none}
+#play.arena-page #rounds>div b{font-size:20px;color:#ceeaf2}
+#play.arena-page #toggleRounds{font-size:10px;min-height:28px;padding:4px 8px;width:100%;color:#a7c1cf}
+#play.arena-page #saveIndicator{font-size:9px;line-height:1.5;margin:10px 0 0;padding:0;min-height:0;gap:5px;word-break:normal;overflow-wrap:anywhere}
+.arena-board{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0}
+#play.arena-page .arena-board #board{width:min(100%,var(--arena-board));max-width:520px;margin:0}
+#play.arena-page .arena-board #toast{font-size:11px;min-height:22px;line-height:1.6;margin:4px 0 0;padding:0 4px;border:0;background:none;box-shadow:none;width:100%}
+#play.arena-page #turnChange{position:absolute;inset:0;z-index:4;justify-content:center;background:#0a202ddd;border:1px solid #67bbc3;margin:0;padding:20px;backdrop-filter:blur(5px)}
+#play.arena-page #turnChange strong{font-size:18px;color:#d5fbff}
+#play.arena-page #confirmTurn{min-height:44px;font-size:14px}
+.arena-turn{align-self:start;padding-top:8px}
+#play.arena-page .arena-turn #progress{display:block;margin-top:2px;font-size:9px;letter-spacing:.03em}
+#play.arena-page #throws{grid-template-columns:1fr;gap:7px}
+#play.arena-page #throws .throw{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px;padding:8px 10px;min-height:57px;text-align:left;border-radius:6px}
+#play.arena-page #throws .throw>span:first-child{font-size:9px}
+#play.arena-page #throws .throw>span:last-child{grid-column:1;font-size:10px}
+#play.arena-page #throws .throw>b{grid-column:2;grid-row:1/3;font-size:27px!important;line-height:1.2}
+.arena-main-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.arena-game-actions{display:grid;gap:6px;margin-top:8px}
+#play.arena-page .arena-main-actions button{padding:7px 4px;min-height:36px;font-size:11px;min-width:0}
+#play.arena-page .arena-game-actions button{padding:5px 7px;min-height:30px;font-size:10px;min-width:0;color:#9fb6c4}
+#play.arena-page .arena-game-actions button.warn{color:#dc9fa5}
+.arena-score-dock{margin-top:14px;border-top:1px solid #354e5c;padding-top:12px}
+#play.arena-page .score-stage{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:108px;padding:16px 20px;border:1px solid #427f8c;border-left:4px solid #75d5db;border-radius:8px;background:linear-gradient(110deg,#163f4b,#122936)}
+.solo-player{display:flex;flex-direction:column;gap:4px;max-width:50%;overflow-wrap:anywhere}
+#soloPlayerName{font-size:18px;font-weight:800;color:#c9f2f7}
+#play.arena-page #scoreCaption{font-size:10px;letter-spacing:.08em}
+#play.arena-page .bigscore{font-size:76px!important;line-height:1!important;margin:10px 0 0;color:#efff8a!important}
+#play.arena-page #checkoutHome .checkout-guide{position:absolute;right:20px;top:5px;margin:0;max-width:75%}
+#play.arena-page.is-match .score-stage{display:none}
+#play.arena-page #matchPlayers{gap:12px;margin:0}
+#play.arena-page .match-player{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr auto;gap:0 12px;min-height:118px;padding:32px 16px 12px;border-radius:8px;opacity:.7;border-left-width:4px}
+#play.arena-page .match-player.p1{border-color:#c35b67;background:linear-gradient(110deg,#482833,#18232d)}
+#play.arena-page .match-player.p2{border-color:#4299c4;background:linear-gradient(110deg,#173e58,#162632)}
+#play.arena-page .match-player.current{opacity:1;box-shadow:inset 0 0 0 1px #c8f5ff55,0 0 22px #63b5d51a}
+#play.arena-page .match-player>span{font-size:16px;align-self:end;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#play.arena-page .match-player>strong{grid-row:1/3;grid-column:2;align-self:center;font-size:68px;line-height:1;font-weight:900;color:#e8f6ff}
+#play.arena-page .match-player.current>strong{color:#efff8a}
+#play.arena-page .match-player>small{font-size:10px;min-height:15px;letter-spacing:.13em}
+#play.arena-page .match-player .checkout-guide{position:absolute;right:14px;top:5px;margin:0;max-width:94%;text-align:right}
+#play.arena-page .checkout-guide h3{font-size:9px;margin:0;color:#91afbb}
+#play.arena-page .checkout-routes{font-size:11px;line-height:1.4}
+.arena-extras{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+#play.arena-page .arena-extras details.play-extra{padding:10px 14px!important;min-width:0}
+#play.arena-page .arena-extras summary{font-size:11px;min-height:20px}
+.arena-playing .tabs{position:static;margin:10px 0 0;max-width:none;padding:4px;box-shadow:none}
+.arena-playing .tabs button{min-height:34px;font-size:12px;padding:6px 8px}
+@media(max-width:1050px){.arena-layout{grid-template-columns:112px minmax(0,1fr) 165px;gap:12px}#play.arena-page .arena-stage{padding:12px;--arena-board:clamp(240px,calc(100dvh - 390px),440px)}}
+@media(max-width:600px) and (orientation:portrait){
+ #play.arena-page .arena-stage{display:grid;grid-template-columns:1fr 1fr;gap:12px}.arena-layout{display:contents}.arena-topline{grid-column:1/-1;grid-row:1}.arena-board{grid-column:1/-1;grid-row:2}.arena-score-dock{grid-column:1/-1;grid-row:3;margin-top:0}.arena-rounds{grid-column:1;grid-row:4}.arena-turn{grid-column:2;grid-row:4}
+ #play.arena-page .arena-stage{--arena-board:min(80vw,360px);padding:12px}
+ .arena-topline{gap:8px;flex-wrap:wrap}.arena-topline #arenaGameTitle{font-size:13px}.arena-topline #arenaTurnName{font-size:10px;max-width:100%}.arena-topline #roundlabel{font-size:10px}
+ .arena-rounds,.arena-turn{padding-top:0}#play.arena-page #rounds>div{min-height:35px;padding:5px 8px!important}#play.arena-page #throws .throw{min-height:42px;padding:5px 8px}
+ #play.arena-page .match-player{padding:30px 10px 10px;min-height:105px;column-gap:4px}#play.arena-page .match-player>span{font-size:11px}#play.arena-page .match-player>strong{font-size:39px}
+ #play.arena-page .match-player .checkout-guide{right:8px;top:4px}.arena-extras{grid-template-columns:1fr}.arena-toolbar #gameRules{display:none}
+}
+@media(orientation:landscape) and (max-height:560px){
+ .arena-playing .top{display:none!important}.arena-playing .shell{padding-top:4px!important}
+ #play.arena-page .arena-settings{display:block;font-size:16px;line-height:1;min-height:24px;min-width:26px;padding:3px 5px}
+ #play.arena-page .arena-toolbar{margin:2px 0 6px;gap:5px;flex-wrap:nowrap}#play.arena-page .play-heading{gap:4px}#play.arena-page #gameRules{display:none}
+ #play.arena-page .play-heading .match-setup,#play.arena-page .play-chips .aim-chip{font-size:9px;padding:3px 6px;min-height:24px}
+ #play.arena-page .game-picker select{font-size:10px;padding:3px 5px}.game-picker{gap:3px}
+ #play.arena-page .arena-stage{padding:6px 10px;--arena-board:clamp(135px,calc(100dvh - 190px),370px)}
+ .arena-topline{padding-bottom:4px;margin-bottom:4px;gap:12px}.arena-topline #arenaGameTitle{font-size:11px}.arena-topline #roundlabel,.arena-topline #arenaTurnName{font-size:10px}
+ .arena-layout{grid-template-columns:100px minmax(0,1fr) 146px;gap:8px;align-items:center}.arena-rounds,.arena-turn{padding-top:0}
+ #play.arena-page .arena-layout h3{font-size:9px;margin-bottom:4px}#play.arena-page #rounds{gap:3px;max-height:115px;margin-bottom:4px}#play.arena-page #rounds>div{min-height:27px;padding:3px 7px!important;font-size:10px!important}#play.arena-page #rounds>div b{font-size:15px}
+ #play.arena-page #toggleRounds{font-size:9px;min-height:22px;padding:2px 5px}#play.arena-page #saveIndicator{font-size:8px;margin-top:4px}
+ #play.arena-page #throws{gap:4px}#play.arena-page #throws .throw{min-height:34px;padding:3px 7px}#play.arena-page #throws .throw>b{font-size:19px!important}#play.arena-page #throws .throw>span:last-child{font-size:8px}
+ #play.arena-page .arena-turn #progress{display:inline;margin-left:3px;font-size:8px}.arena-main-actions,.arena-game-actions{margin-top:5px;gap:4px}
+ #play.arena-page .arena-main-actions button{min-height:26px;padding:3px;font-size:9px}.arena-game-actions{grid-template-columns:1fr 1fr}#play.arena-page .arena-game-actions button{min-height:23px;padding:2px;font-size:8px}
+ #play.arena-page .arena-board #toast{font-size:9px;min-height:15px;margin-top:0}
+ .arena-score-dock{margin-top:5px;padding-top:5px}#play.arena-page #matchPlayers{gap:8px}#play.arena-page .match-player{min-height:72px;padding:24px 12px 7px}
+ #play.arena-page .match-player>span{font-size:12px}#play.arena-page .match-player>strong{font-size:43px}#play.arena-page .match-player>small{font-size:8px;min-height:10px}
+ #play.arena-page .checkout-guide h3{font-size:8px}#play.arena-page .checkout-routes{font-size:9px}#play.arena-page .match-player .checkout-guide{top:3px;right:10px}
+ #play.arena-page .score-stage{min-height:70px;padding:10px 14px}#play.arena-page .bigscore{font-size:47px!important;margin-top:9px}#soloPlayerName{font-size:14px}#play.arena-page #scoreCaption{font-size:8px}
+ #play.arena-page #checkoutHome .checkout-guide{right:14px;top:3px}
+ .arena-extras{margin-top:5px;gap:6px}#play.arena-page .arena-extras details.play-extra{padding:5px 10px!important}#play.arena-page .arena-extras summary{font-size:9px;min-height:14px}
+ .arena-playing .tabs{margin-top:5px}.arena-playing .tabs button{min-height:26px;padding:3px!important;font-size:10px!important}
+ #play.arena-page #turnChange{padding:10px;gap:6px}#play.arena-page #turnChange strong{font-size:14px}#play.arena-page #confirmTurn{min-height:34px;font-size:12px}
+ #play.arena-page .round-break .cool-card{max-height:calc(100dvh - 20px);overflow:auto;padding:12px 18px;gap:4px}
+ #play.arena-page .cool-pixel{height:40px;width:auto;max-width:100%}
+ #play.arena-page .cool-ring{width:68px;height:68px}
+ #play.arena-page .cool-praise{font-size:20px!important}
+ #play.arena-page .cool-card button{min-height:30px;margin-top:3px}
+}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><canvas id="pixelFx" width="160" height="90" aria-hidden="true"></canvas><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
-<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.5.41-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
+<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.8.0-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
 
-<section class="page active" id="play"><div class="play-heading"><strong>COUNT-UP</strong><span>8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button></div><div class="grid playgrid"><article class="panel"><div class="playmeta"><span class="muted">TOTAL SCORE</span><strong id="roundlabel">ROUND 1 / 8</strong></div><div class="bigscore" id="score" aria-live="polite">0</div><div class="rounds" id="rounds"></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="次のラウンドへ"><div class="cool-card"><div class="cool-kicker">NEXT ROUND</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><canvas id="coolPixel" class="cool-pixel" width="128" height="60" aria-hidden="true"></canvas><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><p class="tiny muted" style="text-align:center">リングをクリック：SINGLE / DOUBLE / TRIPLE / BULL</p></article><div class="grid play-sidebar"><article class="panel"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="actions"><button id="newgame">新しいゲーム</button></div><div class="actions"><button id="endgame" class="warn">途中終了して保存</button></div><p class="tiny muted">3投で自動的に次のラウンドへ。未投球は自動補完しません。</p><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></article><details class="panel play-extra" open><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra" open><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div></div><article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div id="resultCompare"></div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article><div class="sheet hidden" id="accountSheet" role="dialog" aria-label="プレイヤー"><div class="sheet-box"><h3>PLAYER</h3><article class="panel" id="profilePanel" style="margin-top:16px"><h3>ユーザー名</h3><div class="grid cols2" style="margin-top:10px"><label>ニックネーム<input id="myNick" maxlength="32" placeholder="ゲストでもOK"></label></div><p class="tiny muted">練習記録に表示するニックネームです。</p></article><article class="panel" id="cloudPanel" style="margin-top:16px"><h3>CLOUD SYNC <span class="tiny muted">GOOGLE</span></h3><div class="tiny muted" id="cloudStatus">OFF</div><div class="actions"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudSync" class="hidden">SYNC NOW</button><button type="button" id="cloudLogout" class="hidden">ログアウト</button></div><p class="tiny muted">ログインすると、履歴とMY DARTSがクラウドに保存され、他の端末と同期されます。ログインしなくても使えます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div><div class="sheet hidden" id="aimSheet" role="dialog" aria-label="狙い"><div class="sheet-box"><article class="panel aim-settings"><h3>狙い / AIM TARGET</h3><div class="flex"><select id="aimSelect" aria-label="狙い"></select></div><p class="tiny muted">変更した後の投球から、この狙いで記録されます。それまでの記録はブル狙いとして扱います。分析は、狙いごとに分けて見られます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div></section>
-<section class="page" id="history"><div class="eyebrow">PRACTICE ARCHIVE</div><h1 class="section-title">スコア・結果</h1><p class="lead">まず最新のスコアを確認。過去の詳細もここから。</p><div class="grid cols2 result-actions"><button class="primary" id="againFromHistory">もう1ゲーム投げる →</button><button id="analyseFromHistory">分析を見る →</button></div><article class="panel latest-result"><div class="eyebrow">LATEST GAME</div><div id="savedNotice" class="saved-notice hidden" role="status">✓ 完走記録を保存しました</div><div id="latestResult" aria-live="polite">まだ記録がありません</div></article><details class="result-archive"><summary>過去のスコア一覧を開く</summary><article class="panel"><div class="minirows" style="max-height:420px"><table><thead><tr><th>日時</th><th>状態</th><th>得点</th><th>ブル</th><th>投数</th><th>詳細</th></tr></thead><tbody id="sessions"></tbody></table></div></article></details><article class="panel" style="margin-top:16px"><h3>投球詳細</h3><div id="sessiondetail" class="muted">履歴の「詳細」を押してください。</div></article></section>
-<section class="page" id="analysis"><div class="eyebrow">DARTS INTELLIGENCE</div><h1 class="section-title">PERFORMANCE</h1>
+<section class="page active arena-page" id="play">
+<div class="arena-toolbar"><div class="play-heading"><label class="game-picker">GAME <select id="gameSelect" aria-label="ゲームを選択"><option value="countup">COUNT-UP</option><option value="501">501 / 01</option><option value="301">301 / 01</option><option value="701">701 / 01</option></select></label><button type="button" class="match-setup" id="matchSetup">2人対戦</button><button type="button" class="match-setup hidden" id="soloMode">1人練習へ</button><span id="gameRules">8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button><button type="button" class="arena-settings" data-tab="settings" aria-label="設定を開く">⚙</button></div></div>
+<article class="panel arena-stage">
+ <div class="arena-topline"><strong id="arenaGameTitle">COUNT-UP</strong><strong id="roundlabel">ROUND 1 / 8</strong><span id="arenaTurnName">SOLO PRACTICE</span></div>
+ <div class="arena-layout">
+  <aside class="arena-rounds"><h3>ROUND SCORE</h3><div class="rounds" id="rounds"></div><button type="button" id="toggleRounds" aria-expanded="false">全ラウンド</button><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></aside>
+  <div class="arena-board"><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><div class="turn-change hidden" id="turnChange" role="status"><strong id="nextPlayerName"></strong><button type="button" class="primary" id="confirmTurn">交代して投げる</button><span class="tiny muted">200SのCHANGEでも交代できます</span></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="次のラウンドへ"><div class="cool-card"><div class="cool-kicker">NEXT ROUND</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><canvas id="coolPixel" class="cool-pixel" width="128" height="60" aria-hidden="true"></canvas><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div></div>
+  <aside class="arena-turn"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="arena-main-actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="arena-game-actions"><button id="newgame">新しいゲーム</button><button id="endgame" class="warn">途中終了して保存</button></div></aside>
+ </div>
+ <div class="arena-score-dock"><div class="score-stage"><div class="solo-player"><span id="soloPlayerName">PLAYER 1</span><span class="muted" id="scoreCaption">TOTAL SCORE</span></div><div id="checkoutHome"><aside class="checkout-guide hidden" id="checkoutGuide" aria-live="polite" aria-label="上がり方の候補（順不同）" title="順不同 · S:シングル / D:ダブル / T:トリプル / BULL:50点"><h3 id="checkoutTitle">CHECKOUT</h3><div class="checkout-routes" id="checkoutRoutes"></div></aside></div><div class="bigscore" id="score" aria-live="polite">0</div></div><div class="match-players hidden" id="matchPlayers" aria-label="2人の残点"></div></div>
+</article>
+<article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted" id="resultCaption">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div id="resultCompare"></div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article>
+<div class="arena-extras"><details class="panel play-extra"><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra"><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div>
+<div class="sheet hidden" id="matchSheet" role="dialog" aria-label="2人対戦の準備"><div class="sheet-box"><h3>2 PLAYER / LOCAL MATCH</h3><form id="matchForm"><p class="tiny muted">そのまま開始できます。名前やアカウントは変更できます。</p><div class="grid cols2"><label>プレーヤー1（先攻）<select id="playerOneIdentity" aria-label="プレーヤー1のアカウント"><option value="guest">ゲスト</option></select><input id="playerOneName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label><label>プレーヤー2<select id="playerTwoIdentity" aria-label="プレーヤー2のアカウント"><option value="guest">ゲスト</option></select><input id="playerTwoName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label></div><p class="tiny muted" id="matchAccountHint"></p><label class="match-start">開始点<select id="matchStartScore"><option value="501">501</option><option value="301">301</option><option value="701">701</option></select></label><p class="tiny muted">ブル50点 · オープンアウト · 各20ラウンド。先に0にした人の勝ち。</p><p class="tiny" id="matchNameError" role="status"></p><button type="submit" class="primary">この2人で対戦を始める</button></form><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
+<div class="sheet hidden" id="accountSheet" role="dialog" aria-label="プレイヤー"><div class="sheet-box"><h3>PLAYER</h3><article class="panel" id="profilePanel" style="margin-top:16px"><h3>ユーザー名</h3><div class="grid cols2" style="margin-top:10px"><label>ニックネーム<input id="myNick" maxlength="32" placeholder="ゲストでもOK"></label></div><p class="tiny muted">練習記録に表示するニックネームです。</p></article><article class="panel" id="cloudPanel" style="margin-top:16px"><h3>CLOUD SYNC <span class="tiny muted">GOOGLE</span></h3><div class="tiny muted" id="cloudStatus">OFF</div><div class="actions"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudSync" class="hidden">SYNC NOW</button><button type="button" id="cloudLogout" class="hidden">ログアウト</button></div><p class="tiny muted">ログインすると、履歴とMY DARTSがクラウドに保存され、他の端末と同期されます。ログインしなくても使えます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
+<div class="sheet hidden" id="aimSheet" role="dialog" aria-label="狙い"><div class="sheet-box"><article class="panel aim-settings"><h3>狙い / AIM TARGET</h3><div class="flex"><select id="aimSelect" aria-label="狙い"></select></div><p class="tiny muted">変更した後の投球から、この狙いで記録されます。それまでの記録はブル狙いとして扱います。分析は、狙いごとに分けて見られます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
+</section>
+<section class="page" id="history"><div class="eyebrow">PRACTICE ARCHIVE</div><h1 class="section-title">スコア・結果</h1><p class="lead">まず最新のスコアを確認。過去の詳細もここから。</p><div class="grid cols2 result-actions"><button class="primary" id="againFromHistory">もう1ゲーム投げる →</button><button id="analyseFromHistory">分析を見る →</button></div><article class="panel latest-result"><div class="eyebrow">LATEST GAME</div><div id="savedNotice" class="saved-notice hidden" role="status">✓ ゲーム記録を保存しました</div><div id="latestResult" aria-live="polite">まだ記録がありません</div></article><details class="result-archive"><summary>過去のスコア一覧を開く</summary><article class="panel"><div class="minirows" style="max-height:420px"><table><thead><tr><th>日時</th><th>状態</th><th>得点 / 残点</th><th>ブル</th><th>投数</th><th>詳細</th></tr></thead><tbody id="sessions"></tbody></table></div></article></details><article class="panel" style="margin-top:16px"><h3>投球詳細</h3><div id="sessiondetail" class="muted">履歴の「詳細」を押してください。</div></article></section>
+<section class="page" id="analysis"><div class="eyebrow">DARTS INTELLIGENCE</div><h1 class="section-title">PERFORMANCE</h1><p class="tiny muted">COUNT-UP ANALYSIS · 01の投球は履歴で確認できます。</p>
 <div class="analysis-periods" id="analysisPeriods" role="group" aria-label="分析するラウンド数"><button data-aim-period="1">1R</button><button data-aim-period="10" class="selected">10R</button><button data-aim-period="20">20R</button><button data-aim-period="all">ALL</button></div>
 <div class="analysis-scope" id="analysisScope">0R · 0 DARTS</div><div style="margin:10px 0 14px;padding:12px;border:1px solid #31414B;border-radius:10px;background:#15212B"><div id="roundTotal" style="font-size:16px;font-weight:bold">記録 0R ／ 分析対象 0R</div><details style="margin-top:8px"><summary style="cursor:pointer">ラウンドを確認・分析から除外</summary><p class="tiny muted">不要なラウンドは分析から除外できます。投球履歴は残り、いつでも元に戻せます。3投そろったラウンドが対象です。</p><div id="roundManager" style="max-height:300px;overflow:auto"></div></details></div><div class="aim-target-row hidden" id="analysisAim" role="group" aria-label="狙いで絞り込み"></div>
 <div class="grid cols4" id="metrics"></div>
@@ -541,7 +685,7 @@ function recordError(area,error){
  try{const raw=JSON.parse(localStorage.getItem(ERROR_LOG_KEY)||'[]'),rows=Array.isArray(raw)?raw:[];rows.push({at:new Date().toISOString(),area:String(area).slice(0,48),message:String(error&&error.message||error).slice(0,160)});localStorage.setItem(ERROR_LOG_KEY,JSON.stringify(rows.slice(-30)))}catch(_){}
 }
 function parseSavedState(raw){if(!raw)return null;try{const v=JSON.parse(raw);if(!v||v.schemaVersion!==DATA_SCHEMA_VERSION||!Array.isArray(v.sessions)||v.sessions.some(s=>!s||typeof s!=='object'||!Array.isArray(s.darts))|| (v.active!==null&&v.active!==undefined&&(!v.active||typeof v.active!=='object'||!Array.isArray(v.active.darts))))return null;return v}catch(_){return null}}
-function updateSaveIndicator(){const box=runtime.$('saveIndicator'),label=runtime.$('saveText');if(!box||!label)return;box.classList.toggle('save-error',runtime.saveOK===false);box.classList.toggle('save-pending',runtime.store.active.darts.length===24&&runtime.saveOK!==false);if(runtime.saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(runtime.saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=runtime.savedAt?new Date(runtime.savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=runtime.store.active.darts.length===24?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
+function updateSaveIndicator(){const box=runtime.$('saveIndicator'),label=runtime.$('saveText');if(!box||!label)return;box.classList.toggle('save-error',runtime.saveOK===false);box.classList.toggle('save-pending',runtime.sessionDone(runtime.store.active)&&runtime.saveOK!==false);if(runtime.saveOK===false){label.textContent='保存失敗 — ブラウザの保存領域を確認';return}if(runtime.saveOK===null){label.textContent='未投球 — 投げると自動保存';return}const time=runtime.savedAt?new Date(runtime.savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'';label.textContent=runtime.sessionDone(runtime.store.active)?'入力保存済み · 確定待ち':'自動保存済み · '+time;}
 function recoveryCandidates(){
  const rows=[['現在の保存',runtime.KEY],['直前の保存',runtime.KEY+'-recovery']];
  try{const h=JSON.parse(localStorage.getItem(RECOVERY_HISTORY_KEY)||'[]');if(Array.isArray(h))h.forEach((v,i)=>{if(typeof v==='string')rows.push(['履歴 '+(i+1),null,v])})}catch(_){}
@@ -612,9 +756,9 @@ let CLOUD_CFG,FB_BASE,docId;
 function profTouch(){if(runtime.cloud.applying)return;runtime.syncMeta.myAt=Date.now();syncMetaSave();try{cloudAuto()}catch(_){}}
 function syncMetaSave(){try{localStorage.setItem(runtime.SYNC_KEY,JSON.stringify(runtime.syncMeta))}catch(_){}}
 function cloudStatus(t){const e=runtime.$('cloudStatus');if(e)e.textContent=t}
-function cloudPendingCount(){const pushed=new Set(runtime.syncMeta.pushed);return runtime.store.sessions.filter(s=>runtime.validSession(s)&&!pushed.has(s.id)).length+(runtime.syncMeta.myAt>runtime.syncMeta.myPushed?1:0)}
+function cloudPendingCount(){const pushed=new Set(runtime.syncMeta.pushed);return runtime.store.sessions.filter(s=>(runtime.validSession(s)&&!runtime.isMatch(s))&&!pushed.has(s.id)).length+(runtime.syncMeta.myAt>runtime.syncMeta.myPushed?1:0)}
 function cloudQueue(){runtime.cloud.pending=true;clearTimeout(runtime.cloud.timer);runtime.cloud.timer=setTimeout(()=>{runtime.cloud.pending=false;if(runtime.cloud.user&&!runtime.cloud.busy&&!runtime.cloud.autoBusy)cloudAuto();else if(runtime.cloud.user)cloudQueue()},4500)}
-function cloudUi(){const u=runtime.cloud.user,on=!!u;const ac=runtime.$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=runtime.$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);runtime.$('cloudSync').classList.toggle('hidden',!on);runtime.$('cloudLogout').classList.toggle('hidden',!on);if(on&&!runtime.cloud.busy){const t=runtime.syncMeta.lastAt?new Date(runtime.syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
+function cloudUi(){runtime.renderMatchAccounts();const u=runtime.cloud.user,on=!!u;const ac=runtime.$('authChip');if(ac){ac.textContent=on?String(u.name||'LOGIN').slice(0,12):'GUEST';ac.classList.toggle('on',on)}const b=runtime.$('cloudLogin');if(!b)return;b.classList.toggle('hidden',on);runtime.$('cloudSync').classList.toggle('hidden',!on);runtime.$('cloudLogout').classList.toggle('hidden',!on);if(on&&!runtime.cloud.busy){const t=runtime.syncMeta.lastAt?new Date(runtime.syncMeta.lastAt).toTimeString().slice(0,5):'--:--';cloudStatus('ON · '+(u.name||'GOOGLE')+' · 未同期 '+cloudPendingCount()+'件 · LAST SYNC '+t)}}
 async function cloudLoadApi(){
  if(window.__DTL_CLOUD_FAKE)return window.__DTL_CLOUD_FAKE;
  const [a,au,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-auth.js'),import(FB_BASE+'firebase-firestore.js')]);
@@ -653,9 +797,9 @@ async function cloudSync(){
  if(!runtime.cloud.api||!runtime.cloud.user)return;if(runtime.cloud.busy||runtime.cloud.autoBusy){cloudQueue();return}runtime.cloud.busy=true;cloudStatus('SYNCING…');
  try{
   const uid=runtime.cloud.user.uid,api=runtime.cloud.api;
-  const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&runtime.validSession(s));
+  const remote=(await api.listSessions(uid)).filter(s=>s&&typeof s.id==='string'&&(runtime.validSession(s)&&!runtime.isMatch(s)));
   const rids=new Set(remote.map(s=>s.id)),lids=new Set(runtime.store.sessions.map(s=>s.id));
-  const add=remote.filter(s=>!lids.has(s.id)),up=runtime.store.sessions.filter(s=>!rids.has(s.id)&&runtime.validSession(s));
+  const add=remote.filter(s=>!lids.has(s.id)),up=runtime.store.sessions.filter(s=>!rids.has(s.id)&&(runtime.validSession(s)&&!runtime.isMatch(s)));
   for(const s of up)await api.putSession(uid,s);
   if(add.length){const before=runtime.store.sessions;runtime.store.sessions=[...runtime.store.sessions,...add].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));if(!runtime.persist()){runtime.store.sessions=before;throw Error('local save failed')}}
   runtime.syncMeta.pushed=[...new Set([...runtime.syncMeta.pushed,...rids,...up.map(s=>s.id)])];
@@ -678,7 +822,7 @@ function cloudAuto(){
   runtime.cloud.autoBusy=true;
   try{
    const uid=runtime.cloud.user.uid,api=runtime.cloud.api,done=new Set(runtime.syncMeta.pushed);
-   const up=runtime.store.sessions.filter(s=>!done.has(s.id)&&runtime.validSession(s));
+   const up=runtime.store.sessions.filter(s=>!done.has(s.id)&&(runtime.validSession(s)&&!runtime.isMatch(s)));
    for(const s of up){await api.putSession(uid,s);done.add(s.id)}
    runtime.syncMeta.pushed=[...done];syncMetaSave();
    if(runtime.syncMeta.myAt>runtime.syncMeta.myPushed)await cloudPushProfile(uid,api);
@@ -771,18 +915,230 @@ const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Ob
 modules.connectCatalog=connectCatalog;
 })();
 
+// Pure replay of actual throws. No fabricated darts after a bust or checkout.
+(()=>{'use strict';
+function connectZeroOne(runtime){
+const starts=[301,501,701];
+const isZero=s=>s?.gameType==='zero-one';
+const validAccount=a=>a===undefined||a===null||(a.provider==='google'&&typeof a.uid==='string'&&a.uid.length>0&&a.uid.length<=128&&!/[\u0000-\u0020\u007f]/.test(a.uid));
+const validPlayers=players=>Array.isArray(players)&&players.length===2&&players.every((p,i)=>p&&p.id==='p'+(i+1)&&typeof p.name==='string'&&p.name===p.name.trim()&&p.name.length>0&&p.name.length<=20&&!/[\u0000-\u001f\u007f]/.test(p.name)&&validAccount(p.account))&&players.filter(p=>p.account).length<=1;
+const isMatch=s=>isZero(s)&&validPlayers(s.players);
+const awaitingPlayer=s=>isMatch(s)&&!evaluateZero(s).ended&&(s.readyTurn??0)!==evaluateZero(s).turnIndex;
+function newMatch(start,names){
+ return {...runtime.newSession(),gameType:'zero-one',rules:{startScore:start,inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20},players:names.map((entry,i)=>({id:'p'+(i+1),name:typeof entry==='string'?entry:entry.name,...(entry.account?{account:{...entry.account}}:{})})),readyTurn:0};
+}
+const isCountup=s=>!!s&&(s.gameType===undefined||s.gameType==='countup');
+const validRules=r=>!!r&&starts.includes(r.startScore)&&r.inRule==='straight'&&r.outRule==='open'&&r.bullMode==='fat'&&r.maxRounds===20;
+// Open-out routes for this app's 50-point bull rules. Prefer fewer darts,
+// then singles, bull, doubles and triples; these are candidates, not odds.
+const checkoutCache=new Map();
+function checkoutRoutes(remaining,available){
+ if(!Number.isInteger(remaining)||remaining<1||remaining>180||!Number.isInteger(available)||available<1||available>3)return [];
+ const key=remaining+':'+available;
+ if(checkoutCache.has(key))return checkoutCache.get(key).map(route=>route.slice());
+ const targets=['S','D','T'].flatMap((ring,i)=>Array.from({length:20},(_,j)=>({label:ring+(20-j),score:(20-j)*(i+1),cost:i===0?0:i+1}))).concat([{label:'BULL',score:50,cost:1}]);
+ let candidates=[];
+ function find(left,count,start,path,cost){
+  if(count===0){if(left===0)candidates.push({path:path.slice().sort((a,b)=>b.score-a.score||a.cost-b.cost),cost});return}
+  if(left<count||left>60*count)return;
+  for(let i=start;i<targets.length;i++){const t=targets[i];if(t.score<=left)find(left-t.score,count-1,i,path.concat(t),cost+t.cost)}
+ }
+ for(let count=1;count<=available;count++){find(remaining,count,0,[],0);if(candidates.length)break}
+ candidates.sort((a,b)=>a.cost-b.cost||a.path.reduce((cmp,t,i)=>cmp||b.path[i].score-t.score,0));
+ const routes=candidates.slice(0,3).map(x=>x.path.map(t=>t.label));
+ checkoutCache.set(key,routes);
+ return routes.map(route=>route.slice());
+}
+function evaluateZero(s){
+ const rules=s?.rules;
+ if(!validRules(rules)||!Array.isArray(s.darts))return {valid:false};
+ if(s.players!==undefined)return evaluateMatch(s);
+ let remaining=rules.startScore,roundStart=remaining,round=1,dart=1,ended=false,reason=null;
+ const frames=[],rounds=[];
+ for(const d of s.darts){
+  if(ended||!d||d.roundIndex!==round||d.dartIndex!==dart||typeof d.segment!=='string'||! /^(?:[SDT](?:[1-9]|1[0-9]|20)|OB|IB|MISS)$/.test(d.segment)||d.score!==runtime.points(d.segment))return {valid:false};
+  const next=remaining-d.score,bust=next<0;
+  remaining=bust?roundStart:next;
+  const checkout=remaining===0,closed=bust||checkout||dart===3;
+  frames.push({round,dart,bust,remaining});
+  let row=rounds.at(-1);
+  if(!row||row.round!==round){row={round,start:roundStart,remaining,score:0,bust:false,closed:false};rounds.push(row)}
+  Object.assign(row,{remaining,score:roundStart-remaining,bust,closed});
+  if(checkout){ended=true;reason='checkout'}
+  else if(closed&&round===rules.maxRounds){ended=true;reason='round-limit'}
+  if(closed){round++;dart=1;roundStart=remaining}else dart++;
+ }
+ return {valid:true,remaining,round:ended?frames.at(-1).round:Math.min(round,rules.maxRounds),dart,ended,reason,frames,rounds};
+}
+function evaluateMatch(s){
+ if(!validPlayers(s.players))return {valid:false};
+ const scores=[s.rules.startScore,s.rules.startScore],frames=[],rounds=[];
+ let turn=0,dart=1,roundStart=scores[0],ended=false,reason=null,winner=null;
+ for(const d of s.darts){
+  const playerIndex=turn%2,round=Math.floor(turn/2)+1;
+  if(ended||!d||d.playerIndex!==playerIndex||d.roundIndex!==round||d.dartIndex!==dart||typeof d.segment!=='string'||!/^(?:[SDT](?:[1-9]|1[0-9]|20)|OB|IB|MISS)$/.test(d.segment)||d.score!==runtime.points(d.segment))return {valid:false};
+  const next=scores[playerIndex]-d.score,bust=next<0;
+  scores[playerIndex]=bust?roundStart:next;
+  const checkout=scores[playerIndex]===0,closed=bust||checkout||dart===3;
+  frames.push({round,dart,playerIndex,turn,bust,remaining:scores[playerIndex]});
+  let row=rounds.at(-1);
+  if(!row||row.turn!==turn){row={round,turn,playerIndex,start:roundStart};rounds.push(row)}
+  Object.assign(row,{remaining:scores[playerIndex],score:roundStart-scores[playerIndex],bust,closed});
+  if(checkout){ended=true;reason='checkout';winner=playerIndex}
+  else if(closed&&turn===39){ended=true;reason='round-limit'}
+  if(closed&&!ended){turn++;dart=1;roundStart=scores[turn%2]}else if(!closed)dart++;
+ }
+ const playerIndex=turn%2;
+ return {valid:true,remaining:scores[playerIndex],scores,playerIndex,turnIndex:turn,round:Math.floor(turn/2)+1,dart,ended,reason,winner,frames,rounds};
+}
+const sessionDone=s=>isZero(s)?evaluateZero(s).ended===true:isCountup(s)&&s.darts.length===24;
+const roundReady=s=>isZero(s)?s.darts.length>0&&!sessionDone(s)&&evaluateZero(s).dart===1:s.darts.length>0&&s.darts.length%3===0;
+function validZeroSession(s){
+ if(!isZero(s)||typeof s.id!=='string'||typeof s.startedAt!=='string'||!['completed','abandoned'].includes(s.status)||!Array.isArray(s.darts)||!s.darts.length||s.darts.length>(isMatch(s)?120:60)||s.darts.some(d=>typeof d?.id!=='string'))return false;
+ const state=evaluateZero(s);
+ return state.valid&&(s.status==='completed'?state.ended:!state.ended)&&(!s.result||(s.result.reason===state.reason&&s.result.remaining===state.remaining&&(!isMatch(s)||(s.result.winner===state.winner&&JSON.stringify(s.result.scores)===JSON.stringify(state.scores)))));
+}
+function gameName(s){return isZero(s)?String(s.rules.startScore)+' / 01'+(isMatch(s)?' · 2P':''):'COUNT-UP'}
+function gameOutcome(s){if(s.status==='abandoned')return '途中終了';if(!isZero(s))return '完走';const q=evaluateZero(s);return isMatch(s)?q.winner!==null?'P'+(q.winner+1)+' WIN':'DRAW / ROUND LIMIT':q.reason==='checkout'?'CHECKOUT':'ROUND LIMIT'}
+function gameScore(s){return isMatch(s)?evaluateZero(s).scores.join(' / '):isZero(s)?evaluateZero(s).remaining:runtime.sum(s.darts)}
+function matchSummary(s){return isMatch(s)?s.players.map((p,i)=>'P'+(i+1)+' '+p.name+' · 残り '+evaluateZero(s).scores[i]).join(' / '):''}
+function initialize(){
+ const countup={add:runtime.add,startNew:runtime.startNew,undo:runtime.undo,finishEarly:runtime.finishEarly,confirmResult:runtime.confirmResult};
+ function commit(status,choice,names){
+  const s=runtime.store.active,previousChoice=runtime.store.gameChoice;
+  const previousResult=s.result;
+  s.status=status;s.endedAt=new Date().toISOString();
+  if(isZero(s)){const q=evaluateZero(s);s.result={reason:q.reason,remaining:q.remaining,...(isMatch(s)?{winner:q.winner,scores:q.scores}: {})}}
+  runtime.store.sessions.unshift(s);
+  if(choice!==undefined)runtime.store.gameChoice=choice;
+  runtime.store.active=names?newMatch(Number(choice),names):choice===undefined&&isMatch(s)?newMatch(s.rules.startScore,s.players):runtime.newSession();
+  if(!runtime.persist()){
+   runtime.store.active=s;runtime.store.sessions.shift();runtime.store.gameChoice=previousChoice;
+   s.status='active';s.endedAt=null;if(previousResult===undefined)delete s.result;else s.result=previousResult;
+   return false;
+  }
+  return true;
+ }
+ function replaceEmpty(choice,names){
+  const previous=runtime.store.active,previousChoice=runtime.store.gameChoice;
+  runtime.store.gameChoice=choice;runtime.store.active=names?newMatch(Number(choice),names):runtime.newSession();
+  if(!runtime.persist()){runtime.store.active=previous;runtime.store.gameChoice=previousChoice;return false}return true;
+ }
+ function selectGame(choice,forceSolo=false){
+  if(!['countup','301','501','701'].includes(choice))return;
+  const s=runtime.store.active,current=isZero(s)?String(s.rules.startScore):'countup';
+  if(choice===current&&!forceSolo)return;
+  if(s.darts.length){
+   if(!confirm(sessionDone(s)?'現在の結果を保存してゲームを切り替えますか？':'進行中のゲームを途中終了として保存し、ゲームを切り替えますか？')){runtime.render();return}
+   if(!commit(sessionDone(s)?'completed':'abandoned',choice)){runtime.render();return}
+  }else if(!replaceEmpty(choice)){runtime.render();return}
+  runtime.cancelAchievementDelay();runtime.finishRoundBreak();runtime.showResult=false;runtime.justSaved=false;runtime.render();runtime.toast('READY TO THROW');
+ }
+ function addZero(segment,source='manual',zone=null){
+  if(runtime.roundBreakUntil>Date.now())return;
+  const s=runtime.store.active,q=evaluateZero(s);
+  if(!q.valid||q.ended||awaitingPlayer(s))return;
+  s.darts.push({id:runtime.id(),sessionId:s.id,roundIndex:q.round,dartIndex:q.dart,...(isMatch(s)?{playerIndex:q.playerIndex}:{}),timestamp:new Date().toISOString(),segment,zone:zone||null,score:runtime.points(segment),inputSource:source,aim:runtime.curAim(),corrected:false});
+  const next=evaluateZero(s);
+  if(!next.valid){s.darts.pop();return}
+  const last=next.frames.at(-1),row=next.rounds.at(-1);
+  runtime.showResult=next.ended;runtime.persist();runtime.render();runtime.flashBoardHit(segment,zone);
+  if(next.ended){
+   runtime.playSound(next.reason==='checkout'?'finish':'round');
+   const title=isMatch(s)?next.winner!==null?s.players[next.winner].name+' WIN!':'DRAW / ROUND LIMIT':next.reason==='checkout'?'CHECKOUT!':'ROUND LIMIT';
+   runtime.toast(title);runtime.gameEffect(title,s.darts.length+' DARTS / 残り '+gameScore(s),'finish',1800);
+  }else if(row.closed){
+   if(isMatch(s)){runtime.playSound(last.bust?'miss':'round');runtime.toast((last.bust?'BUST · ':'')+s.players[next.playerIndex].name+'に交代');return}
+   runtime.playSound(last.bust?'miss':'round');runtime.toast(last.bust?'BUST — ラウンド開始時の残点に戻ります':'NEXT ROUND');
+   runtime.beginRoundBreak(row.round,row.score,s.darts.filter(d=>d.roundIndex===row.round));
+   runtime.$('roundBreakLabel').textContent='ROUND '+row.round+(last.bust?' BUST':' CLEAR');
+   runtime.$('roundBreakScore').textContent='残り '+next.remaining;
+   runtime.$('roundBreakPraise').textContent=last.bust?'BUST!':runtime.roundPraise(s.darts.filter(d=>d.roundIndex===row.round),row.score);
+   runtime.playSound('cooldown',.6);
+  }else{
+   runtime.playSound(segment==='MISS'?'miss':segment==='IB'?'inner':segment==='OB'?'bull':segment[0]==='T'?'triple':segment[0]==='D'?'double':'hit');
+   runtime.toast(runtime.label(segment)+' — 残り '+next.remaining);
+  }
+ }
+ runtime.add=(...args)=>isZero(runtime.store.active)?addZero(...args):countup.add(...args);
+ runtime.undo=()=>{
+  if(!isZero(runtime.store.active))return countup.undo();
+  runtime.cancelAchievementDelay();runtime.finishRoundBreak();
+  if(!runtime.store.active.darts.length)return;
+  runtime.store.active.darts.pop();if(isMatch(runtime.store.active))runtime.store.active.readyTurn=evaluateZero(runtime.store.active).turnIndex;runtime.showResult=false;runtime.persist();runtime.render();runtime.toast('直前の投球を取り消しました');
+ };
+ runtime.confirmResult=()=>{
+  if(!isZero(runtime.store.active))return countup.confirmResult();
+  if(!sessionDone(runtime.store.active))return;
+  runtime.finishRoundBreak();
+  if(!commit('completed'))return;
+  runtime.showResult=false;runtime.justSaved=true;runtime.viewId=runtime.store.sessions[0].id;
+  runtime.toast('01の結果を保存しました');runtime.changeTab('history');
+ };
+ runtime.finishEarly=()=>{
+  if(!isZero(runtime.store.active))return countup.finishEarly();
+  if(sessionDone(runtime.store.active))return runtime.confirmResult();
+  if(!runtime.store.active.darts.length||!confirm('この01を途中終了として保存しますか？'))return;
+  if(!commit('abandoned'))return;
+  runtime.finishRoundBreak();runtime.showResult=false;runtime.render();runtime.toast('途中終了として保存しました');
+ };
+ runtime.startNew=()=>{
+  if(!isZero(runtime.store.active))return countup.startNew();
+  const s=runtime.store.active;
+  if(s.darts.length){if(!confirm(sessionDone(s)?'結果を保存して新しい01を始めますか？':'途中終了として保存し、新しい01を始めますか？'))return;if(!commit(sessionDone(s)?'completed':'abandoned'))return}
+  else if(!replaceEmpty(String(s.rules.startScore),isMatch(s)?s.players:undefined))return;
+  runtime.finishRoundBreak();runtime.showResult=false;runtime.changeTab('play');runtime.toast('NEW GAME — GOOD LUCK!');
+ };
+ runtime.$('gameSelect').onchange=e=>selectGame(e.target.value);
+ runtime.$('soloMode').onclick=()=>selectGame(String(runtime.store.active.rules.startScore),true);
+ runtime.$('matchSetup').onclick=()=>runtime.openMatchSetup();
+ runtime.$('matchForm').onsubmit=e=>{
+  e.preventDefault();const names=runtime.matchAccountPlayers(),start=runtime.$('matchStartScore').value;
+  if(!validPlayers(names)){runtime.$('matchNameError').textContent='2人の名前を1〜20文字で入力してください';return}
+  if(!['301','501','701'].includes(start))return;
+  const s=runtime.store.active;
+  if(s.darts.length){if(!confirm(sessionDone(s)?'現在の結果を保存して2人対戦を始めますか？':'現在のゲームを途中終了として保存し、2人対戦を始めますか？'))return;if(!commit(sessionDone(s)?'completed':'abandoned',start,names))return}
+  else if(!replaceEmpty(start,names))return;
+  runtime.cancelAchievementDelay();runtime.finishRoundBreak();runtime.showResult=false;runtime.justSaved=false;runtime.closeSheets();runtime.changeTab('play');runtime.toast(names[0].name+'からスタート');
+ };
+ runtime.$('confirmTurn').onclick=()=>runtime.confirmPlayerChange();
+}
+function confirmPlayerChange(){
+ const s=runtime.store.active;if(!awaitingPlayer(s))return false;
+ const old=s.readyTurn,q=evaluateZero(s);s.readyTurn=q.turnIndex;
+ if(!runtime.persist()){if(old===undefined)delete s.readyTurn;else s.readyTurn=old;runtime.render();return false}
+ runtime.render();runtime.toast(s.players[q.playerIndex].name+' · READY');return true;
+}
+Object.assign(runtime,{isZero,isMatch,isCountup,evaluateZero,sessionDone,roundReady,validZeroSession,gameName,gameOutcome,gameScore,matchSummary,checkoutRoutes,awaitingPlayer,confirmPlayerChange});
+return {initialize};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectZeroOne=connectZeroOne;
+})();
+
 // game/rules: existing behavior extracted from app.js.
 // Register functions first; app.js runs initializers in the original order.
 (()=>{'use strict';
 function connectRules(runtime){
-function newSession(){return {id:runtime.id(),schemaVersion:1,gameType:'countup',startedAt:new Date().toISOString(),endedAt:null,status:'active',setupId:runtime.myDarts.current||null,setupName:runtime.myDarts.sets.find(x=>x.id===runtime.myDarts.current)?.SetupName||null,nickname:runtime.myDarts.nick||null,darts:[]}}
+function newSession(){
+ const choice=runtime.store.gameChoice,zero=['301','501','701'].includes(choice);
+ return {
+  id:runtime.id(),schemaVersion:1,gameType:zero?'zero-one':'countup',
+  ...(zero?{rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}}:{}),
+  startedAt:new Date().toISOString(),endedAt:null,status:'active',
+  setupId:runtime.myDarts.current||null,
+  setupName:runtime.myDarts.sets.find(x=>x.id===runtime.myDarts.current)?.SetupName||null,
+  nickname:runtime.myDarts.nick||null,darts:[]
+ };
+}
 Object.assign(runtime,{newSession});
 function initialize(){
 if(![5,8,10,15].includes(Number(runtime.store.roundDelay)))runtime.store.roundDelay=8;
 if(!runtime.store.active)runtime.store.active=newSession();
 if(localStorage.getItem(runtime.KEY)!==null){runtime.saveOK=true;runtime.savedAt=Date.now()}
-if(runtime.store.active.darts.length===24)runtime.showResult=true;
 runtime.points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
+if(runtime.sessionDone(runtime.store.active))runtime.showResult=true;
+if(runtime.isZero(runtime.store.active))runtime.store.gameChoice=String(runtime.store.active.rules.startScore);else runtime.store.gameChoice='countup';
 runtime.label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
 runtime.dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):runtime.label(d.segment);
 runtime.isBull=d=>d.segment==='IB'||d.segment==='OB';
@@ -797,8 +1153,8 @@ runtime.isHit=d=>runtime.aimHit(d,runtime.hitAim);
 runtime.hitRate=ds=>ds.length?Math.round(ds.filter(runtime.isHit).length/ds.length*1000)/10:0;
 runtime.AT=t=>runtime.hitAim==='BULL'?t:t.replace(/\b(INNER |OUTER |IN |OUT )?BULL(S?)\b/g,(m,p,pl)=>p?m:runtime.hitAim+pl).replace(/ブル/g,runtime.hitAim).replace('（HAT TRICK）','');
 runtime.sum=ds=>ds.reduce((a,d)=>a+d.score,0);
-runtime.all=()=>runtime.store.sessions.flatMap(s=>s.darts);
-runtime.finished=()=>runtime.store.sessions.filter(s=>s.status==='completed');
+runtime.all=()=>runtime.store.sessions.filter(runtime.isCountup).flatMap(s=>s.darts);
+runtime.finished=()=>runtime.store.sessions.filter(s=>runtime.isCountup(s)&&s.status==='completed');
 runtime.completedDarts=()=>runtime.finished().flatMap(s=>s.darts);
 runtime.rate=ds=>ds.length?Math.round(ds.filter(runtime.isBull).length/ds.length*1000)/10:0;
 runtime.esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1122,7 +1478,7 @@ modules.connectNavigation=connectNavigation;
 (()=>{'use strict';
 function connectBoard(runtime){
 function flashBoardHit(segment,zone){if(segment==='MISS')return;const matching=[...runtime.$('board').querySelectorAll('svg .hit')].filter(el=>el.dataset.segment===(zone||segment));matching.forEach(el=>{el.classList.remove('flash-hit','flash-outer-bull','flash-inner-bull');void el.getBoundingClientRect();const cls=segment==='IB'?'flash-inner-bull':segment==='OB'?'flash-outer-bull':'flash-hit';el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),950)})}
-function drawBoard(){const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-230 -230 460 460');svg.setAttribute('role','img');svg.setAttribute('aria-label','着弾位置を選択するダーツボード');function el(t,a){let n=document.createElementNS(NS,t);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n}function xy(r,a){return [r*Math.sin(a),-r*Math.cos(a)]}function wedge(r1,r2,a1,a2){let p=xy(r1,a1),q=xy(r2,a1),r=xy(r2,a2),s=xy(r1,a2);return 'M'+p+' L'+q+' A'+r2+' '+r2+' 0 0 1 '+r+' L'+s+' A'+r1+' '+r1+' 0 0 0 '+p+' Z'}el('circle',{r:225,fill:'#0a121b',stroke:'#4b6879','stroke-width':4});for(let i=0;i<20;i++){let a=i*Math.PI/10,n=runtime.nums[i];for(let [r1,r2,ring] of [[17,100,'S'],[100,113,'T'],[113,172,'S'],[172,185,'D']]){let col=ring==='S'?(i%2?'#ddd9c9':'#27323a'):(i%2?'#d64b55':'#2eb28d');let p=el('path',{d:wedge(r1,r2,a-Math.PI/20,a+Math.PI/20),fill:col,stroke:'#72828b','stroke-width':.65,class:'hit',tabindex:'0',role:'button','data-segment':ring+n+(ring==='S'?(r2===100?'I':'O'):''),'aria-label':runtime.label(ring+n)});p.addEventListener('click',()=>runtime.add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):'')));p.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runtime.add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):''))}})}let [x,y]=xy(206,a),t=el('text',{x,y,fill:'#edf3fa','font-size':15,'font-weight':700,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none'});t.textContent=n}let ob=el('circle',{r:17,fill:'#1d9b7b',stroke:'#d9e0d8','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'OB','aria-label':'OUTER BULL 25'});ob.onclick=()=>runtime.add('OB');ob.onkeydown=e=>{if(e.key==='Enter')runtime.add('OB')};let ib=el('circle',{r:7.7,fill:'#d94e5c',stroke:'#f0d2c6','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'IB','aria-label':'INNER BULL 50'});ib.onclick=e=>{e.stopPropagation();runtime.add('IB')};ib.onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();runtime.add('IB')}};runtime.$('board').appendChild(svg)}
+function drawBoard(){const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','-230 -230 460 460');svg.setAttribute('role','img');svg.setAttribute('aria-label','着弾位置を選択するダーツボード');function el(t,a){let n=document.createElementNS(NS,t);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));svg.appendChild(n);return n}function xy(r,a){return [r*Math.sin(a),-r*Math.cos(a)]}function wedge(r1,r2,a1,a2){let p=xy(r1,a1),q=xy(r2,a1),r=xy(r2,a2),s=xy(r1,a2);return 'M'+p+' L'+q+' A'+r2+' '+r2+' 0 0 1 '+r+' L'+s+' A'+r1+' '+r1+' 0 0 0 '+p+' Z'}el('circle',{r:225,fill:'#0a121b',stroke:'#4b6879','stroke-width':4});for(let i=0;i<20;i++){let a=i*Math.PI/10,n=runtime.nums[i];for(let [r1,r2,ring] of [[17,100,'S'],[100,113,'T'],[113,172,'S'],[172,185,'D']]){let col=ring==='S'?(i%2?'#ddd9c9':'#27323a'):(i%2?'#d64b55':'#2eb28d');let p=el('path',{d:wedge(r1,r2,a-Math.PI/20,a+Math.PI/20),fill:col,stroke:'#72828b','stroke-width':.65,class:'hit',tabindex:'0',role:'button','data-segment':ring+n+(ring==='S'?(r2===100?'I':'O'):''),'aria-label':runtime.label(ring+n)});p.addEventListener('click',()=>runtime.add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):'')));p.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runtime.add(ring+n,'manual',ring+n+(ring==='S'?(r2===100?'I':'O'):''))}})}let [x,y]=xy(206,a),t=el('text',{x,y,fill:'#edf3fa','font-size':15,'font-weight':700,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none'});t.textContent=n}let ob=el('circle',{r:17,fill:'#1d9b7b',stroke:'#d9e0d8','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'OB','aria-label':'OUTER BULL '+runtime.points('OB')});ob.onclick=()=>runtime.add('OB');ob.onkeydown=e=>{if(e.key==='Enter')runtime.add('OB')};let ib=el('circle',{r:7.7,fill:'#d94e5c',stroke:'#f0d2c6','stroke-width':1.5,class:'hit',role:'button',tabindex:'0','data-segment':'IB','aria-label':'INNER BULL 50'});ib.onclick=e=>{e.stopPropagation();runtime.add('IB')};ib.onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();runtime.add('IB')}};runtime.$('board').appendChild(svg)}
 Object.assign(runtime,{flashBoardHit,drawBoard});
 
 return {};
@@ -1269,7 +1625,7 @@ modules.connectAim=connectAim;
 // Register functions first; app.js runs initializers in the original order.
 (()=>{'use strict';
 function connectRoundStorage(runtime){
-function roundEntries(){const entries=[];for(const s of runtime.store.sessions.slice().reverse().concat([runtime.store.active])){if(!s||!Array.isArray(s.darts))continue;for(let i=0;i+3<=s.darts.length;i+=3){entries.push({key:runtime.roundKey(s,i/3),session:s,round:i/3+1,darts:s.darts.slice(i,i+3)})}}return entries}
+function roundEntries(){const entries=[];for(const s of runtime.store.sessions.slice().reverse().concat([runtime.store.active])){if(!runtime.isCountup(s)||!Array.isArray(s.darts))continue;for(let i=0;i+3<=s.darts.length;i+=3){entries.push({key:runtime.roundKey(s,i/3),session:s,round:i/3+1,darts:s.darts.slice(i,i+3)})}}return entries}
 function renderRoundManager(){const el=runtime.$('roundManager');if(!el)return;const entries=roundEntries(),excluded=new Set(runtime.excludedRounds),valid=new Set(entries.map(x=>x.key));if(runtime.excludedRounds.some(x=>!valid.has(x))){runtime.excludedRounds=runtime.excludedRounds.filter(x=>valid.has(x));try{localStorage.setItem(runtime.EXCLUDED_ROUNDS_KEY,JSON.stringify(runtime.excludedRounds))}catch(_){}}
 const used=entries.filter(x=>!excluded.has(x.key));runtime.$('roundTotal').textContent='記録 '+entries.length+'R ／ 分析対象 '+used.length+'R ／ 除外 '+(entries.length-used.length)+'R';
 el.innerHTML=entries.slice().reverse().map(x=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #31414B"><span style="font-size:12px">'+new Date(x.darts[0].timestamp).toLocaleString('ja-JP')+'　R'+x.round+'　'+x.darts.map(d=>runtime.label(d.segment)).join(' / ')+'　'+runtime.sum(x.darts)+'pt</span><button type="button" data-round-key="'+runtime.esc(x.key)+'" aria-pressed="'+excluded.has(x.key)+'">'+(excluded.has(x.key)?'元に戻す':'分析から除外')+'</button></div>').join('')||'<p class="muted">まだ3投そろったラウンドがありません。</p>';
@@ -1296,10 +1652,10 @@ function connectPeriod(runtime){
 let AIM_SKIP;
 function allRecordedRounds(raw){
  const blocks=[];
- const sessions=runtime.store.sessions.slice().reverse();
+ const sessions=runtime.store.sessions.filter(runtime.isCountup).slice().reverse();
  /* Only complete 3-dart rounds count as a round (1R/10R/20R/ALL); an unfinished round never shrinks or skews the window. */
  for(const s of sessions)for(let i=0;i<s.darts.length;i+=3){const round=s.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(s,i/3)))blocks.push(round)}
- for(let i=0;i<runtime.store.active.darts.length;i+=3){const round=runtime.store.active.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(runtime.store.active,i/3)))blocks.push(round)}
+ for(let i=0;runtime.isCountup(runtime.store.active)&&i<runtime.store.active.darts.length;i+=3){const round=runtime.store.active.darts.slice(i,i+3);if(round.length===3&&!runtime.excludedRounds.includes(runtime.roundKey(runtime.store.active,i/3)))blocks.push(round)}
  return raw?blocks:blocks.filter(r=>runtime.aimOf(r[0])===effectiveAim(blocks));
 }
 function effectiveAim(blocks){
@@ -1481,7 +1837,7 @@ function renderPace(rounds){
 }
 function renderLog(){
  const byDay=new Map();
- for(const d of runtime.all().concat(runtime.store.active.darts)){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
+ for(const d of runtime.all().concat(runtime.isCountup(runtime.store.active)?runtime.store.active.darts:[])){if(!d.timestamp||isNaN(Date.parse(d.timestamp)))continue;const k=dayKey(d.timestamp);byDay.set(k,(byDay.get(k)||0)+1)}
  const today=new Date(),cells=[];
  for(let i=34;i>=0;i--){const t=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i),k=dayKey(t),n=byDay.get(k)||0;cells.push({k,n,t,today:i===0})}
  const level=n=>n===0?0:n<24?1:n<72?2:n<144?3:4;
@@ -1704,6 +2060,113 @@ const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Ob
 modules.connectHelp=connectHelp;
 })();
 
+(()=>{'use strict';
+function connectMatchAccounts(runtime){
+const slots=[{name:'playerOneName',identity:'playerOneIdentity',fallback:'プレーヤー1'},{name:'playerTwoName',identity:'playerTwoIdentity',fallback:'プレーヤー2'}];
+const user=()=>runtime.cloud.user&&typeof runtime.cloud.user.uid==='string'?runtime.cloud.user:null;
+const displayName=u=>String(u.name||runtime.myDarts.nick||'ログインユーザー').replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,20)||'ログインユーザー';
+function renderMatchAccounts(){
+ const u=user();
+ for(const slot of slots){
+  const select=runtime.$(slot.identity),input=runtime.$(slot.name);if(!select||!input)continue;
+  if(select.dataset.source==='current'&&(!u||select.dataset.uid!==u.uid)){
+   select.dataset.source='guest';input.value=input.dataset.guestName||slot.fallback;
+  }
+  const current=select.dataset.source==='current'&&!!u;
+  select.replaceChildren();
+  const guest=document.createElement('option');guest.value='guest';guest.textContent='ゲスト';select.appendChild(guest);
+  if(u){const account=document.createElement('option');account.value='current';account.textContent=displayName(u)+'（ログイン中）';select.appendChild(account)}
+  select.value=current?'current':'guest';input.readOnly=current;
+  if(current)input.value=displayName(u);
+ }
+ runtime.$('matchAccountHint').textContent=u?'ログイン中のアカウントは、どちらか1人に選べます。':'未ログインでも、そのまま対戦できます。ログインするとアカウントを選べます。';
+}
+function openMatchSetup(){
+ const s=runtime.store.active,u=user();runtime.$('matchNameError').textContent='';
+ slots.forEach((slot,i)=>{
+  const p=runtime.isMatch(s)?s.players[i]:null,input=runtime.$(slot.name),select=runtime.$(slot.identity);
+  input.value=p?.name||slot.fallback;input.dataset.guestName=p?.account?slot.fallback:input.value;
+  select.dataset.source=p?.account&&p.account.uid===u?.uid?'current':'guest';select.dataset.uid=u?.uid||'';
+ });
+ runtime.$('matchStartScore').value=runtime.isZero(s)?String(s.rules.startScore):'501';
+ renderMatchAccounts();runtime.openSheet('matchSheet');
+}
+function matchAccountPlayers(){
+ renderMatchAccounts();const u=user();
+ return slots.map((slot,i)=>({id:'p'+(i+1),name:runtime.$(slot.name).value.trim(),...(u&&runtime.$(slot.identity).value==='current'?{account:{provider:'google',uid:u.uid}}:{})}));
+}
+function initialize(){
+ slots.forEach(slot=>runtime.$(slot.identity).onchange=()=>{
+  const input=runtime.$(slot.name),select=runtime.$(slot.identity),u=user();
+  if(select.value==='current'&&u){
+   if(!input.readOnly)input.dataset.guestName=input.value;
+   for(const other of slots){if(other===slot)continue;const otherSelect=runtime.$(other.identity);if(otherSelect.dataset.source==='current'){otherSelect.dataset.source='guest';runtime.$(other.name).value=runtime.$(other.name).dataset.guestName||other.fallback}}
+   select.dataset.source='current';select.dataset.uid=u.uid;
+  }else{select.dataset.source='guest';input.value=input.dataset.guestName||slot.fallback}
+  renderMatchAccounts();
+ });
+}
+Object.assign(runtime,{openMatchSetup,matchAccountPlayers,renderMatchAccounts});
+return {initialize};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectMatchAccounts=connectMatchAccounts;
+})();
+
+(()=>{'use strict';
+function connectZeroOneView(runtime){
+function renderZero(){
+ const s=runtime.store.active,q=runtime.evaluateZero(s),ds=s.darts;
+ if(!q.valid){runtime.$('score').textContent='—';runtime.$('miss').disabled=true;return}
+ const match=runtime.isMatch(s),pending=runtime.awaitingPlayer(s);
+ const guide=runtime.$('checkoutGuide');runtime.$('checkoutHome').appendChild(guide);
+ if(match){
+  runtime.$('matchPlayers').classList.remove('hidden');
+  runtime.$('matchPlayers').innerHTML=s.players.map((p,i)=>'<div class="match-player p'+(i+1)+' '+(i===q.playerIndex?'current':'')+'" '+(i===q.playerIndex?'aria-current="true"':'')+'><span title="'+runtime.esc(p.name)+'">P'+(i+1)+' · '+runtime.esc(p.name)+'</span><strong>'+q.scores[i]+'</strong><small>'+(q.ended?(q.winner===i?'WIN':q.winner===null?'DRAW':''):i===q.playerIndex?(pending?'交代待ち':'THROWING'):'WAIT')+'</small></div>').join('');
+  runtime.$('matchPlayers').querySelector('.current').appendChild(guide);
+  runtime.$('scoreCaption').textContent='P'+(q.playerIndex+1)+' REMAINING';
+  runtime.$('turnChange').classList.toggle('hidden',!pending);
+  runtime.$('nextPlayerName').textContent='P'+(q.playerIndex+1)+' · '+s.players[q.playerIndex].name+'の番です';
+  runtime.$('confirmTurn').textContent='交代して投げる';
+  runtime.$('livebull').innerHTML=runtime.bullBars(ds.filter(d=>d.playerIndex===q.playerIndex),runtime.curAim());
+ }
+ runtime.$('score').textContent=q.remaining;
+ guide.classList.toggle('hidden',q.ended||q.remaining>180);
+ if(!q.ended&&q.remaining<=180){
+  const available=4-q.dart,routes=runtime.checkoutRoutes(q.remaining,available);
+  const nextRound=!match&&q.dart===1&&q.rounds.at(-1)?.closed;
+  runtime.$('checkoutTitle').textContent='CHECKOUT · '+(nextRound?'次ラウンド ':'残り ')+available+'投';
+  runtime.$('checkoutRoutes').replaceChildren();
+  if(routes.length){for(const route of routes){const item=document.createElement('span');item.className='checkout-route';item.textContent=route.join(' + ');runtime.$('checkoutRoutes').appendChild(item)}}
+  else runtime.$('checkoutRoutes').textContent='残り'+available+'投で上がれる候補はありません';
+ }
+ runtime.$('roundlabel').textContent='ROUND '+q.round+' / 20';
+ runtime.$('progress').textContent=ds.length+' DARTS';
+ runtime.$('rounds').innerHTML=Array.from({length:20},(_,i)=>{
+  const r=q.rounds.find(x=>x.round===i+1&&(!match||x.playerIndex===q.playerIndex));
+  return '<div class="'+(r?.closed?'done':i+1===q.round?'active':'')+'">R'+(i+1)+'<br><b>'+(r?(r.bust?'BUST':r.score):'—')+'</b></div>';
+ }).join('');
+ const last=match?q.rounds.filter(r=>r.playerIndex===q.playerIndex).at(-1):q.rounds.at(-1),displayRound=match?q.round:last?.round||1,current=ds.filter(d=>d.roundIndex===displayRound&&(!match||d.playerIndex===q.playerIndex));
+ runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{
+  const d=current[i];
+  return '<div class="throw '+(!q.ended&&!d&&displayRound===q.round&&i+1===q.dart?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):last?.bust?'BUST':q.ended?'END':'READY')+'</span></div>';
+ }).join('');
+ runtime.$('resultpanel').classList.toggle('hidden',!q.ended||!runtime.showResult);
+ runtime.$('resultscore').textContent=q.remaining;
+ runtime.$('resultCaption').textContent=q.reason==='checkout'?'CHECKOUT! 残点0でクリアしました。':'ROUND LIMIT · 20ラウンド終了。残点を記録します。';
+ runtime.$('resultCompare').textContent=runtime.gameName(s)+' · '+q.round+' ROUND · '+ds.length+' DARTS';
+ if(match){runtime.$('resultCaption').textContent=q.winner!==null?'P'+(q.winner+1)+' · '+s.players[q.winner].name+' WIN!':'DRAW · 2人とも20ラウンド終了';runtime.$('resultCompare').textContent=runtime.matchSummary(s);}
+ runtime.$('resultbull').textContent=ds.filter(runtime.isBull).length+' / '+ds.length;
+ runtime.$('saveResult').disabled=!q.ended;runtime.$('miss').disabled=q.ended;
+ runtime.$('throwlog').innerHTML=ds.map((d,i)=>'<tr><td>'+(match?'P'+(d.playerIndex+1)+' · ':'')+'R'+d.roundIndex+'-'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+(q.frames[i].bust?' · BUST':'')+'</td><td class="num">'+d.score+' → '+q.frames[i].remaining+'</td></tr>').reverse().join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
+}
+Object.assign(runtime,{renderZero});
+return {};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectZeroOneView=connectZeroOneView;
+})();
+
 // ui/render: existing behavior extracted from app.js.
 // Register functions first; app.js runs initializers in the original order.
 (()=>{'use strict';
@@ -1713,18 +2176,40 @@ function renderAimSetting(){
  const chip=runtime.$('aimChip');if(chip)chip.textContent='AIM '+runtime.curAim();
 }
 function render(){renderAimSetting();runtime.$('soundToggle').textContent=runtime.store.soundEnabled===false?'効果音 OFF':'効果音 ON';runtime.$('soundToggle').setAttribute('aria-pressed',String(runtime.store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(runtime.store.roundDelay))});runtime.updateSaveIndicator();runtime.$('savedNotice').classList.toggle('hidden',!runtime.justSaved);const s=runtime.store.active,ds=s.darts,n=ds.length,ss=runtime.finished(),a=runtime.completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+runtime.sum(x.darts),0)/ss.length):0,bulls=a.filter(runtime.isBull).length;
+const zero=runtime.isZero(s);
+runtime.$('play').classList.toggle('is-match',runtime.isMatch(s));
+runtime.$('matchPlayers').classList.add('hidden');runtime.$('turnChange').classList.add('hidden');runtime.$('soloMode').classList.toggle('hidden',!runtime.isMatch(s));
+runtime.$('checkoutGuide').classList.add('hidden');
+runtime.$('gameSelect').value=zero?String(s.rules.startScore):'countup';
+runtime.$('gameRules').textContent=zero?'BULL 50 / OPEN OUT / 20 ROUND':'8 ROUND / 24 DARTS';
+runtime.$('scoreCaption').textContent=zero?'REMAINING':'TOTAL SCORE';
+runtime.$('rounds').classList.toggle('zero-rounds',zero);
+runtime.$('resultCaption').textContent='24投完了。スコアを確認して記録を確定してください。';
 runtime.renderAnalysis();runtime.$('livebull').innerHTML=runtime.bullBars(ds,runtime.curAim());
+if(!zero){
 runtime.$('score').textContent=runtime.sum(ds);runtime.$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';runtime.$('progress').textContent=n+' / 24';
 runtime.$('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?runtime.sum(d):'—')+'</b></div>'}).join('');
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):'READY')+'</span></div>'}).join('');
 runtime.$('throwlog').innerHTML=ds.slice().reverse().map((d,i)=>'<tr><td>'+(n-i)+' (R'+d.roundIndex+'-'+d.dartIndex+')</td><td>'+runtime.dartLabel(d)+'</td><td class="num">'+d.score+'</td></tr>').join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
-runtime.$('undo').disabled=!n;runtime.$('endgame').disabled=!n;
 runtime.$('resultpanel').classList.toggle('hidden',n!==24||!runtime.showResult);runtime.$('resultCompare').innerHTML=n===24?resultCompare(ds,ss):'';runtime.$('resultscore').textContent=runtime.sum(ds);runtime.$('resultbull').textContent=ds.filter(runtime.isBull).length+' / 24';runtime.$('saveResult').disabled=n!==24;
 runtime.$('miss').disabled=n===24;
-const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.sum(latest.darts)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+(latest.status==='completed'?'24投 完走':'途中終了 '+latest.darts.length+'投')+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
-runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+(x.status==='completed'?'完走':'途中終了')+'</td><td>'+runtime.sum(x.darts)+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
+}else runtime.renderZero();
+runtime.$('undo').disabled=!n;runtime.$('endgame').disabled=!n;
+const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.gameScore(latest)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+runtime.esc(runtime.gameName(latest))+' · '+runtime.gameOutcome(latest)+(runtime.isMatch(latest)?'<br>'+runtime.esc(runtime.matchSummary(latest)):'')+(runtime.isZero(latest)?' · 残点':'')+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
+runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+runtime.esc(runtime.gameName(x))+' · '+runtime.gameOutcome(x)+'</td><td>'+runtime.gameScore(x)+(runtime.isZero(x)?' 残り':'')+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{runtime.viewId=b.dataset.detail;renderDetail()});if(runtime.store.sessions.length&&!runtime.store.sessions.some(x=>x.id===runtime.viewId))runtime.viewId=runtime.store.sessions[0].id;renderDetail();
 runtime.$('bindinglog').textContent=Object.entries(runtime.store.bindings).map(([k,v])=>k+' → '+runtime.label(v)).join('\n')||'割当なし';
+renderArena(s);
+}
+function renderArena(s){
+ const q=runtime.isZero(s)?runtime.evaluateZero(s):null,round=q?.round||Math.min(8,Math.floor(s.darts.length/3)+1);
+ runtime.$('arenaGameTitle').textContent=runtime.gameName(s);
+ runtime.$('arenaTurnName').textContent=runtime.isMatch(s)?'P'+(q.playerIndex+1)+' · '+s.players[q.playerIndex].name:runtime.myDarts.nick||'SOLO PRACTICE';
+ runtime.$('soloPlayerName').textContent=runtime.myDarts.nick||'PLAYER 1';
+ const rows=runtime.$('rounds');[...rows.children].forEach((row,i)=>row.classList.toggle('arena-recent',i>=Math.max(0,round-3)&&i<round));
+ runtime.$('toggleRounds').textContent=rows.classList.contains('show-all')?'直近ラウンド':'全ラウンド';
+ runtime.$('toggleRounds').setAttribute('aria-expanded',String(rows.classList.contains('show-all')));
+ document.body.classList.toggle('arena-playing',runtime.$('play').classList.contains('active'));
 }
 function resultCompare(ds,ss){
  if(!ss.length)return '<div class="cmp-first">FIRST GAME — ここが基準になります</div>';
@@ -1733,7 +2218,7 @@ function resultCompare(ds,ss){
  const r=Math.round((br-pbr)*10)/10;
  return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>'+A+' RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
 }
-function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+(s.status==='completed'?'完走':'途中終了')+'</span><strong class="accent">'+runtime.sum(s.darts)+' POINTS</strong></div><div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map(d=>'<tr><td>'+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.label(d.segment)+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
+function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+runtime.esc(runtime.gameName(s))+' · '+runtime.gameOutcome(s)+'</span><strong class="accent">'+runtime.gameScore(s)+(runtime.isZero(s)?' REMAINING':' POINTS')+'</strong></div>'+(runtime.isMatch(s)?'<p class="tiny">'+runtime.esc(runtime.matchSummary(s))+'</p>':'')+'<div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map((d,i)=>'<tr><td>'+(runtime.isMatch(s)?'P'+(d.playerIndex+1)+' · ':'')+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+(runtime.isZero(s)&&runtime.evaluateZero(s).frames?.[i]?.bust?' · BUST':'')+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
 Object.assign(runtime,{render});
 
 return {};
@@ -1748,7 +2233,7 @@ modules.connectRender=connectRender;
 function connectBackup(runtime){
 function download(content,filename,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function validDart(d){return d&&typeof d==='object'&&typeof d.id==='string'&&Number.isInteger(d.roundIndex)&&d.roundIndex>=1&&d.roundIndex<=8&&Number.isInteger(d.dartIndex)&&d.dartIndex>=1&&d.dartIndex<=3&&typeof d.segment==='string'&&/^(S|D|T)([1-9]|1[0-9]|20)$|^(OB|IB|MISS)$/.test(d.segment)&&d.score===runtime.points(d.segment)}
-function validSession(s){return s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
+function validSession(s){if(runtime.isZero(s))return runtime.validZeroSession(s);return runtime.isCountup(s)&&s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
 function restoreSettings(st){
  if(!st||typeof st!=='object')return false;
  let did=false;
@@ -1765,7 +2250,7 @@ function restoreSettings(st){
 Object.assign(runtime,{download,validSession});
 function initialize(){
 runtime.$('exportjson').onclick=()=>download(JSON.stringify({schemaVersion:1,sessions:runtime.store.sessions,active:runtime.store.active,settings:{bindings:runtime.store.bindings,calibrationKeys:runtime.calibrationKeys(),calibrationCompletedAt:runtime.store.calibrationCompletedAt||null,goalScore:runtime.store.goalScore||null,aimTarget:runtime.curAim()},myDarts:runtime.sanitizeMyDarts(runtime.myDarts)},null,2),'darts-training-lab-backup.json','application/json');
-runtime.$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim'],...runtime.store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',runtime.aimOf(d)]))];download('\ufeff'+rows.map(r=>r.join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
+runtime.$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim','game_type','start_score','player_index','player_name'],...runtime.store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',runtime.aimOf(d),runtime.isZero(s)?'zero-one':'countup',runtime.isZero(s)?s.rules.startScore:'',runtime.isMatch(s)?d.playerIndex+1:'',runtime.isMatch(s)?s.players[d.playerIndex].name:'']))];download('\ufeff'+rows.map(r=>r.map(v=>{const text=String(v??'');return /[",\r\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text}).join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
 runtime.$('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;const snapSessions=runtime.store.sessions,snapMy=JSON.stringify(runtime.myDarts);try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(runtime.store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));let merged=null,addedSets=0,skippedSets=0;if(v.myDarts!==undefined&&v.myDarts!==null){const imp=runtime.sanitizeMyDarts(v.myDarts);if(imp.sets.length||imp.nick){merged=runtime.sanitizeMyDarts(runtime.myDarts);for(const x of imp.sets){const i=merged.sets.findIndex(y=>y.id===x.id);if(i>=0)merged.sets[i]=x;else if(merged.sets.length<10){merged.sets.push(x);addedSets++}else skippedSets++}if(!merged.nick)merged.nick=imp.nick;if(!merged.current&&imp.current&&merged.sets.some(y=>y.id===imp.current))merged.current=imp.current}}if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'+(merged?'\nMY DARTS：同じIDのセットは上書き、新規'+addedSets+'件を追加します（既存セットは残ります）。'+(skippedSets?'\n10セットを超える'+skippedSets+'件は取り込めません。':''):'')))return;runtime.store.sessions=[...runtime.store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);let myOk=true;if(merged){runtime.myDarts=merged;runtime.editingSetup='';myOk=runtime.mySaveState();runtime.myLoad('')}if(!runtime.persist()){runtime.store.sessions=snapSessions;if(merged&&myOk){runtime.myDarts=runtime.sanitizeMyDarts(JSON.parse(snapMy));runtime.mySaveState();runtime.myLoad('')}runtime.render();return}if(!myOk){runtime.render();return}runtime.render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':'')+(merged?'（MY DARTSも復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
 runtime.$('clearall').onclick=async()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){runtime.store.sessions=[];runtime.viewId=null;runtime.persist();runtime.render();if(runtime.cloud.user&&runtime.cloud.api&&confirm('クラウドの履歴も削除しますか？\n（削除しないと、次の同期で戻ります）')){try{runtime.cloudStatus('DELETING…');const uid=runtime.cloud.user.uid,l=await runtime.cloud.api.listSessions(uid);for(const x of l){if(x&&typeof x.id==='string')await runtime.cloud.api.deleteSession(uid,x.id)}runtime.syncMeta.pushed=[];runtime.syncMetaSave();runtime.cloudUi();runtime.toast('クラウドの履歴も削除しました')}catch(e){runtime.cloudStatus('DELETE FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}}};
 }
@@ -1790,6 +2275,7 @@ runtime.$('newgame').onclick=runtime.startNew;
 runtime.$('startdash').onclick=()=>{runtime.changeTab('play')};
 runtime.$('endgame').onclick=runtime.finishEarly;
 runtime.$('saveResult').onclick=runtime.confirmResult;
+runtime.$('toggleRounds').onclick=()=>{runtime.$('rounds').classList.toggle('show-all');runtime.render()};
 }
 function initializeSettings(){
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{runtime.store.roundDelay=Number(b.dataset.delay);runtime.persist();runtime.render()});
@@ -1835,8 +2321,8 @@ function board200sInput(e){
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
- if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.store.active.darts.length===24){board200sStatus('START：結果確定');runtime.confirmResult()}else if(runtime.store.active.darts.length===0){board200sStatus('START：投球待機');runtime.toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
- if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.roundBreakUntil>Date.now()){runtime.finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');runtime.toast('NEXT ROUND — READY')}else if(runtime.store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');runtime.toast('GAME COMPLETE — 結果を確認してください')}else if(runtime.store.active.darts.length%3===0&&runtime.store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');runtime.toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.sessionDone(runtime.store.active)){board200sStatus('START：結果確定');runtime.confirmResult()}else if(runtime.store.active.darts.length===0){board200sStatus('START：投球待機');runtime.toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(runtime.awaitingPlayer(runtime.store.active)){if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');runtime.confirmPlayerChange();board200sStatus('CHANGE：プレイヤー交代');return true}if(!runtime.$('play').classList.contains('active'))runtime.changeTab('play');if(runtime.roundBreakUntil>Date.now()){runtime.finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');runtime.toast('NEXT ROUND — READY')}else if(runtime.sessionDone(runtime.store.active)){board200sStatus('CHANGE：ゲーム終了（結果確認）');runtime.toast('GAME COMPLETE — 結果を確認してください')}else if(runtime.roundReady(runtime.store.active)){board200sStatus('CHANGE：次のラウンド待機中');runtime.toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
  if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
  const zone=board200sMap[k];if(!zone)return false;const segment=zone.startsWith('S')?zone.slice(0,-1):zone;
  e.preventDefault();
@@ -1844,8 +2330,9 @@ function board200sInput(e){
  if(k===board200sLastKey&&now-board200sLastAt<180)return true;
  if(now-board200sLastAt<90)return true;
  board200sLastKey=k;board200sLastAt=now;
+ if(runtime.awaitingPlayer(runtime.store.active)){board200sStatus('交代待ち：CHANGEで次のプレイヤーへ');return true}
  if(runtime.roundBreakUntil>Date.now()){board200sStatus('ラウンド切替待ち：CHANGEで進めます');return true}
- if(runtime.store.active.darts.length>=24){board200sStatus('24投完了：STARTで結果確定');return true}
+ if(runtime.sessionDone(runtime.store.active)){board200sStatus('ゲーム終了：STARTで結果確定');return true}
  runtime.add(segment,'board',zone);
  board200sStatus('受信：'+runtime.label(segment)+' / '+runtime.points(segment)+'点');
  return true;
@@ -1901,7 +2388,7 @@ modules.connectInput=connectInput;
 
 // Feature scripts register factories before this deferred entry point runs.
 (()=>{'use strict';
-const {connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
+const {connectMatchAccounts,connectZeroOneView,connectZeroOne,connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
 delete globalThis.RETRO_DARTS_MODULES;
 
 try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.add('no-dev')}catch(e){}
@@ -1911,6 +2398,9 @@ const runtime=Object.create(null);
 
 // Register every function before running any state reads or event wiring.
 const features={
+ matchAccounts: connectMatchAccounts(runtime),
+ zeroOne: connectZeroOne(runtime),
+ zeroOneView: connectZeroOneView(runtime),
  state: connectState(runtime),
  localStorage: connectLocalStorage(runtime),
  cloud: connectCloud(runtime),
@@ -1948,6 +2438,8 @@ features.effects.initialize();
 features.rounds.initialize();
 features.navigation.initialize();
 features.countup.initialize();
+features.zeroOne.initialize();
+features.matchAccounts.initialize();
 features.aim.initialize();
 features.roundStorage.initialize();
 features.period.initialize();
