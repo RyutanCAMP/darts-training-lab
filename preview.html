@@ -2141,15 +2141,17 @@ function renderZero(){
   else runtime.$('checkoutRoutes').textContent='残り'+available+'投で上がれる候補はありません';
  }
  runtime.$('roundlabel').textContent='ROUND '+q.round+' / 20';
- runtime.$('progress').textContent=ds.length+' DARTS';
+ // While a handoff is pending, keep showing the turn that just finished.
+ const shown=pending?ds.at(-1).playerIndex:q.playerIndex;
+ runtime.$('progress').textContent=pending?'P'+(shown+1)+' · LAST TURN':ds.length+' DARTS';
  runtime.$('rounds').innerHTML=Array.from({length:20},(_,i)=>{
-  const r=q.rounds.find(x=>x.round===i+1&&(!match||x.playerIndex===q.playerIndex));
-  return '<div class="'+(r?.closed?'done':i+1===q.round?'active':'')+'">R'+(i+1)+'<br><b>'+(r?(r.bust?'BUST':r.score):'—')+'</b></div>';
+  const r=q.rounds.find(x=>x.round===i+1&&(!match||x.playerIndex===shown));
+  return '<div class="'+(r?.closed?'done':!pending&&i+1===q.round?'active':'')+'">R'+(i+1)+'<br><b>'+(r?(r.bust?'BUST':r.score):'—')+'</b></div>';
  }).join('');
- const last=match?q.rounds.filter(r=>r.playerIndex===q.playerIndex).at(-1):q.rounds.at(-1),displayRound=match?q.round:last?.round||1,current=ds.filter(d=>d.roundIndex===displayRound&&(!match||d.playerIndex===q.playerIndex));
+ const last=match?q.rounds.filter(r=>r.playerIndex===shown).at(-1):q.rounds.at(-1),displayRound=pending?last.round:match?q.round:last?.round||1,current=ds.filter(d=>d.roundIndex===displayRound&&(!match||d.playerIndex===shown));
  runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{
   const d=current[i];
-  return '<div class="throw '+(!q.ended&&!d&&displayRound===q.round&&i+1===q.dart?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):last?.bust?'BUST':q.ended?'END':'READY')+'</span></div>';
+  return '<div class="throw '+(!q.ended&&!pending&&!d&&displayRound===q.round&&i+1===q.dart?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):last?.bust&&last.round===displayRound?'BUST':q.ended?'END':'READY')+'</span></div>';
  }).join('');
  runtime.$('resultpanel').classList.toggle('hidden',!q.ended||!runtime.showResult);
  runtime.$('resultscore').textContent=q.remaining;

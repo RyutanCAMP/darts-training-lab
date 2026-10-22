@@ -67,14 +67,19 @@ try:
     assert 'あお' in pg.locator('.match-player.current').inner_text()
     for _ in range(3):hit(pg,'T20')
     assert pg.locator('#turnChange').is_visible() and 'りん' in pg.locator('#nextPlayerName').inner_text()
+    # The finished turn stays visible until the handoff is confirmed.
+    assert pg.locator('#throws .throw b').all_text_contents()==['60','60','60'] and pg.locator('#progress').inner_text()=='P1 · LAST TURN'
+    assert pg.locator('#rounds>div').first.inner_text().split()==['R1','180'] and pg.locator('#throws .throw.active').count()==0
     hit(pg,'IB');assert len(state(pg)['active']['darts'])==3
     pg.reload();pg.evaluate("document.getElementById('startupFx').style.display='none'");assert pg.locator('#turnChange').is_visible()
     key(pg,'KeyA','A');assert len(state(pg)['active']['darts'])==3
     pg.screenshot(path=str(ART/f'match-switch-{filename}-{mobile}.png'),full_page=True)
     key(pg,'Enter','Enter');assert pg.locator('#turnChange').is_hidden()
+    assert pg.locator('#throws .throw b').all_text_contents()==['—','—','—'] and pg.locator('#progress').inner_text()=='3 DARTS'
     for _ in range(3):hit(pg,'S20')
     click(pg,'confirmTurn');hit(pg,'T20');hit(pg,'T20');hit(pg,'S2')
     assert pg.locator('#turnChange').is_visible()
+    assert pg.locator('#throws .throw b').all_text_contents()==['60','60','2'] and pg.locator('#rounds>div').nth(1).inner_text().split()==['R2','BUST']
     assert pg.locator('.match-player strong').all_text_contents()==['121','241']
     click(pg,'undo');assert pg.locator('#turnChange').is_hidden() and pg.locator('#score').inner_text()=='1'
     hit(pg,'S1');assert 'あお WIN' in pg.locator('#resultCaption').inner_text()
