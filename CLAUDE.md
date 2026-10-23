@@ -2,7 +2,7 @@
 
 ## 01 checkpoint (2026-10-23)
 
-Read `docs/ai-handoff-2026-10-23.md` first for the current branch, landscape layout, verification, and remaining work. This checkpoint includes the 01 solo/local-match implementation and the landscape-first arena on top of the unmerged module refactor. `docs/zero-one-preparation.md` is historical design material, not the current implementation status.
+Read `docs/ai-handoff-2026-10-23.md` first (updated through the cricket work) for the current branch, landscape layout, verification, and remaining work. This checkpoint includes the 01 solo/local-match implementation and the landscape-first arena on top of the unmerged module refactor. `docs/zero-one-preparation.md` is historical design material, not the current implementation status.
 
 ## Latest: v0.9.0-beta.1 (2026-10-23)
 
