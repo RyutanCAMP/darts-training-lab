@@ -26,7 +26,7 @@ function openMatchSetup(){
   input.value=p?.name||slot.fallback;input.dataset.guestName=p?.account?slot.fallback:input.value;
   select.dataset.source=p?.account&&p.account.uid===u?.uid?'current':'guest';select.dataset.uid=u?.uid||'';
  });
- runtime.$('matchStartScore').value=runtime.isZero(s)?String(s.rules.startScore):'501';
+ runtime.$('matchStartScore').value=runtime.isGame(s)?runtime.gameChoiceOf(s):'501';runtime.updateMatchRules();
  renderMatchAccounts();runtime.openSheet('matchSheet');
 }
 function matchAccountPlayers(){

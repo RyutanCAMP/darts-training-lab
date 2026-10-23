@@ -93,7 +93,7 @@ try:
         pg.add_init_script(FAKE)
         url=f'http://127.0.0.1:{server.server_port}/index.html' if filename=='index.html' else (ROOT/filename).as_uri()
         pg.goto(url);hide_fx(pg)
-        assert pg.locator('#appVersion').inner_text()=='v0.8.0-beta.1'
+        assert pg.locator('#appVersion').inner_text()=='v0.9.0-beta.1'
         pg.select_option('#gameSelect','501');assert pg.locator('#score').inner_text()=='501'
         pg.locator('#board').scroll_into_view_if_needed()
         box=pg.locator('#board svg').bounding_box()

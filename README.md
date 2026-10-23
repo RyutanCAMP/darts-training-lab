@@ -1,13 +1,14 @@
 # DARTS TRAINING LAB — RETRO DARTS
 
-A retro arcade-style COUNT-UP and 01 practice app for darts, including DARTSLIVE-200S input.
+A retro arcade-style COUNT-UP, 01 and CRICKET practice app for darts, including DARTSLIVE-200S input.
 
 ## Start
 - Open `index.html` with its companion `styles.css` and `app.js` on a static server, or open `preview.html` for a standalone browser preview.
 - All personal practice records are stored locally in the browser (`dtl-data-v1`).
 - Source: https://github.com/RyutanCAMP/darts-training-lab
 
-## Features (v0.8.0-beta.1)
+## Features (v0.9.0-beta.1)
+- CRICKET (standard): 15–20 and BULL (outer 1 mark, inner 2 marks, 25 points per mark), 15 rounds. Solo practice shows points and MPR and ends when everything is closed; local 2-player matches use the same handoff as 01. Closing everything with points equal or ahead wins; at the round limit the higher score wins, equal points is a draw. The left panel shows the mark board and non-cricket segments are dimmed.
 - Landscape-first play arena: central board, round history on the left, turn controls on the right, and player scores below. Recent rounds expand to the full list; portrait layouts remain supported.
 - Match setup starts with `プレーヤー1` / `プレーヤー2`, so no typing is required. Each slot can choose guest or the currently logged-in account; selecting it on one side makes the other side a guest. Account ID and display name are stored separately in local match records.
 - Local 2-player 01: tap `2人対戦`, enter both player names and choose 301 / 501 / 701. P1 starts; three darts or a bust hands off to the other player after confirmation (button or 200S CHANGE). First checkout wins; both finish 20 rounds without checkout = draw.
@@ -32,6 +33,7 @@ A retro arcade-style COUNT-UP and 01 practice app for darts, including DARTSLIVE
 - `app.js`: private shared context, feature connections, initialization order
 - `core/`: initial state; `game/`: COUNT-UP rules, progress and round breaks
 - `game/zero-one.js`: 01 replay/validation and game-aware operation routing; `ui/zero-one.js`: 01 score, rounds and result display
+- `game/cricket.js`: cricket replay/validation and throw handling; `ui/cricket.js`: mark board, points/MPR and result display
 - `board/`: SVG board, keyboard input and 200S calibration
 - `audio/`: sounds, music and visual effects
 - `storage/`: local recovery, backup/restore, round exclusions and Firebase sync

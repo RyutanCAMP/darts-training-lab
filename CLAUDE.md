@@ -4,7 +4,14 @@
 
 Read `docs/ai-handoff-2026-10-23.md` first for the current branch, landscape layout, verification, and remaining work. This checkpoint includes the 01 solo/local-match implementation and the landscape-first arena on top of the unmerged module refactor. `docs/zero-one-preparation.md` is historical design material, not the current implementation status.
 
-## Latest: v0.8.0-beta.1 (2026-10-23 checkpoint)
+## Latest: v0.9.0-beta.1 (2026-10-23)
+
+- CRICKET (standard, 15 rounds, solo and local 2-player). Rules and data shape: `docs/release-0.9.0-beta.1.md`. Sessions use `gameType:'cricket'`, `rules:{mode:'standard',bullMode:'split',maxRounds:15}`; each dart's `score` is the cricket points it earned (not `runtime.points`), verified by replay in `evaluateCricket`.
+- `game/zero-one.js` is now the router for every non-COUNT-UP game: `isGame`, `evaluateGame`, `gameChoiceOf`, and `isMatch` covers cricket matches too. `connectCricket` registers after zeroOne and its initializer runs right after `features.zeroOne.initialize()`.
+- Cricket is excluded from COUNT-UP analysis by the existing `isCountup` filters; solo cricket syncs like solo 01, matches stay local. Tests: `tools/tests/test_cricket.py`.
+- While a match handoff is pending, the throw cards and round list keep showing the turn that just finished (`P1 · LAST TURN`).
+
+## v0.8.0-beta.1 (2026-10-23 checkpoint)
 
 - Landscape-first arena with central board, side panels, bottom score dock, recent/all-round toggle, and collapsible details. Layout/rotation/input coverage: `tools/tests/test_arena_layout.py`. Read the checkpoint handoff for verification and remaining work.
 

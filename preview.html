@@ -595,16 +595,27 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
  #play.arena-page .cool-praise{font-size:20px!important}
  #play.arena-page .cool-card button{min-height:30px;margin-top:3px}
 }
+/* v0.9.0 — cricket mark board (15-20 / BULL) */
+.cricket-board{display:grid;gap:3px;margin:0 0 12px}
+.ck-row{display:grid;grid-template-columns:1fr 46px 1fr;align-items:center;min-height:27px;border-radius:5px;background:#101f2b;font-variant-numeric:tabular-nums}
+.cricket-board.solo .ck-row{grid-template-columns:52px 1fr}
+.ck-row b{text-align:center;font-size:15px;color:#e7f6fb;letter-spacing:.02em}
+.ck-mark{text-align:center;font-size:19px;font-weight:900;line-height:1}
+.ck-mark.p1{color:#ef8f9a}.ck-mark.p2{color:#7cc6ec}.cricket-board.solo .ck-mark{color:#efff8a}
+.ck-mark.closed{text-shadow:0 0 10px currentColor}
+.ck-row.dead{opacity:.38}.ck-row.dead b{text-decoration:line-through}
+#board .hit.cricket-off{opacity:.28}
+@media(orientation:landscape) and (max-height:560px){.cricket-board{gap:2px;margin-bottom:4px}.ck-row{min-height:19px}.ck-row b{font-size:11px}.ck-mark{font-size:13px}#play.arena-page.is-cricket #rounds,#play.arena-page.is-cricket #toggleRounds,#play.arena-page.is-cricket #roundsTitle{display:none}}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><canvas id="pixelFx" width="160" height="90" aria-hidden="true"></canvas><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
-<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.8.0-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
+<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.9.0-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
 
 <section class="page active arena-page" id="play">
-<div class="arena-toolbar"><div class="play-heading"><label class="game-picker">GAME <select id="gameSelect" aria-label="ゲームを選択"><option value="countup">COUNT-UP</option><option value="501">501 / 01</option><option value="301">301 / 01</option><option value="701">701 / 01</option></select></label><button type="button" class="match-setup" id="matchSetup">2人対戦</button><button type="button" class="match-setup hidden" id="soloMode">1人練習へ</button><span id="gameRules">8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button><button type="button" class="arena-settings" data-tab="settings" aria-label="設定を開く">⚙</button></div></div>
+<div class="arena-toolbar"><div class="play-heading"><label class="game-picker">GAME <select id="gameSelect" aria-label="ゲームを選択"><option value="countup">COUNT-UP</option><option value="501">501 / 01</option><option value="301">301 / 01</option><option value="701">701 / 01</option><option value="cricket">CRICKET</option></select></label><button type="button" class="match-setup" id="matchSetup">2人対戦</button><button type="button" class="match-setup hidden" id="soloMode">1人練習へ</button><span id="gameRules">8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button><button type="button" class="arena-settings" data-tab="settings" aria-label="設定を開く">⚙</button></div></div>
 <article class="panel arena-stage">
  <div class="arena-topline"><strong id="arenaGameTitle">COUNT-UP</strong><strong id="roundlabel">ROUND 1 / 8</strong><span id="arenaTurnName">SOLO PRACTICE</span></div>
  <div class="arena-layout">
-  <aside class="arena-rounds"><h3>ROUND SCORE</h3><div class="rounds" id="rounds"></div><button type="button" id="toggleRounds" aria-expanded="false">全ラウンド</button><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></aside>
+  <aside class="arena-rounds"><div class="cricket-board hidden" id="cricketBoard" aria-label="クリケットのマーク"></div><h3 id="roundsTitle">ROUND SCORE</h3><div class="rounds" id="rounds"></div><button type="button" id="toggleRounds" aria-expanded="false">全ラウンド</button><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></aside>
   <div class="arena-board"><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><div class="turn-change hidden" id="turnChange" role="status"><strong id="nextPlayerName"></strong><button type="button" class="primary" id="confirmTurn">交代して投げる</button><span class="tiny muted">200SのCHANGEでも交代できます</span></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="次のラウンドへ"><div class="cool-card"><div class="cool-kicker">NEXT ROUND</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><canvas id="coolPixel" class="cool-pixel" width="128" height="60" aria-hidden="true"></canvas><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div></div>
   <aside class="arena-turn"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="arena-main-actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="arena-game-actions"><button id="newgame">新しいゲーム</button><button id="endgame" class="warn">途中終了して保存</button></div></aside>
  </div>
@@ -612,7 +623,7 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 </article>
 <article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted" id="resultCaption">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div id="resultCompare"></div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article>
 <div class="arena-extras"><details class="panel play-extra"><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra"><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div>
-<div class="sheet hidden" id="matchSheet" role="dialog" aria-label="2人対戦の準備"><div class="sheet-box"><h3>2 PLAYER / LOCAL MATCH</h3><form id="matchForm"><p class="tiny muted">そのまま開始できます。名前やアカウントは変更できます。</p><div class="grid cols2"><label>プレーヤー1（先攻）<select id="playerOneIdentity" aria-label="プレーヤー1のアカウント"><option value="guest">ゲスト</option></select><input id="playerOneName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label><label>プレーヤー2<select id="playerTwoIdentity" aria-label="プレーヤー2のアカウント"><option value="guest">ゲスト</option></select><input id="playerTwoName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label></div><p class="tiny muted" id="matchAccountHint"></p><label class="match-start">開始点<select id="matchStartScore"><option value="501">501</option><option value="301">301</option><option value="701">701</option></select></label><p class="tiny muted">ブル50点 · オープンアウト · 各20ラウンド。先に0にした人の勝ち。</p><p class="tiny" id="matchNameError" role="status"></p><button type="submit" class="primary">この2人で対戦を始める</button></form><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
+<div class="sheet hidden" id="matchSheet" role="dialog" aria-label="2人対戦の準備"><div class="sheet-box"><h3>2 PLAYER / LOCAL MATCH</h3><form id="matchForm"><p class="tiny muted">そのまま開始できます。名前やアカウントは変更できます。</p><div class="grid cols2"><label>プレーヤー1（先攻）<select id="playerOneIdentity" aria-label="プレーヤー1のアカウント"><option value="guest">ゲスト</option></select><input id="playerOneName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label><label>プレーヤー2<select id="playerTwoIdentity" aria-label="プレーヤー2のアカウント"><option value="guest">ゲスト</option></select><input id="playerTwoName" required maxlength="20" autocomplete="off" placeholder="名前を入力"></label></div><p class="tiny muted" id="matchAccountHint"></p><label class="match-start">ゲーム<select id="matchStartScore"><option value="501">501</option><option value="301">301</option><option value="701">701</option><option value="cricket">CRICKET</option></select></label><p class="tiny muted" id="matchRules">ブル50点 · オープンアウト · 各20ラウンド。先に0にした人の勝ち。</p><p class="tiny" id="matchNameError" role="status"></p><button type="submit" class="primary">この2人で対戦を始める</button></form><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
 <div class="sheet hidden" id="accountSheet" role="dialog" aria-label="プレイヤー"><div class="sheet-box"><h3>PLAYER</h3><article class="panel" id="profilePanel" style="margin-top:16px"><h3>ユーザー名</h3><div class="grid cols2" style="margin-top:10px"><label>ニックネーム<input id="myNick" maxlength="32" placeholder="ゲストでもOK"></label></div><p class="tiny muted">練習記録に表示するニックネームです。</p></article><article class="panel" id="cloudPanel" style="margin-top:16px"><h3>CLOUD SYNC <span class="tiny muted">GOOGLE</span></h3><div class="tiny muted" id="cloudStatus">OFF</div><div class="actions"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudSync" class="hidden">SYNC NOW</button><button type="button" id="cloudLogout" class="hidden">ログアウト</button></div><p class="tiny muted">ログインすると、履歴とMY DARTSがクラウドに保存され、他の端末と同期されます。ログインしなくても使えます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
 <div class="sheet hidden" id="aimSheet" role="dialog" aria-label="狙い"><div class="sheet-box"><article class="panel aim-settings"><h3>狙い / AIM TARGET</h3><div class="flex"><select id="aimSelect" aria-label="狙い"></select></div><p class="tiny muted">変更した後の投球から、この狙いで記録されます。それまでの記録はブル狙いとして扱います。分析は、狙いごとに分けて見られます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div>
 </section>
@@ -920,12 +931,19 @@ modules.connectCatalog=connectCatalog;
 function connectZeroOne(runtime){
 const starts=[301,501,701];
 const isZero=s=>s?.gameType==='zero-one';
+const isCricket=s=>s?.gameType==='cricket';
+// Played games other than COUNT-UP share turns, matches and saving.
+const isGame=s=>isZero(s)||isCricket(s);
+const evaluateGame=s=>isCricket(s)?runtime.evaluateCricket(s):evaluateZero(s);
+const choiceOf=s=>isCricket(s)?'cricket':isZero(s)?String(s.rules.startScore):'countup';
+const gameLabel=s=>isCricket(s)?'クリケット':'01';
 const validAccount=a=>a===undefined||a===null||(a.provider==='google'&&typeof a.uid==='string'&&a.uid.length>0&&a.uid.length<=128&&!/[\u0000-\u0020\u007f]/.test(a.uid));
 const validPlayers=players=>Array.isArray(players)&&players.length===2&&players.every((p,i)=>p&&p.id==='p'+(i+1)&&typeof p.name==='string'&&p.name===p.name.trim()&&p.name.length>0&&p.name.length<=20&&!/[\u0000-\u001f\u007f]/.test(p.name)&&validAccount(p.account))&&players.filter(p=>p.account).length<=1;
-const isMatch=s=>isZero(s)&&validPlayers(s.players);
-const awaitingPlayer=s=>isMatch(s)&&!evaluateZero(s).ended&&(s.readyTurn??0)!==evaluateZero(s).turnIndex;
-function newMatch(start,names){
- return {...runtime.newSession(),gameType:'zero-one',rules:{startScore:start,inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20},players:names.map((entry,i)=>({id:'p'+(i+1),name:typeof entry==='string'?entry:entry.name,...(entry.account?{account:{...entry.account}}:{})})),readyTurn:0};
+const isMatch=s=>isGame(s)&&validPlayers(s.players);
+const awaitingPlayer=s=>isMatch(s)&&!evaluateGame(s).ended&&(s.readyTurn??0)!==evaluateGame(s).turnIndex;
+function newMatch(choice,names){
+ const game=choice==='cricket'?{gameType:'cricket',rules:runtime.cricketRules()}:{gameType:'zero-one',rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}};
+ return {...runtime.newSession(),...game,players:names.map((entry,i)=>({id:'p'+(i+1),name:typeof entry==='string'?entry:entry.name,...(entry.account?{account:{...entry.account}}:{})})),readyTurn:0};
 }
 const isCountup=s=>!!s&&(s.gameType===undefined||s.gameType==='countup');
 const validRules=r=>!!r&&starts.includes(r.startScore)&&r.inRule==='straight'&&r.outRule==='open'&&r.bullMode==='fat'&&r.maxRounds===20;
@@ -991,27 +1009,31 @@ function evaluateMatch(s){
  const playerIndex=turn%2;
  return {valid:true,remaining:scores[playerIndex],scores,playerIndex,turnIndex:turn,round:Math.floor(turn/2)+1,dart,ended,reason,winner,frames,rounds};
 }
-const sessionDone=s=>isZero(s)?evaluateZero(s).ended===true:isCountup(s)&&s.darts.length===24;
-const roundReady=s=>isZero(s)?s.darts.length>0&&!sessionDone(s)&&evaluateZero(s).dart===1:s.darts.length>0&&s.darts.length%3===0;
+const sessionDone=s=>isGame(s)?evaluateGame(s).ended===true:isCountup(s)&&s.darts.length===24;
+const roundReady=s=>isGame(s)?s.darts.length>0&&!sessionDone(s)&&evaluateGame(s).dart===1:s.darts.length>0&&s.darts.length%3===0;
 function validZeroSession(s){
  if(!isZero(s)||typeof s.id!=='string'||typeof s.startedAt!=='string'||!['completed','abandoned'].includes(s.status)||!Array.isArray(s.darts)||!s.darts.length||s.darts.length>(isMatch(s)?120:60)||s.darts.some(d=>typeof d?.id!=='string'))return false;
  const state=evaluateZero(s);
  return state.valid&&(s.status==='completed'?state.ended:!state.ended)&&(!s.result||(s.result.reason===state.reason&&s.result.remaining===state.remaining&&(!isMatch(s)||(s.result.winner===state.winner&&JSON.stringify(s.result.scores)===JSON.stringify(state.scores)))));
 }
-function gameName(s){return isZero(s)?String(s.rules.startScore)+' / 01'+(isMatch(s)?' · 2P':''):'COUNT-UP'}
-function gameOutcome(s){if(s.status==='abandoned')return '途中終了';if(!isZero(s))return '完走';const q=evaluateZero(s);return isMatch(s)?q.winner!==null?'P'+(q.winner+1)+' WIN':'DRAW / ROUND LIMIT':q.reason==='checkout'?'CHECKOUT':'ROUND LIMIT'}
-function gameScore(s){return isMatch(s)?evaluateZero(s).scores.join(' / '):isZero(s)?evaluateZero(s).remaining:runtime.sum(s.darts)}
-function matchSummary(s){return isMatch(s)?s.players.map((p,i)=>'P'+(i+1)+' '+p.name+' · 残り '+evaluateZero(s).scores[i]).join(' / '):''}
+function gameName(s){if(isCricket(s))return 'CRICKET'+(isMatch(s)?' · 2P':'');return isZero(s)?String(s.rules.startScore)+' / 01'+(isMatch(s)?' · 2P':''):'COUNT-UP'}
+function gameOutcome(s){if(s.status==='abandoned')return '途中終了';if(!isGame(s))return '完走';const q=evaluateGame(s);return isMatch(s)?q.winner!==null?'P'+(q.winner+1)+' WIN':'DRAW / ROUND LIMIT':q.reason==='checkout'?'CHECKOUT':q.reason==='closed'?'ALL CLOSED':'ROUND LIMIT'}
+function gameScore(s){if(isCricket(s)){const q=runtime.evaluateCricket(s);return isMatch(s)?q.points.join(' / '):q.mpr[0].toFixed(2)}return isMatch(s)?evaluateZero(s).scores.join(' / '):isZero(s)?evaluateZero(s).remaining:runtime.sum(s.darts)}
+function matchSummary(s){if(isCricket(s))return isMatch(s)?s.players.map((p,i)=>'P'+(i+1)+' '+p.name+' · '+runtime.evaluateCricket(s).points[i]+' PTS').join(' / '):'';return isMatch(s)?s.players.map((p,i)=>'P'+(i+1)+' '+p.name+' · 残り '+evaluateZero(s).scores[i]).join(' / '):''}
+function updateMatchRules(){
+ runtime.$('matchRules').textContent=runtime.$('matchStartScore').value==='cricket'?'15〜20とBULL · 各15ラウンド。全部閉めて、点数が相手以上なら勝ち。':'ブル50点 · オープンアウト · 各20ラウンド。先に0にした人の勝ち。';
+}
 function initialize(){
  const countup={add:runtime.add,startNew:runtime.startNew,undo:runtime.undo,finishEarly:runtime.finishEarly,confirmResult:runtime.confirmResult};
  function commit(status,choice,names){
   const s=runtime.store.active,previousChoice=runtime.store.gameChoice;
   const previousResult=s.result;
   s.status=status;s.endedAt=new Date().toISOString();
-  if(isZero(s)){const q=evaluateZero(s);s.result={reason:q.reason,remaining:q.remaining,...(isMatch(s)?{winner:q.winner,scores:q.scores}: {})}}
+  if(isCricket(s))s.result=runtime.cricketResult(runtime.evaluateCricket(s));
+  else if(isZero(s)){const q=evaluateZero(s);s.result={reason:q.reason,remaining:q.remaining,...(isMatch(s)?{winner:q.winner,scores:q.scores}: {})}}
   runtime.store.sessions.unshift(s);
   if(choice!==undefined)runtime.store.gameChoice=choice;
-  runtime.store.active=names?newMatch(Number(choice),names):choice===undefined&&isMatch(s)?newMatch(s.rules.startScore,s.players):runtime.newSession();
+  runtime.store.active=names?newMatch(choice,names):choice===undefined&&isMatch(s)?newMatch(choiceOf(s),s.players):runtime.newSession();
   if(!runtime.persist()){
    runtime.store.active=s;runtime.store.sessions.shift();runtime.store.gameChoice=previousChoice;
    s.status='active';s.endedAt=null;if(previousResult===undefined)delete s.result;else s.result=previousResult;
@@ -1021,12 +1043,12 @@ function initialize(){
  }
  function replaceEmpty(choice,names){
   const previous=runtime.store.active,previousChoice=runtime.store.gameChoice;
-  runtime.store.gameChoice=choice;runtime.store.active=names?newMatch(Number(choice),names):runtime.newSession();
+  runtime.store.gameChoice=choice;runtime.store.active=names?newMatch(choice,names):runtime.newSession();
   if(!runtime.persist()){runtime.store.active=previous;runtime.store.gameChoice=previousChoice;return false}return true;
  }
  function selectGame(choice,forceSolo=false){
-  if(!['countup','301','501','701'].includes(choice))return;
-  const s=runtime.store.active,current=isZero(s)?String(s.rules.startScore):'countup';
+  if(!['countup','301','501','701','cricket'].includes(choice))return;
+  const s=runtime.store.active,current=choiceOf(s);
   if(choice===current&&!forceSolo)return;
   if(s.darts.length){
    if(!confirm(sessionDone(s)?'現在の結果を保存してゲームを切り替えますか？':'進行中のゲームを途中終了として保存し、ゲームを切り替えますか？')){runtime.render();return}
@@ -1060,60 +1082,154 @@ function initialize(){
    runtime.toast(runtime.label(segment)+' — 残り '+next.remaining);
   }
  }
- runtime.add=(...args)=>isZero(runtime.store.active)?addZero(...args):countup.add(...args);
+ runtime.add=(...args)=>isCricket(runtime.store.active)?runtime.addCricket(...args):isZero(runtime.store.active)?addZero(...args):countup.add(...args);
  runtime.undo=()=>{
-  if(!isZero(runtime.store.active))return countup.undo();
+  if(!isGame(runtime.store.active))return countup.undo();
   runtime.cancelAchievementDelay();runtime.finishRoundBreak();
   if(!runtime.store.active.darts.length)return;
-  runtime.store.active.darts.pop();if(isMatch(runtime.store.active))runtime.store.active.readyTurn=evaluateZero(runtime.store.active).turnIndex;runtime.showResult=false;runtime.persist();runtime.render();runtime.toast('直前の投球を取り消しました');
+  runtime.store.active.darts.pop();if(isMatch(runtime.store.active))runtime.store.active.readyTurn=evaluateGame(runtime.store.active).turnIndex;runtime.showResult=false;runtime.persist();runtime.render();runtime.toast('直前の投球を取り消しました');
  };
  runtime.confirmResult=()=>{
-  if(!isZero(runtime.store.active))return countup.confirmResult();
+  if(!isGame(runtime.store.active))return countup.confirmResult();
   if(!sessionDone(runtime.store.active))return;
   runtime.finishRoundBreak();
   if(!commit('completed'))return;
   runtime.showResult=false;runtime.justSaved=true;runtime.viewId=runtime.store.sessions[0].id;
-  runtime.toast('01の結果を保存しました');runtime.changeTab('history');
+  runtime.toast((isCricket(runtime.store.sessions[0])?'CRICKET':'01')+'の結果を保存しました');runtime.changeTab('history');
  };
  runtime.finishEarly=()=>{
-  if(!isZero(runtime.store.active))return countup.finishEarly();
+  if(!isGame(runtime.store.active))return countup.finishEarly();
   if(sessionDone(runtime.store.active))return runtime.confirmResult();
-  if(!runtime.store.active.darts.length||!confirm('この01を途中終了として保存しますか？'))return;
+  if(!runtime.store.active.darts.length||!confirm('この'+gameLabel(runtime.store.active)+'を途中終了として保存しますか？'))return;
   if(!commit('abandoned'))return;
   runtime.finishRoundBreak();runtime.showResult=false;runtime.render();runtime.toast('途中終了として保存しました');
  };
  runtime.startNew=()=>{
-  if(!isZero(runtime.store.active))return countup.startNew();
+  if(!isGame(runtime.store.active))return countup.startNew();
   const s=runtime.store.active;
-  if(s.darts.length){if(!confirm(sessionDone(s)?'結果を保存して新しい01を始めますか？':'途中終了として保存し、新しい01を始めますか？'))return;if(!commit(sessionDone(s)?'completed':'abandoned'))return}
-  else if(!replaceEmpty(String(s.rules.startScore),isMatch(s)?s.players:undefined))return;
+  if(s.darts.length){if(!confirm(sessionDone(s)?'結果を保存して新しい'+gameLabel(s)+'を始めますか？':'途中終了として保存し、新しい'+gameLabel(s)+'を始めますか？'))return;if(!commit(sessionDone(s)?'completed':'abandoned'))return}
+  else if(!replaceEmpty(choiceOf(s),isMatch(s)?s.players:undefined))return;
   runtime.finishRoundBreak();runtime.showResult=false;runtime.changeTab('play');runtime.toast('NEW GAME — GOOD LUCK!');
  };
  runtime.$('gameSelect').onchange=e=>selectGame(e.target.value);
- runtime.$('soloMode').onclick=()=>selectGame(String(runtime.store.active.rules.startScore),true);
+ runtime.$('soloMode').onclick=()=>selectGame(choiceOf(runtime.store.active),true);
  runtime.$('matchSetup').onclick=()=>runtime.openMatchSetup();
  runtime.$('matchForm').onsubmit=e=>{
   e.preventDefault();const names=runtime.matchAccountPlayers(),start=runtime.$('matchStartScore').value;
   if(!validPlayers(names)){runtime.$('matchNameError').textContent='2人の名前を1〜20文字で入力してください';return}
-  if(!['301','501','701'].includes(start))return;
+  if(!['301','501','701','cricket'].includes(start))return;
   const s=runtime.store.active;
   if(s.darts.length){if(!confirm(sessionDone(s)?'現在の結果を保存して2人対戦を始めますか？':'現在のゲームを途中終了として保存し、2人対戦を始めますか？'))return;if(!commit(sessionDone(s)?'completed':'abandoned',start,names))return}
   else if(!replaceEmpty(start,names))return;
   runtime.cancelAchievementDelay();runtime.finishRoundBreak();runtime.showResult=false;runtime.justSaved=false;runtime.closeSheets();runtime.changeTab('play');runtime.toast(names[0].name+'からスタート');
  };
  runtime.$('confirmTurn').onclick=()=>runtime.confirmPlayerChange();
+ runtime.$('matchStartScore').addEventListener('change',updateMatchRules);updateMatchRules();
 }
 function confirmPlayerChange(){
  const s=runtime.store.active;if(!awaitingPlayer(s))return false;
- const old=s.readyTurn,q=evaluateZero(s);s.readyTurn=q.turnIndex;
+ const old=s.readyTurn,q=evaluateGame(s);s.readyTurn=q.turnIndex;
  if(!runtime.persist()){if(old===undefined)delete s.readyTurn;else s.readyTurn=old;runtime.render();return false}
  runtime.render();runtime.toast(s.players[q.playerIndex].name+' · READY');return true;
 }
-Object.assign(runtime,{isZero,isMatch,isCountup,evaluateZero,sessionDone,roundReady,validZeroSession,gameName,gameOutcome,gameScore,matchSummary,checkoutRoutes,awaitingPlayer,confirmPlayerChange});
+Object.assign(runtime,{isZero,isCricket,isGame,evaluateGame,gameChoiceOf:choiceOf,updateMatchRules,isMatch,isCountup,evaluateZero,sessionDone,roundReady,validZeroSession,gameName,gameOutcome,gameScore,matchSummary,checkoutRoutes,awaitingPlayer,confirmPlayerChange});
 return {initialize};
 }
 const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
 modules.connectZeroOne=connectZeroOne;
+})();
+
+// Standard cricket: pure replay of actual throws (15-20 and BULL, 15 rounds).
+// A dart's `score` holds the cricket points it earned, checked on replay.
+(()=>{'use strict';
+function connectCricket(runtime){
+const TARGETS=['20','19','18','17','16','15','BULL'];
+const SEGMENT=/^(?:[SDT](?:[1-9]|1[0-9]|20)|OB|IB|MISS)$/;
+const validRules=r=>!!r&&r.mode==='standard'&&r.bullMode==='split'&&r.maxRounds===15;
+const cricketRules=()=>({mode:'standard',bullMode:'split',maxRounds:15});
+// Outer bull is one mark and inner bull two; each bull mark is worth 25.
+function hitOf(segment){
+ if(segment==='IB')return {target:'BULL',marks:2,value:25};
+ if(segment==='OB')return {target:'BULL',marks:1,value:25};
+ const n=Number(segment.slice(1));
+ return n>=15&&n<=20?{target:String(n),marks:{S:1,D:2,T:3}[segment[0]],value:n}:null;
+}
+const emptyMarks=()=>Object.fromEntries(TARGETS.map(t=>[t,0]));
+// Marks that close a number count; extra marks count only when they score.
+function scoreDart(marks,playerIndex,segment,match){
+ const hit=hitOf(segment);if(!hit)return {target:null,marks:0,points:0};
+ const before=marks[playerIndex][hit.target],closing=Math.min(hit.marks,3-before),extra=hit.marks-closing;
+ const open=!match||marks[1-playerIndex][hit.target]<3,points=open?extra*hit.value:0;
+ return {target:hit.target,marks:closing+(points?extra:0),points};
+}
+const allClosed=m=>TARGETS.every(t=>m[t]>=3);
+function evaluateCricket(s){
+ if(!validRules(s?.rules)||!Array.isArray(s.darts))return {valid:false};
+ const match=s.players!==undefined;
+ if(match&&!runtime.isMatch(s))return {valid:false};
+ const count=match?2:1,turnLimit=s.rules.maxRounds*count,marks=[emptyMarks(),emptyMarks()],points=[0,0],totals=[0,0],thrown=[0,0],frames=[],rounds=[];
+ let turn=0,dart=1,ended=false,reason=null,winner=null;
+ for(const d of s.darts){
+  const playerIndex=turn%count,round=Math.floor(turn/count)+1;
+  if(ended||!d||(match?d.playerIndex!==playerIndex:d.playerIndex!==undefined)||d.roundIndex!==round||d.dartIndex!==dart||typeof d.segment!=='string'||!SEGMENT.test(d.segment))return {valid:false};
+  const hit=scoreDart(marks,playerIndex,d.segment,match);
+  if(d.score!==hit.points)return {valid:false};
+  if(hit.target)marks[playerIndex][hit.target]=Math.min(3,marks[playerIndex][hit.target]+hitOf(d.segment).marks);
+  points[playerIndex]+=hit.points;totals[playerIndex]+=hit.marks;thrown[playerIndex]++;
+  frames.push({round,dart,playerIndex,turn,target:hit.target,marks:hit.marks,points:hit.points});
+  let row=rounds.at(-1);
+  if(!row||row.turn!==turn){row={round,turn,playerIndex,marks:0,points:0,closed:false};rounds.push(row)}
+  row.marks+=hit.marks;row.points+=hit.points;
+  if(allClosed(marks[playerIndex])&&(!match||points[playerIndex]>=points[1-playerIndex])){ended=true;reason='closed';winner=match?playerIndex:null}
+  const closed=ended||dart===3;row.closed=closed;
+  if(closed&&!ended&&turn===turnLimit-1){ended=true;reason='round-limit';winner=match&&points[0]!==points[1]?(points[0]>points[1]?0:1):null}
+  if(closed&&!ended){turn++;dart=1}else if(!closed)dart++;
+ }
+ const playerIndex=turn%count,mpr=thrown.map((n,i)=>n?Math.round(totals[i]/n*300)/100:0);
+ return {valid:true,match,marks,points,totals,mpr,playerIndex,turnIndex:turn,round:Math.min(Math.floor(turn/count)+1,s.rules.maxRounds),dart,ended,reason,winner,frames,rounds};
+}
+function validCricketSession(s){
+ if(!runtime.isCricket(s)||typeof s.id!=='string'||typeof s.startedAt!=='string'||!['completed','abandoned'].includes(s.status)||!Array.isArray(s.darts)||!s.darts.length||s.darts.length>(runtime.isMatch(s)?90:45)||s.darts.some(d=>typeof d?.id!=='string'))return false;
+ const q=evaluateCricket(s);
+ return q.valid&&(s.status==='completed'?q.ended:!q.ended)&&(!s.result||(s.result.reason===q.reason&&s.result.winner===q.winner&&JSON.stringify(s.result.points)===JSON.stringify(q.match?q.points:q.points.slice(0,1))));
+}
+const cricketResult=q=>({reason:q.reason,winner:q.winner,points:q.match?q.points:q.points.slice(0,1),mpr:q.match?q.mpr:q.mpr.slice(0,1)});
+const cricketPreview=(s,segment)=>{const q=evaluateCricket(s);return q.valid?scoreDart(q.marks,q.playerIndex,segment,q.match):null};
+function initialize(){
+ runtime.addCricket=(segment,source='manual',zone=null)=>{
+  if(runtime.roundBreakUntil>Date.now())return;
+  const s=runtime.store.active,q=evaluateCricket(s);
+  if(!q.valid||q.ended||runtime.awaitingPlayer(s))return;
+  const hit=cricketPreview(s,segment);
+  s.darts.push({id:runtime.id(),sessionId:s.id,roundIndex:q.round,dartIndex:q.dart,...(q.match?{playerIndex:q.playerIndex}:{}),timestamp:new Date().toISOString(),segment,zone:zone||null,score:hit.points,inputSource:source,aim:runtime.curAim(),corrected:false});
+  const next=evaluateCricket(s);
+  if(!next.valid){s.darts.pop();return}
+  const row=next.rounds.at(-1);
+  runtime.showResult=next.ended;runtime.persist();runtime.render();runtime.flashBoardHit(segment,zone);
+  if(next.ended){
+   runtime.playSound('finish');
+   const title=q.match?next.winner!==null?s.players[next.winner].name+' WIN!':'DRAW / ROUND LIMIT':next.reason==='closed'?'ALL CLOSED!':'ROUND LIMIT';
+   runtime.toast(title);runtime.gameEffect(title,s.darts.length+' DARTS / '+runtime.gameScore(s),'finish',1800);
+  }else if(row.closed){
+   runtime.playSound('round');
+   if(q.match){runtime.toast(row.marks+' MARK · '+s.players[next.playerIndex].name+'に交代');return}
+   runtime.toast('NEXT ROUND');
+   const darts=s.darts.filter(d=>d.roundIndex===row.round);
+   runtime.beginRoundBreak(row.round,row.points,darts);
+   runtime.$('roundBreakScore').textContent=row.marks+' MARK'+(row.points?' · +'+row.points:'');
+   runtime.$('roundBreakPraise').textContent=row.marks>=9?'WHITE HORSE!':row.marks>=5?'NICE MARKS!':runtime.roundPraise(darts,row.points);
+   runtime.playSound('cooldown',.6);
+  }else{
+   runtime.playSound(segment==='MISS'?'miss':segment==='IB'?'inner':segment==='OB'?'bull':segment[0]==='T'?'triple':segment[0]==='D'?'double':'hit');
+   runtime.toast(runtime.label(segment)+(hit.marks?' — '+hit.marks+' MARK':' — NO MARK')+(hit.points?' · +'+hit.points:''));
+  }
+ };
+}
+Object.assign(runtime,{CRICKET_TARGETS:TARGETS,cricketRules,evaluateCricket,validCricketSession,cricketResult,cricketPreview});
+return {initialize};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectCricket=connectCricket;
 })();
 
 // game/rules: existing behavior extracted from app.js.
@@ -1121,10 +1237,10 @@ modules.connectZeroOne=connectZeroOne;
 (()=>{'use strict';
 function connectRules(runtime){
 function newSession(){
- const choice=runtime.store.gameChoice,zero=['301','501','701'].includes(choice);
+ const choice=runtime.store.gameChoice,zero=['301','501','701'].includes(choice),cricket=choice==='cricket';
  return {
-  id:runtime.id(),schemaVersion:1,gameType:zero?'zero-one':'countup',
-  ...(zero?{rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}}:{}),
+  id:runtime.id(),schemaVersion:1,gameType:cricket?'cricket':zero?'zero-one':'countup',
+  ...(zero?{rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}}:cricket?{rules:runtime.cricketRules()}:{}),
   startedAt:new Date().toISOString(),endedAt:null,status:'active',
   setupId:runtime.myDarts.current||null,
   setupName:runtime.myDarts.sets.find(x=>x.id===runtime.myDarts.current)?.SetupName||null,
@@ -1138,7 +1254,7 @@ if(!runtime.store.active)runtime.store.active=newSession();
 if(localStorage.getItem(runtime.KEY)!==null){runtime.saveOK=true;runtime.savedAt=Date.now()}
 runtime.points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
 if(runtime.sessionDone(runtime.store.active))runtime.showResult=true;
-if(runtime.isZero(runtime.store.active))runtime.store.gameChoice=String(runtime.store.active.rules.startScore);else runtime.store.gameChoice='countup';
+runtime.store.gameChoice=runtime.gameChoiceOf(runtime.store.active);
 runtime.label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
 runtime.dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):runtime.label(d.segment);
 runtime.isBull=d=>d.segment==='IB'||d.segment==='OB';
@@ -2088,7 +2204,7 @@ function openMatchSetup(){
   input.value=p?.name||slot.fallback;input.dataset.guestName=p?.account?slot.fallback:input.value;
   select.dataset.source=p?.account&&p.account.uid===u?.uid?'current':'guest';select.dataset.uid=u?.uid||'';
  });
- runtime.$('matchStartScore').value=runtime.isZero(s)?String(s.rules.startScore):'501';
+ runtime.$('matchStartScore').value=runtime.isGame(s)?runtime.gameChoiceOf(s):'501';runtime.updateMatchRules();
  renderMatchAccounts();runtime.openSheet('matchSheet');
 }
 function matchAccountPlayers(){
@@ -2169,6 +2285,56 @@ const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Ob
 modules.connectZeroOneView=connectZeroOneView;
 })();
 
+(()=>{'use strict';
+function connectCricketView(runtime){
+const MARK=['','/','×','⊗'];
+const short=d=>d.segment==='IB'?'IB':d.segment==='OB'?'OB':d.segment;
+function renderCricket(){
+ const s=runtime.store.active,q=runtime.evaluateCricket(s),ds=s.darts;
+ if(!q.valid){runtime.$('score').textContent='—';runtime.$('miss').disabled=true;return}
+ const match=q.match,pending=runtime.awaitingPlayer(s),T=runtime.CRICKET_TARGETS;
+ // While a handoff is pending, keep showing the turn that just finished.
+ const shown=pending?ds.at(-1).playerIndex:q.playerIndex;
+ if(match){
+  runtime.$('matchPlayers').classList.remove('hidden');
+  runtime.$('matchPlayers').innerHTML=s.players.map((p,i)=>'<div class="match-player p'+(i+1)+' '+(i===q.playerIndex?'current':'')+'" '+(i===q.playerIndex?'aria-current="true"':'')+'><span title="'+runtime.esc(p.name)+'">P'+(i+1)+' · '+runtime.esc(p.name)+'</span><strong>'+q.points[i]+'</strong><small>'+(q.ended?(q.winner===i?'WIN':q.winner===null?'DRAW':''):i===q.playerIndex?(pending?'交代待ち':'THROWING'):'WAIT')+' · MPR '+q.mpr[i].toFixed(2)+'</small></div>').join('');
+  runtime.$('turnChange').classList.toggle('hidden',!pending);
+  runtime.$('nextPlayerName').textContent='P'+(q.playerIndex+1)+' · '+s.players[q.playerIndex].name+'の番です';
+  runtime.$('confirmTurn').textContent='交代して投げる';
+  runtime.$('livebull').innerHTML=runtime.bullBars(ds.filter(d=>d.playerIndex===q.playerIndex),runtime.curAim());
+ }
+ runtime.$('score').textContent=q.points[0];
+ runtime.$('scoreCaption').textContent=match?'P'+(q.playerIndex+1)+' POINTS':'POINTS · MPR '+q.mpr[0].toFixed(2);
+ const cell=(i,t)=>'<span class="ck-mark p'+(i+1)+(q.marks[i][t]>=3?' closed':'')+'">'+MARK[q.marks[i][t]]+'</span>';
+ runtime.$('cricketBoard').innerHTML=T.map(t=>'<div class="ck-row'+(match&&q.marks[0][t]>=3&&q.marks[1][t]>=3?' dead':'')+'">'+(match?cell(0,t):'')+'<b>'+t+'</b>'+(match?cell(1,t):cell(0,t))+'</div>').join('');
+ runtime.$('cricketBoard').classList.toggle('solo',!match);
+ runtime.$('roundlabel').textContent='ROUND '+q.round+' / 15';
+ runtime.$('progress').textContent=pending?'P'+(shown+1)+' · LAST TURN':ds.length+' DARTS';
+ runtime.$('rounds').innerHTML=Array.from({length:15},(_,i)=>{
+  const r=q.rounds.find(x=>x.round===i+1&&x.playerIndex===shown);
+  return '<div class="'+(r?.closed?'done':!pending&&i+1===q.round?'active':'')+'">R'+(i+1)+'<br><b>'+(r?r.marks+'M':'—')+'</b></div>';
+ }).join('');
+ const last=q.rounds.filter(r=>r.playerIndex===shown).at(-1),displayRound=pending?last.round:match?q.round:last?.round||1;
+ const current=ds.map((d,i)=>({d,f:q.frames[i]})).filter(x=>x.f.round===displayRound&&x.f.playerIndex===shown);
+ runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{
+  const x=current[i];
+  return '<div class="throw '+(!q.ended&&!pending&&!x&&displayRound===q.round&&i+1===q.dart?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(x?short(x.d):'—')+'</b><span class="tiny muted">'+(x?(x.f.marks?x.f.marks+' MARK':'NO MARK')+(x.f.points?' · +'+x.f.points:''):q.ended?'END':'READY')+'</span></div>';
+ }).join('');
+ runtime.$('resultpanel').classList.toggle('hidden',!q.ended||!runtime.showResult);
+ runtime.$('resultscore').textContent=match?q.points.join(' - '):q.mpr[0].toFixed(2);
+ runtime.$('resultCaption').textContent=match?q.winner!==null?'P'+(q.winner+1)+' · '+s.players[q.winner].name+' WIN!':'DRAW · 2人とも15ラウンド終了':q.reason==='closed'?'ALL CLOSED! 15〜20とBULLを全部閉めました。':'ROUND LIMIT · 15ラウンド終了。';
+ runtime.$('resultCompare').textContent=match?runtime.matchSummary(s):'MPR '+q.mpr[0].toFixed(2)+' · '+q.totals[0]+' MARKS · '+q.points[0]+' PTS · '+ds.length+' DARTS';
+ runtime.$('resultbull').textContent=ds.filter(runtime.isBull).length+' / '+ds.length;
+ runtime.$('saveResult').disabled=!q.ended;runtime.$('miss').disabled=q.ended;
+ runtime.$('throwlog').innerHTML=ds.map((d,i)=>'<tr><td>'+(match?'P'+(d.playerIndex+1)+' · ':'')+'R'+d.roundIndex+'-'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+'</td><td class="num">'+q.frames[i].marks+'M'+(d.score?' +'+d.score:'')+'</td></tr>').reverse().join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
+}
+Object.assign(runtime,{renderCricket});
+return {};
+}
+const modules=globalThis.RETRO_DARTS_MODULES||(globalThis.RETRO_DARTS_MODULES=Object.create(null));
+modules.connectCricketView=connectCricketView;
+})();
+
 // ui/render: existing behavior extracted from app.js.
 // Register functions first; app.js runs initializers in the original order.
 (()=>{'use strict';
@@ -2178,33 +2344,36 @@ function renderAimSetting(){
  const chip=runtime.$('aimChip');if(chip)chip.textContent='AIM '+runtime.curAim();
 }
 function render(){renderAimSetting();runtime.$('soundToggle').textContent=runtime.store.soundEnabled===false?'効果音 OFF':'効果音 ON';runtime.$('soundToggle').setAttribute('aria-pressed',String(runtime.store.soundEnabled!==false));document.querySelectorAll('[data-delay]').forEach(b=>{b.classList.toggle('selected',Number(b.dataset.delay)===Number(runtime.store.roundDelay))});runtime.updateSaveIndicator();runtime.$('savedNotice').classList.toggle('hidden',!runtime.justSaved);const s=runtime.store.active,ds=s.darts,n=ds.length,ss=runtime.finished(),a=runtime.completedDarts(),average=ss.length?Math.round(ss.reduce((v,x)=>v+runtime.sum(x.darts),0)/ss.length):0,bulls=a.filter(runtime.isBull).length;
-const zero=runtime.isZero(s);
-runtime.$('play').classList.toggle('is-match',runtime.isMatch(s));
+const zero=runtime.isZero(s),cricket=runtime.isCricket(s);
+runtime.$('play').classList.toggle('is-match',runtime.isMatch(s));runtime.$('play').classList.toggle('is-cricket',cricket);
+runtime.$('cricketBoard').classList.toggle('hidden',!cricket);runtime.$('roundsTitle').textContent=cricket?'ROUND MARKS':'ROUND SCORE';
+// Cricket only uses 15-20 and BULL; dim the other segments.
+document.querySelectorAll('#board .hit').forEach(h=>{const n=Number(h.dataset.segment.replace(/^[SDT](\d+).*$/,'$1'));h.classList.toggle('cricket-off',cricket&&n>0&&n<15)});
 runtime.$('matchPlayers').classList.add('hidden');runtime.$('turnChange').classList.add('hidden');runtime.$('soloMode').classList.toggle('hidden',!runtime.isMatch(s));
 runtime.$('checkoutGuide').classList.add('hidden');
-runtime.$('gameSelect').value=zero?String(s.rules.startScore):'countup';
-runtime.$('gameRules').textContent=zero?'BULL 50 / OPEN OUT / 20 ROUND':'8 ROUND / 24 DARTS';
-runtime.$('scoreCaption').textContent=zero?'REMAINING':'TOTAL SCORE';
+runtime.$('gameSelect').value=runtime.gameChoiceOf(s);
+runtime.$('gameRules').textContent=cricket?'15-20 / BULL / 15 ROUND':zero?'BULL 50 / OPEN OUT / 20 ROUND':'8 ROUND / 24 DARTS';
+runtime.$('scoreCaption').textContent=zero?'REMAINING':cricket?'POINTS':'TOTAL SCORE';
 runtime.$('rounds').classList.toggle('zero-rounds',zero);
 runtime.$('resultCaption').textContent='24投完了。スコアを確認して記録を確定してください。';
 runtime.renderAnalysis();runtime.$('livebull').innerHTML=runtime.bullBars(ds,runtime.curAim());
-if(!zero){
+if(!zero&&!cricket){
 runtime.$('score').textContent=runtime.sum(ds);runtime.$('roundlabel').textContent='ROUND '+Math.min(8,Math.floor(n/3)+1)+' / 8';runtime.$('progress').textContent=n+' / 24';
 runtime.$('rounds').innerHTML=Array.from({length:8},(_,i)=>{let d=ds.filter(x=>x.roundIndex===i+1);return '<div class="'+(d.length===3?'done':i===Math.min(7,Math.floor(n/3))?'active':'')+'">R'+(i+1)+'<br><b>'+(d.length?runtime.sum(d):'—')+'</b></div>'}).join('');
 let r=n>0&&n%3===0?Math.min(7,n/3-1):Math.min(7,Math.floor(n/3));runtime.$('throws').innerHTML=Array.from({length:3},(_,i)=>{let d=ds[r*3+i];return '<div class="throw '+(!d&&i===n%3?'active':'')+'"><span class="tiny muted">DART '+(i+1)+'</span><b>'+(d?d.score:'—')+'</b><span class="tiny muted">'+(d?runtime.dartLabel(d):'READY')+'</span></div>'}).join('');
 runtime.$('throwlog').innerHTML=ds.slice().reverse().map((d,i)=>'<tr><td>'+(n-i)+' (R'+d.roundIndex+'-'+d.dartIndex+')</td><td>'+runtime.dartLabel(d)+'</td><td class="num">'+d.score+'</td></tr>').join('')||'<tr><td colspan="3" class="muted">まだ投球記録がありません</td></tr>';
 runtime.$('resultpanel').classList.toggle('hidden',n!==24||!runtime.showResult);runtime.$('resultCompare').innerHTML=n===24?resultCompare(ds,ss):'';runtime.$('resultscore').textContent=runtime.sum(ds);runtime.$('resultbull').textContent=ds.filter(runtime.isBull).length+' / 24';runtime.$('saveResult').disabled=n!==24;
 runtime.$('miss').disabled=n===24;
-}else runtime.renderZero();
+}else if(cricket)runtime.renderCricket();else runtime.renderZero();
 runtime.$('undo').disabled=!n;runtime.$('endgame').disabled=!n;
-const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.gameScore(latest)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+runtime.esc(runtime.gameName(latest))+' · '+runtime.gameOutcome(latest)+(runtime.isMatch(latest)?'<br>'+runtime.esc(runtime.matchSummary(latest)):'')+(runtime.isZero(latest)?' · 残点':'')+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
-runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+runtime.esc(runtime.gameName(x))+' · '+runtime.gameOutcome(x)+'</td><td>'+runtime.gameScore(x)+(runtime.isZero(x)?' 残り':'')+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
+const latest=runtime.store.sessions[0];runtime.$('latestResult').innerHTML=latest?'<div class="latest-score">'+runtime.gameScore(latest)+'</div><div class="latest-meta"><span>'+runtime.date(latest.startedAt)+'</span><span>'+runtime.esc(runtime.gameName(latest))+' · '+runtime.gameOutcome(latest)+(runtime.isMatch(latest)?'<br>'+runtime.esc(runtime.matchSummary(latest)):'')+(runtime.isZero(latest)?' · 残点':scoreUnit(latest,' · '))+'</span><span>BULL '+latest.darts.filter(runtime.isBull).length+' / '+latest.darts.length+'</span></div>':'<div class="empty">まだ記録がありません。PLAYで最初のゲームを始めましょう。</div>';
+runtime.$('sessions').innerHTML=runtime.store.sessions.map(x=>'<tr><td>'+runtime.date(x.startedAt)+'</td><td>'+runtime.esc(runtime.gameName(x))+' · '+runtime.gameOutcome(x)+'</td><td>'+runtime.gameScore(x)+scoreUnit(x,' ')+'</td><td>'+x.darts.filter(runtime.isBull).length+'</td><td>'+x.darts.length+'</td><td><button data-detail="'+runtime.esc(x.id)+'">詳細</button></td></tr>').join('')||'<tr><td colspan="6" class="muted">まだ履歴がありません。PLAYから練習を始めましょう。</td></tr>';
 document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{runtime.viewId=b.dataset.detail;renderDetail()});if(runtime.store.sessions.length&&!runtime.store.sessions.some(x=>x.id===runtime.viewId))runtime.viewId=runtime.store.sessions[0].id;renderDetail();
 runtime.$('bindinglog').textContent=Object.entries(runtime.store.bindings).map(([k,v])=>k+' → '+runtime.label(v)).join('\n')||'割当なし';
 renderArena(s);
 }
 function renderArena(s){
- const q=runtime.isZero(s)?runtime.evaluateZero(s):null,round=q?.round||Math.min(8,Math.floor(s.darts.length/3)+1);
+ const q=runtime.isGame(s)?runtime.evaluateGame(s):null,round=q?.round||Math.min(8,Math.floor(s.darts.length/3)+1);
  runtime.$('arenaGameTitle').textContent=runtime.gameName(s);
  runtime.$('arenaTurnName').textContent=runtime.isMatch(s)?'P'+(q.playerIndex+1)+' · '+s.players[q.playerIndex].name:runtime.myDarts.nick||'SOLO PRACTICE';
  runtime.$('soloPlayerName').textContent=runtime.myDarts.nick||'PLAYER 1';
@@ -2213,6 +2382,8 @@ function renderArena(s){
  runtime.$('toggleRounds').setAttribute('aria-expanded',String(rows.classList.contains('show-all')));
  document.body.classList.toggle('arena-playing',runtime.$('play').classList.contains('active'));
 }
+// Unit after a history score: 01 shows what is left, cricket solo shows MPR.
+const scoreUnit=(s,sep)=>runtime.isZero(s)?sep+'残り':runtime.isCricket(s)?sep+(runtime.isMatch(s)?'PTS':'MPR'):'';
 function resultCompare(ds,ss){
  if(!ss.length)return '<div class="cmp-first">FIRST GAME — ここが基準になります</div>';
  const sc=runtime.sum(ds),scores=ss.map(x=>runtime.sum(x.darts)),avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length),best=Math.max(...scores),rank=scores.filter(x=>x>sc).length+1,A=runtime.curAim(),rt=x=>x.length?x.filter(q=>runtime.aimHit(q,A)).length/x.length*100:0,br=rt(ds),pbr=Math.round(ss.reduce((a,x)=>a+rt(x.darts),0)/ss.length*10)/10;
@@ -2220,7 +2391,7 @@ function resultCompare(ds,ss){
  const r=Math.round((br-pbr)*10)/10;
  return '<div class="cmp-grid"><div><span>VS AVG '+avg+'</span>'+d(sc-avg)+'</div><div><span>VS BEST '+best+'</span>'+d(sc-best)+'</div><div><span>RANK</span><b>'+rank+' / '+(scores.length+1)+'</b></div><div><span>'+A+' RATE vs AVG</span>'+d(r,'pt')+'</div></div>'+(sc>best?'<div class="cmp-new">NEW PERSONAL BEST!</div>':'');
 }
-function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+runtime.esc(runtime.gameName(s))+' · '+runtime.gameOutcome(s)+'</span><strong class="accent">'+runtime.gameScore(s)+(runtime.isZero(s)?' REMAINING':' POINTS')+'</strong></div>'+(runtime.isMatch(s)?'<p class="tiny">'+runtime.esc(runtime.matchSummary(s))+'</p>':'')+'<div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map((d,i)=>'<tr><td>'+(runtime.isMatch(s)?'P'+(d.playerIndex+1)+' · ':'')+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+(runtime.isZero(s)&&runtime.evaluateZero(s).frames?.[i]?.bust?' · BUST':'')+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
+function renderDetail(){let s=runtime.store.sessions.find(x=>x.id===runtime.viewId);if(!s){runtime.$('sessiondetail').textContent='履歴の「詳細」を押してください。';return}runtime.$('sessiondetail').innerHTML='<div class="flex"><b>'+runtime.date(s.startedAt)+'</b><span class="pill">'+runtime.esc(runtime.gameName(s))+' · '+runtime.gameOutcome(s)+'</span><strong class="accent">'+runtime.gameScore(s)+(runtime.isZero(s)?' REMAINING':runtime.isCricket(s)&&!runtime.isMatch(s)?' MPR':' POINTS')+'</strong></div>'+(runtime.isMatch(s)?'<p class="tiny">'+runtime.esc(runtime.matchSummary(s))+'</p>':'')+'<div class="minirows"><table><thead><tr><th>R</th><th>投球順</th><th>着弾</th><th>得点</th><th>時刻</th></tr></thead><tbody>'+s.darts.map((d,i)=>'<tr><td>'+(runtime.isMatch(s)?'P'+(d.playerIndex+1)+' · ':'')+d.roundIndex+'</td><td>'+d.dartIndex+'</td><td>'+runtime.dartLabel(d)+(runtime.isZero(s)&&runtime.evaluateZero(s).frames?.[i]?.bust?' · BUST':'')+(runtime.isCricket(s)?' · '+(runtime.evaluateCricket(s).frames[i]?.marks||0)+'M':'')+'</td><td>'+d.score+'</td><td>'+new Date(d.timestamp).toLocaleTimeString('ja-JP')+'</td></tr>').join('')+'</tbody></table></div>'}
 Object.assign(runtime,{render});
 
 return {};
@@ -2235,7 +2406,7 @@ modules.connectRender=connectRender;
 function connectBackup(runtime){
 function download(content,filename,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function validDart(d){return d&&typeof d==='object'&&typeof d.id==='string'&&Number.isInteger(d.roundIndex)&&d.roundIndex>=1&&d.roundIndex<=8&&Number.isInteger(d.dartIndex)&&d.dartIndex>=1&&d.dartIndex<=3&&typeof d.segment==='string'&&/^(S|D|T)([1-9]|1[0-9]|20)$|^(OB|IB|MISS)$/.test(d.segment)&&d.score===runtime.points(d.segment)}
-function validSession(s){if(runtime.isZero(s))return runtime.validZeroSession(s);return runtime.isCountup(s)&&s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
+function validSession(s){if(runtime.isZero(s))return runtime.validZeroSession(s);if(runtime.isCricket(s))return runtime.validCricketSession(s);return runtime.isCountup(s)&&s&&typeof s.id==='string'&&typeof s.startedAt==='string'&&['completed','abandoned'].includes(s.status)&&Array.isArray(s.darts)&&s.darts.length<=24&&s.darts.every((d,i)=>validDart(d)&&d.roundIndex===Math.floor(i/3)+1&&d.dartIndex===i%3+1)&&(s.status!=='completed'||s.darts.length===24)}
 function restoreSettings(st){
  if(!st||typeof st!=='object')return false;
  let did=false;
@@ -2252,7 +2423,7 @@ function restoreSettings(st){
 Object.assign(runtime,{download,validSession});
 function initialize(){
 runtime.$('exportjson').onclick=()=>download(JSON.stringify({schemaVersion:1,sessions:runtime.store.sessions,active:runtime.store.active,settings:{bindings:runtime.store.bindings,calibrationKeys:runtime.calibrationKeys(),calibrationCompletedAt:runtime.store.calibrationCompletedAt||null,goalScore:runtime.store.goalScore||null,aimTarget:runtime.curAim()},myDarts:runtime.sanitizeMyDarts(runtime.myDarts)},null,2),'darts-training-lab-backup.json','application/json');
-runtime.$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim','game_type','start_score','player_index','player_name'],...runtime.store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',runtime.aimOf(d),runtime.isZero(s)?'zero-one':'countup',runtime.isZero(s)?s.rules.startScore:'',runtime.isMatch(s)?d.playerIndex+1:'',runtime.isMatch(s)?s.players[d.playerIndex].name:'']))];download('\ufeff'+rows.map(r=>r.map(v=>{const text=String(v??'');return /[",\r\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text}).join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
+runtime.$('exportcsv').onclick=()=>{let rows=[['session_id','started_at','status','round','dart','timestamp','segment','score','source','zone','aim','game_type','start_score','player_index','player_name'],...runtime.store.sessions.flatMap(s=>s.darts.map(d=>[s.id,s.startedAt,s.status,d.roundIndex,d.dartIndex,d.timestamp,d.segment,d.score,d.inputSource,d.zone||'',runtime.aimOf(d),runtime.isCricket(s)?'cricket':runtime.isZero(s)?'zero-one':'countup',runtime.isZero(s)?s.rules.startScore:'',runtime.isMatch(s)?d.playerIndex+1:'',runtime.isMatch(s)?s.players[d.playerIndex].name:'']))];download('\ufeff'+rows.map(r=>r.map(v=>{const text=String(v??'');return /[",\r\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text}).join(',')).join('\r\n'),'darts-training-lab-throws.csv','text/csv;charset=utf-8')};
 runtime.$('importjson').onchange=async e=>{let file=e.target.files[0];if(!file)return;const snapSessions=runtime.store.sessions,snapMy=JSON.stringify(runtime.myDarts);try{let v=JSON.parse(await file.text());if(v.schemaVersion!==1||!Array.isArray(v.sessions)||!v.sessions.every(validSession))throw Error('ファイル形式が違うか、投球データが不正です');let existing=new Set(runtime.store.sessions.map(s=>s.id)),newItems=v.sessions.filter(s=>!existing.has(s.id));let merged=null,addedSets=0,skippedSets=0;if(v.myDarts!==undefined&&v.myDarts!==null){const imp=runtime.sanitizeMyDarts(v.myDarts);if(imp.sets.length||imp.nick){merged=runtime.sanitizeMyDarts(runtime.myDarts);for(const x of imp.sets){const i=merged.sets.findIndex(y=>y.id===x.id);if(i>=0)merged.sets[i]=x;else if(merged.sets.length<10){merged.sets.push(x);addedSets++}else skippedSets++}if(!merged.nick)merged.nick=imp.nick;if(!merged.current&&imp.current&&merged.sets.some(y=>y.id===imp.current))merged.current=imp.current}}if(!confirm(newItems.length+'件の履歴を追加しますか？現在の履歴は残ります。'+(merged?'\nMY DARTS：同じIDのセットは上書き、新規'+addedSets+'件を追加します（既存セットは残ります）。'+(skippedSets?'\n10セットを超える'+skippedSets+'件は取り込めません。':''):'')))return;runtime.store.sessions=[...runtime.store.sessions,...newItems].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));const restored=restoreSettings(v.settings);let myOk=true;if(merged){runtime.myDarts=merged;runtime.editingSetup='';myOk=runtime.mySaveState();runtime.myLoad('')}if(!runtime.persist()){runtime.store.sessions=snapSessions;if(merged&&myOk){runtime.myDarts=runtime.sanitizeMyDarts(JSON.parse(snapMy));runtime.mySaveState();runtime.myLoad('')}runtime.render();return}if(!myOk){runtime.render();return}runtime.render();alert(newItems.length+'件を復元しました'+(restored?'（200S設定・目標も復元）':'')+(merged?'（MY DARTSも復元）':''))}catch(err){alert('復元できませんでした：'+err.message)}finally{e.target.value=''}};
 runtime.$('clearall').onclick=async()=>{if(confirm('全履歴を削除します。JSONバックアップを保存しましたか？')&&confirm('本当に全履歴を削除しますか？')){runtime.store.sessions=[];runtime.viewId=null;runtime.persist();runtime.render();if(runtime.cloud.user&&runtime.cloud.api&&confirm('クラウドの履歴も削除しますか？\n（削除しないと、次の同期で戻ります）')){try{runtime.cloudStatus('DELETING…');const uid=runtime.cloud.user.uid,l=await runtime.cloud.api.listSessions(uid);for(const x of l){if(x&&typeof x.id==='string')await runtime.cloud.api.deleteSession(uid,x.id)}runtime.syncMeta.pushed=[];runtime.syncMetaSave();runtime.cloudUi();runtime.toast('クラウドの履歴も削除しました')}catch(e){runtime.cloudStatus('DELETE FAILED · '+String(e&&(e.code||e.message)||e).slice(0,60))}}}};
 }
@@ -2390,7 +2561,7 @@ modules.connectInput=connectInput;
 
 // Feature scripts register factories before this deferred entry point runs.
 (()=>{'use strict';
-const {connectMatchAccounts,connectZeroOneView,connectZeroOne,connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
+const {connectMatchAccounts,connectZeroOneView,connectZeroOne,connectCricket,connectCricketView,connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
 delete globalThis.RETRO_DARTS_MODULES;
 
 try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.add('no-dev')}catch(e){}
@@ -2403,6 +2574,8 @@ const features={
  matchAccounts: connectMatchAccounts(runtime),
  zeroOne: connectZeroOne(runtime),
  zeroOneView: connectZeroOneView(runtime),
+ cricket: connectCricket(runtime),
+ cricketView: connectCricketView(runtime),
  state: connectState(runtime),
  localStorage: connectLocalStorage(runtime),
  cloud: connectCloud(runtime),
@@ -2441,6 +2614,7 @@ features.rounds.initialize();
 features.navigation.initialize();
 features.countup.initialize();
 features.zeroOne.initialize();
+features.cricket.initialize();
 features.matchAccounts.initialize();
 features.aim.initialize();
 features.roundStorage.initialize();

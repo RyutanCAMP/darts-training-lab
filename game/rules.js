@@ -3,10 +3,10 @@
 (()=>{'use strict';
 function connectRules(runtime){
 function newSession(){
- const choice=runtime.store.gameChoice,zero=['301','501','701'].includes(choice);
+ const choice=runtime.store.gameChoice,zero=['301','501','701'].includes(choice),cricket=choice==='cricket';
  return {
-  id:runtime.id(),schemaVersion:1,gameType:zero?'zero-one':'countup',
-  ...(zero?{rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}}:{}),
+  id:runtime.id(),schemaVersion:1,gameType:cricket?'cricket':zero?'zero-one':'countup',
+  ...(zero?{rules:{startScore:Number(choice),inRule:'straight',outRule:'open',bullMode:'fat',maxRounds:20}}:cricket?{rules:runtime.cricketRules()}:{}),
   startedAt:new Date().toISOString(),endedAt:null,status:'active',
   setupId:runtime.myDarts.current||null,
   setupName:runtime.myDarts.sets.find(x=>x.id===runtime.myDarts.current)?.SetupName||null,
@@ -20,7 +20,7 @@ if(!runtime.store.active)runtime.store.active=newSession();
 if(localStorage.getItem(runtime.KEY)!==null){runtime.saveOK=true;runtime.savedAt=Date.now()}
 runtime.points=s=>s==='IB'?50:s==='OB'?50:s==='MISS'?0:Number(s.slice(1))*({S:1,D:2,T:3}[s[0]]||0);
 if(runtime.sessionDone(runtime.store.active))runtime.showResult=true;
-if(runtime.isZero(runtime.store.active))runtime.store.gameChoice=String(runtime.store.active.rules.startScore);else runtime.store.gameChoice='countup';
+runtime.store.gameChoice=runtime.gameChoiceOf(runtime.store.active);
 runtime.label=s=>s==='IB'?'INNER BULL':s==='OB'?'OUTER BULL':s==='MISS'?'MISS':({S:'SINGLE',D:'DOUBLE',T:'TRIPLE'}[s[0]]||'')+' '+s.slice(1);
 runtime.dartLabel=d=>d.zone&&/^S\d+(I|O)$/.test(d.zone)?'SINGLE '+d.segment.slice(1)+(d.zone.endsWith('I')?'（内側）':'（外側）'):runtime.label(d.segment);
 runtime.isBull=d=>d.segment==='IB'||d.segment==='OB';

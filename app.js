@@ -1,6 +1,6 @@
 // Feature scripts register factories before this deferred entry point runs.
 (()=>{'use strict';
-const {connectMatchAccounts,connectZeroOneView,connectZeroOne,connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
+const {connectMatchAccounts,connectZeroOneView,connectZeroOne,connectCricket,connectCricketView,connectState,connectLocalStorage,connectCloud,connectMyDarts,connectCatalog,connectRules,connectSound,connectEffects,connectRounds,connectNavigation,connectBoard,connectCountup,connectOverview,connectAim,connectRoundStorage,connectPeriod,connectAdvanced,connectReport,connectHelp,connectRender,connectBackup,connectEvents,connectInput}=globalThis.RETRO_DARTS_MODULES;
 delete globalThis.RETRO_DARTS_MODULES;
 
 try{if(!/[?&]dev=1\b/.test(location.search))document.documentElement.classList.add('no-dev')}catch(e){}
@@ -13,6 +13,8 @@ const features={
  matchAccounts: connectMatchAccounts(runtime),
  zeroOne: connectZeroOne(runtime),
  zeroOneView: connectZeroOneView(runtime),
+ cricket: connectCricket(runtime),
+ cricketView: connectCricketView(runtime),
  state: connectState(runtime),
  localStorage: connectLocalStorage(runtime),
  cloud: connectCloud(runtime),
@@ -51,6 +53,7 @@ features.rounds.initialize();
 features.navigation.initialize();
 features.countup.initialize();
 features.zeroOne.initialize();
+features.cricket.initialize();
 features.matchAccounts.initialize();
 features.aim.initialize();
 features.roundStorage.initialize();
