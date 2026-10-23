@@ -68,7 +68,7 @@ try:
     for seg in ['T20','T20','T20']:hit(pg,seg)
     assert pg.locator('#score').inner_text()=='120' and 'MPR 9.00' in pg.locator('#scoreCaption').inner_text()
     assert pg.locator('#throws .throw b').all_text_contents()==['T20','T20','T20'] and '3 MARK · +60' in pg.locator('#throws').inner_text()
-    assert pg.locator('#cricketBoard .ck-row').first.inner_text().split()==['20','⊗']
+    assert pg.locator('#cricketBoard .ck-row').first.locator('.ck-mark').get_attribute('aria-label')=='3 MARK'
     skip(pg)
     for seg in ['T19','T18','T17']:hit(pg,seg)
     skip(pg)
@@ -93,7 +93,10 @@ try:
     assert pg.locator('.match-player strong').all_text_contents()==['80','0']
     hit(pg,'T19');assert len(state(pg)['active']['darts'])==3
     pg.screenshot(path=str(ART/f'cricket-match-{filename}-{mobile}.png'))
-    click(pg,'confirmTurn');hit(pg,'T20');hit(pg,'T20')
+    # After the handoff, P1's last-turn marks stay lit for P2 to see.
+    click(pg,'confirmTurn');assert pg.locator('#cricketBoard .ck-row').first.locator('.ck-mark.p1.recent i').inner_text()=='+7'
+    assert 'own-p1' in pg.locator('#cricketBoard .ck-row').first.get_attribute('class') and pg.locator('.ck-head .p2.current').count()==1
+    hit(pg,'T20');hit(pg,'T20')
     assert pg.locator('.match-player strong').all_text_contents()==['80','0'] and pg.locator('#cricketBoard .ck-row.dead').count()==1
     click(pg,'undo');click(pg,'undo');assert len(state(pg)['active']['darts'])==3 and pg.locator('#turnChange').is_hidden()
     # A saved winning match replays to the same winner and goes to history.

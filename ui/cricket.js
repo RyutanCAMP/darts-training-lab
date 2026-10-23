@@ -1,6 +1,7 @@
 (()=>{'use strict';
 function connectCricketView(runtime){
-const MARK=['','/','×','⊗'];
+// Slash, cross and circled cross drawn as SVG so they stay crisp and large.
+const MARK=['','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19 18 5"/></svg>','<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19 18 5M6 5l12 14"/></svg>','<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 17 17 7M7 7l10 10"/></svg>'];
 const short=d=>d.segment==='IB'?'IB':d.segment==='OB'?'OB':d.segment;
 function renderCricket(){
  const s=runtime.store.active,q=runtime.evaluateCricket(s),ds=s.darts;
@@ -18,8 +19,13 @@ function renderCricket(){
  }
  runtime.$('score').textContent=q.points[0];
  runtime.$('scoreCaption').textContent=match?'P'+(q.playerIndex+1)+' POINTS':'POINTS · MPR '+q.mpr[0].toFixed(2);
- const cell=(i,t)=>'<span class="ck-mark p'+(i+1)+(q.marks[i][t]>=3?' closed':'')+'">'+MARK[q.marks[i][t]]+'</span>';
- runtime.$('cricketBoard').innerHTML=T.map(t=>'<div class="ck-row'+(match&&q.marks[0][t]>=3&&q.marks[1][t]>=3?' dead':'')+'">'+(match?cell(0,t):'')+'<b>'+t+'</b>'+(match?cell(1,t):cell(0,t))+'</div>').join('');
+ // Light up what the opponent took in their last turn and what this turn adds.
+ const lastTurn=pending?q.frames.at(-1).turn:match?q.turnIndex-1:-1,thisTurn=pending?-1:q.turnIndex,added=[{},{}];
+ for(const f of q.frames)if(f.target&&f.marks&&(f.turn===lastTurn||f.turn===thisTurn))added[f.playerIndex][f.target]=(added[f.playerIndex][f.target]||0)+f.marks;
+ const cell=(i,t)=>{const n=q.marks[i][t],plus=added[i][t];return '<span class="ck-mark p'+(i+1)+(n>=3?' closed':'')+(plus?' recent':'')+'" aria-label="'+n+' MARK">'+MARK[n]+(plus?'<i>+'+plus+'</i>':'')+'</span>'};
+ const own=t=>!match?'':q.marks[0][t]>=3&&q.marks[1][t]>=3?' dead':q.marks[0][t]>=3?' own-p1':q.marks[1][t]>=3?' own-p2':'';
+ const head=match?'<div class="ck-head">'+s.players.map((p,i)=>'<span class="p'+(i+1)+(i===q.playerIndex&&!q.ended?' current':'')+'"><em>P'+(i+1)+' · '+runtime.esc(p.name)+'</em><b>'+q.points[i]+'</b></span>').join('<span></span>')+'</div>':'';
+ runtime.$('cricketBoard').innerHTML=head+T.map(t=>'<div class="ck-row'+own(t)+'">'+(match?cell(0,t):'')+'<b>'+t+'</b>'+(match?cell(1,t):cell(0,t))+'</div>').join('');
  runtime.$('cricketBoard').classList.toggle('solo',!match);
  runtime.$('roundlabel').textContent='ROUND '+q.round+' / 15';
  runtime.$('progress').textContent=pending?'P'+(shown+1)+' · LAST TURN':ds.length+' DARTS';
