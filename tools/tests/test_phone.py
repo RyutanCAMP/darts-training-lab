@@ -109,6 +109,28 @@ with sync_playwright() as p:
     chk(darts(pg)[-1:]==['IB'] and len(darts(pg))==4,'dart after CHANGE accepted')
     chk(not pg.errs,'no page errors '+str(pg.errs))
     c.close()
+    # race: switching to BLUETOOTH while PHONE is still connecting must not leave a listener behind
+    c,pg=boot(b,'index.html',{'mode':'bt','code':'ABCD2345','toPlay':True,'lastT':0,'log':[]})
+    pg.evaluate("document.getElementById('phoneChip').click();document.getElementById('inputPhone').click();document.getElementById('inputBt').click()")
+    pg.wait_for_timeout(300)
+    chk(pg.evaluate('window.__cb')==None and pg.inner_text('#phoneChip')=='INPUT BT','switch to BT during connect: no listener')
+    c.close()
+    # race: new code created after switching to BLUETOOTH -> code kept, but not listening
+    c,pg=boot(b,'index.html',{'mode':'phone','code':'','toPlay':True,'lastT':0,'log':[]})
+    pg.evaluate("window.__DTL_PHONE_FAKE.createLink=async c=>{window.__links.push(c);await new Promise(r=>setTimeout(r,200))}")
+    pg.click('#phoneChip');pg.click('#phoneStart');pg.click('#inputBt');pg.wait_for_timeout(400)
+    chk(pg.evaluate('window.__cb')==None and pg.inner_text('#phoneChip')=='INPUT BT','switch to BT during code creation: no listener')
+    c.close()
+    # PHONE mode swallows 200S START/CHANGE (Tab/Enter): no focus move, no button press, no dart
+    c,pg=boot(b,'index.html',{'mode':'phone','code':'ABCD2345','toPlay':True,'lastT':0,'log':[]})
+    pg.wait_for_function('window.__cb!==null');pg.evaluate("window.__push([])")
+    pg.focus('#miss');pg.keyboard.press('Tab')
+    chk(pg.evaluate("document.activeElement.id")=='miss','PHONE mode: Tab (START) does not move focus')
+    pg.evaluate("window.__undoClicks=0;document.getElementById('miss').addEventListener('click',()=>window.__undoClicks++)")
+    pg.focus('#miss');pg.keyboard.press('Enter');pg.keyboard.press('o')
+    chk(pg.evaluate('window.__undoClicks')==0 and darts(pg)==[],'PHONE mode: Enter (CHANGE) presses nothing, board key adds nothing')
+    chk(not pg.errs,'no page errors '+str(pg.errs))
+    c.close()
     # connection guide: linked from the INPUT sheet (both modes), opens as its own page, fits a phone screen
     c,pg=boot(b,'index.html')
     pg.click('#phoneChip')
