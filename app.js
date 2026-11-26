@@ -1066,7 +1066,7 @@ function setupCloud(){
    Firestore links/{CODE}/throws/{id} = {seg,t,n}. This page creates links/{CODE} = {v,createdAt} and listens.
    No login: the random 8-char code is the shared secret (see firestore.rules). Live throws are fed into PLAY through
    the same path as a directly connected 200S; throws that arrived while this page was closed are logged only. */
-const PHONE_KEY='dtl-phone-v1',PHONE_ABC='23456789ABCDEFGHJKMNPQRSTUVWXYZ',PHONE_LOG_MAX=3000;
+const PHONE_KEY='dtl-phone-v1',PHONE_ABC='23456789ABCDEFGHJKMNPQRSTUVWXYZ',PHONE_LOG_MAX=3000,PHONE_OVERLAP=3600000;
 const PHONE_SEGS=new Set(['START','CHANGE','OB','IB',...Object.values(board200sMap)]);
 let phone={code:'',toPlay:true,lastT:0,log:[]},phoneRt={api:null,unsub:null,state:'OFF',synced:false,seen:new Set(),saveTimer:null};
 try{const x=JSON.parse(localStorage.getItem(PHONE_KEY));if(x&&typeof x==='object'){if(validPhoneCode(x.code))phone.code=x.code;phone.toPlay=x.toPlay!==false;phone.lastT=Number(x.lastT)||0;if(Array.isArray(x.log))phone.log=x.log.filter(e=>e&&PHONE_SEGS.has(e.seg)).slice(-PHONE_LOG_MAX)}}catch(_){}
@@ -1130,7 +1130,8 @@ async function phoneListen(){
  try{
   const api=phoneRt.api||(phoneRt.api=await phoneLoadApi()),code=phone.code;
   if(code!==phone.code)return;
-  phoneRt.unsub=api.listen(code,phone.lastT,(list,fromServer)=>{
+  // resume 1h before the newest throw seen: same-millisecond or out-of-order throws are not skipped; ids already seen are dropped
+  phoneRt.unsub=api.listen(code,Math.max(0,phone.lastT-PHONE_OVERLAP),(list,fromServer)=>{
    if(code!==phone.code)return;
    const live=phoneRt.synced;
    if(fromServer&&!phoneRt.synced){phoneRt.synced=true;phoneSetState('LIVE')}
