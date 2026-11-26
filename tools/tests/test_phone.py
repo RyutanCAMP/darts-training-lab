@@ -118,7 +118,7 @@ with sync_playwright() as p:
     g=gp.value;g.errs=[];g.on('pageerror',lambda e:g.errs.append(str(e)));g.wait_for_load_state()
     chk(g.title()=='スマホ連携ガイド' and g.locator('.step').count()==5 and g.locator('.qr svg').count()==1,'guide page: title, 5 steps, QR')
     chk(not g.evaluate('document.documentElement.scrollWidth>innerWidth'),'guide fits phone width')
-    chk('releases/download/' in g.inner_text('#apkUrl'),'guide shows APK url')
+    chk(g.inner_text('#apkUrl').strip().endswith('releases/latest/download/throw-watcher.apk'),'guide shows official APK url (latest)')
     chk(not g.errs and not pg.errs,'no page errors '+str(g.errs+pg.errs))
     c.close()
     # bad saved data does not break the page
