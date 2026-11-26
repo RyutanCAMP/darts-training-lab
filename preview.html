@@ -445,6 +445,13 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .page .play-chips button.chip-set:not(.primary):not(.warn){color:#8dd9e6;border-color:#2f6c78;background:#10252b}
 .page .play-chips button.chip-auth:not(.primary):not(.warn){color:#a8b9c5;border-color:#31414B;background:#15212B}
 .page .play-chips button.chip-auth.on:not(.primary):not(.warn){color:#b4ed38;border-color:#5f8a2a;background:#17240f}
+.page .play-chips button.chip-phone:not(.primary):not(.warn){color:#a8b9c5;border-color:#31414B;background:#15212B}
+.page .play-chips button.chip-phone.on:not(.primary):not(.warn){color:#ffd166;border-color:#8a6d2a;background:#2a2110}
+.phone-code{font-family:"Press Start 2P",monospace;font-size:clamp(26px,8vw,40px);letter-spacing:.08em;color:#ffd166;text-align:center;margin:14px 0 8px;user-select:all}
+.phone-code.muted{color:#4a5a66}
+.phone-toggle{display:block;margin:12px 0 4px}
+.phone-last{font-family:"Press Start 2P",monospace;font-size:20px;color:#b4ed38;text-align:center;margin:10px 0}
+#phoneLog{max-height:180px;overflow:auto}
 .sheet{position:fixed;inset:0;z-index:95;display:flex;align-items:flex-end;justify-content:center;background:#000b}
 .sheet.hidden{display:none}
 .sheet-box{width:min(100%,520px);max-height:80vh;overflow:auto;padding:16px 16px 22px;border:1px solid #31414B;border-radius:16px 16px 0 0;background:#15212B}
@@ -468,10 +475,10 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 @media(max-width:560px){.tabs button{padding:9px 4px!important;font-size:12px!important}}
 </style></head><body><div id="gameFx" class="game-fx" aria-hidden="true"><canvas id="pixelFx" width="160" height="90" aria-hidden="true"></canvas><div class="game-fx-title" id="gameFxTitle"></div><div class="game-fx-sub" id="gameFxSub"></div></div><div id="startupFx" class="startup-fx" aria-hidden="true"><div class="startup-fx-content"><div class="startup-fx-kicker">PRACTICE INTELLIGENCE SYSTEM</div><div class="startup-fx-logo">DARTS <span>TRAINING LAB</span></div><div class="startup-fx-bar"></div><div class="startup-fx-caption">READY TO THROW</div></div></div><div class="shell">
-<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.5.41-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
+<header class="top"><div><div class="eyebrow">PRACTICE INTELLIGENCE SYSTEM</div><div class="brand">DARTS <span>TRAINING LAB</span> <small id="appVersion" style="display:inline-block;vertical-align:middle;font:700 11px/1.4 monospace;letter-spacing:.03em;color:#9fe6cf;border:1px solid #528f7e;border-radius:5px;padding:2px 6px;white-space:nowrap">v0.5.42-beta.1</small></div><div class="tiny muted">投げるほど、自分の強みと弱点が見えてくる。</div></div><div class="header-tools"><button class="settings-icon" data-tab="settings" aria-label="設定を開く" title="設定">⚙</button></div></header>
 
 
-<section class="page active" id="play"><div class="play-heading"><strong>COUNT-UP</strong><span>8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button></div><div class="grid playgrid"><article class="panel"><div class="playmeta"><span class="muted">TOTAL SCORE</span><strong id="roundlabel">ROUND 1 / 8</strong></div><div class="bigscore" id="score" aria-live="polite">0</div><div class="rounds" id="rounds"></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="次のラウンドへ"><div class="cool-card"><div class="cool-kicker">NEXT ROUND</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><canvas id="coolPixel" class="cool-pixel" width="128" height="60" aria-hidden="true"></canvas><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><p class="tiny muted" style="text-align:center">リングをクリック：SINGLE / DOUBLE / TRIPLE / BULL</p></article><div class="grid play-sidebar"><article class="panel"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="actions"><button id="newgame">新しいゲーム</button></div><div class="actions"><button id="endgame" class="warn">途中終了して保存</button></div><p class="tiny muted">3投で自動的に次のラウンドへ。未投球は自動補完しません。</p><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></article><details class="panel play-extra" open><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra" open><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div></div><article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div id="resultCompare"></div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article><div class="sheet hidden" id="accountSheet" role="dialog" aria-label="プレイヤー"><div class="sheet-box"><h3>PLAYER</h3><article class="panel" id="profilePanel" style="margin-top:16px"><h3>ユーザー名</h3><div class="grid cols2" style="margin-top:10px"><label>ニックネーム<input id="myNick" maxlength="32" placeholder="ゲストでもOK"></label></div><p class="tiny muted">練習記録に表示するニックネームです。</p></article><article class="panel" id="cloudPanel" style="margin-top:16px"><h3>CLOUD SYNC <span class="tiny muted">GOOGLE</span></h3><div class="tiny muted" id="cloudStatus">OFF</div><div class="actions"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudSync" class="hidden">SYNC NOW</button><button type="button" id="cloudLogout" class="hidden">ログアウト</button></div><p class="tiny muted">ログインすると、履歴とMY DARTSがクラウドに保存され、他の端末と同期されます。ログインしなくても使えます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div><div class="sheet hidden" id="aimSheet" role="dialog" aria-label="狙い"><div class="sheet-box"><article class="panel aim-settings"><h3>狙い / AIM TARGET</h3><div class="flex"><select id="aimSelect" aria-label="狙い"></select></div><p class="tiny muted">変更した後の投球から、この狙いで記録されます。それまでの記録はブル狙いとして扱います。分析は、狙いごとに分けて見られます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div></section>
+<section class="page active" id="play"><div class="play-heading"><strong>COUNT-UP</strong><span>8 ROUND / 24 DARTS</span></div><div class="play-chips"><button type="button" class="aim-chip" id="aimChip" aria-label="狙いを設定で変更">AIM BULL</button><button type="button" class="aim-chip chip-set" id="setChip" aria-label="使うセットを切り替え">SET —</button><button type="button" class="aim-chip chip-auth" id="authChip" aria-label="ログイン状態">GUEST</button><button type="button" class="aim-chip chip-phone" id="phoneChip" aria-label="スマホ連携">PHONE</button></div><div class="grid playgrid"><article class="panel"><div class="playmeta"><span class="muted">TOTAL SCORE</span><strong id="roundlabel">ROUND 1 / 8</strong></div><div class="bigscore" id="score" aria-live="polite">0</div><div class="rounds" id="rounds"></div><div class="round-break hidden" id="roundBreak" role="dialog" aria-label="次のラウンドへ"><div class="cool-card"><div class="cool-kicker">NEXT ROUND</div><div class="cool-praise" id="roundBreakPraise">NICE ONE!</div><canvas id="coolPixel" class="cool-pixel" width="128" height="60" aria-hidden="true"></canvas><div class="cool-ring"><span id="roundBreakCountdown">8</span><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="cool-track" cx="60" cy="60" r="51"/><circle class="cool-progress" cx="60" cy="60" r="51"/></svg></div><div class="cool-round" id="roundBreakLabel">ROUND CLEAR</div><strong class="cool-score" id="roundBreakScore">+0</strong><button id="skipRoundBreak" type="button">SKIP <span aria-hidden="true">›</span></button></div></div><div class="board" id="board"></div><div class="toast" id="toast" role="status">READY TO THROW</div><p class="tiny muted" style="text-align:center">リングをクリック：SINGLE / DOUBLE / TRIPLE / BULL</p></article><div class="grid play-sidebar"><article class="panel"><h3>THIS ROUND <span class="muted" id="progress">0 / 24</span></h3><div class="throws" id="throws"></div><div class="actions"><button id="miss">MISS +0</button><button id="undo">↶ 1投戻す</button></div><div class="actions"><button id="newgame">新しいゲーム</button></div><div class="actions"><button id="endgame" class="warn">途中終了して保存</button></div><p class="tiny muted">3投で自動的に次のラウンドへ。未投球は自動補完しません。</p><div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="save-dot"></span><span id="saveText">保存状態を確認中</span></div></article><details class="panel play-extra" open><summary>投球ログ</summary><h3>THROW LOG</h3><div class="minirows"><table><thead><tr><th>投球</th><th>着弾</th><th>得点</th></tr></thead><tbody id="throwlog"></tbody></table></div></details><details class="panel play-extra" open><summary>投球中の詳細</summary><h3>LIVE ANALYTICS</h3><div id="livebull"></div></details></div></div><article class="panel hidden resultpanel" id="resultpanel"><div class="eyebrow">GAME COMPLETE / REVIEW</div><h3>ゲーム終了！</h3><p class="tiny muted">24投完了。スコアを確認して記録を確定してください。</p><div class="resultscore" id="resultscore">0</div><div id="resultCompare"></div><div class="flex"><span class="pill">BULL <strong id="resultbull">0 / 24</strong></span><span class="tiny muted">修正する場合は「1投戻す」</span></div><div class="actions"><button class="primary" id="saveResult">このスコアを保存して結果を見る →</button></div></article><div class="sheet hidden" id="accountSheet" role="dialog" aria-label="プレイヤー"><div class="sheet-box"><h3>PLAYER</h3><article class="panel" id="profilePanel" style="margin-top:16px"><h3>ユーザー名</h3><div class="grid cols2" style="margin-top:10px"><label>ニックネーム<input id="myNick" maxlength="32" placeholder="ゲストでもOK"></label></div><p class="tiny muted">練習記録に表示するニックネームです。</p></article><article class="panel" id="cloudPanel" style="margin-top:16px"><h3>CLOUD SYNC <span class="tiny muted">GOOGLE</span></h3><div class="tiny muted" id="cloudStatus">OFF</div><div class="actions"><button type="button" id="cloudLogin">Googleでログイン</button><button type="button" id="cloudSync" class="hidden">SYNC NOW</button><button type="button" id="cloudLogout" class="hidden">ログアウト</button></div><p class="tiny muted">ログインすると、履歴とMY DARTSがクラウドに保存され、他の端末と同期されます。ログインしなくても使えます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div><div class="sheet hidden" id="phoneSheet" role="dialog" aria-label="スマホ連携"><div class="sheet-box"><article class="panel" id="phonePanel"><h3>PHONE LINK <span class="tiny muted">スマホ連携</span></h3><div class="phone-code" id="phoneCode">----</div><div class="tiny muted" id="phoneStatus" role="status" aria-live="polite">OFF</div><div class="actions"><button type="button" class="primary" id="phoneStart">連携コードを発行</button><button type="button" id="phoneStop" class="hidden">連携を止める</button></div><label class="tiny phone-toggle"><input type="checkbox" id="phoneToPlay" checked> 届いた投擲をPLAYに反映（COUNT-UP）</label><div class="phone-last" id="phoneLast" aria-live="polite">—</div><pre class="log" id="phoneLog">まだ届いていません</pre><p class="tiny muted">スマホの「投擲ウォッチャー」にこのコードを入力。公式アプリで投げた場所がここに届きます。COUNT-UP以外を投げるときは反映をOFFに。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div><div class="sheet hidden" id="aimSheet" role="dialog" aria-label="狙い"><div class="sheet-box"><article class="panel aim-settings"><h3>狙い / AIM TARGET</h3><div class="flex"><select id="aimSelect" aria-label="狙い"></select></div><p class="tiny muted">変更した後の投球から、この狙いで記録されます。それまでの記録はブル狙いとして扱います。分析は、狙いごとに分けて見られます。</p></article><button type="button" class="sheet-item sheet-close" data-close-sheet>閉じる</button></div></div></section>
 <section class="page" id="history"><div class="eyebrow">PRACTICE ARCHIVE</div><h1 class="section-title">スコア・結果</h1><p class="lead">まず最新のスコアを確認。過去の詳細もここから。</p><div class="grid cols2 result-actions"><button class="primary" id="againFromHistory">もう1ゲーム投げる →</button><button id="analyseFromHistory">分析を見る →</button></div><article class="panel latest-result"><div class="eyebrow">LATEST GAME</div><div id="savedNotice" class="saved-notice hidden" role="status">✓ 完走記録を保存しました</div><div id="latestResult" aria-live="polite">まだ記録がありません</div></article><details class="result-archive"><summary>過去のスコア一覧を開く</summary><article class="panel"><div class="minirows" style="max-height:420px"><table><thead><tr><th>日時</th><th>状態</th><th>得点</th><th>ブル</th><th>投数</th><th>詳細</th></tr></thead><tbody id="sessions"></tbody></table></div></article></details><article class="panel" style="margin-top:16px"><h3>投球詳細</h3><div id="sessiondetail" class="muted">履歴の「詳細」を押してください。</div></article></section>
 <section class="page" id="analysis"><div class="eyebrow">DARTS INTELLIGENCE</div><h1 class="section-title">PERFORMANCE</h1>
 <div class="analysis-periods" id="analysisPeriods" role="group" aria-label="分析するラウンド数"><button data-aim-period="1">1R</button><button data-aim-period="10" class="selected">10R</button><button data-aim-period="20">20R</button><button data-aim-period="all">ALL</button></div>
@@ -1434,13 +1441,15 @@ $('specialExport').onclick=()=>download(JSON.stringify(specialData,null,2),'200s
 const board200sMap={"KeyA | A":"S20O","KeyW | W":"S20I","Digit7 | &":"T20","KeyY | Y":"D20","KeyQ | Q":"S1O","KeyH | h":"S1I","Minus | -":"T1","KeyJ | J":"D1","KeyZ | Z":"S18O","KeyR | r":"S18I","Quote | \"":"T18","KeyT | t":"D18","Slash | /":"S4O","KeyM | M":"S4I","Digit2 | @":"T4","KeyK | K":"D4","Digit2 | 2":"S13O","Digit5 | %":"S13I","KeyQ | q":"T13","Digit6 | ^":"D13","Period | .":"S6O","KeyU | U":"S6I","Digit4 | 4":"T6","KeyV | V":"D6","Equal | =":"S10O","KeyM | m":"S10I","KeyA | a":"T10","KeyL | l":"D10","KeyH | H":"S15O","Digit4 | $":"S15I","KeyE | e":"T15","BracketLeft | [":"D15","KeyR | R":"S2O","Comma | <":"S2I","KeyD | d":"T2","Digit9 | 9":"D2","KeyI | I":"S17O","KeyF | f":"S17I","Digit1 | 1":"T17","Comma | ,":"D17","KeyD | D":"S3O","KeyI | i":"S3I","Semicolon | ;":"T3","KeyS | S":"D3","Digit8 | 8":"S19O","KeyC | c":"S19I","Equal | +":"T19","KeyB | B":"D19","KeyO | O":"S7O","KeyN | N":"S7I","Slash | ?":"T7","Digit3 | 3":"D7","Digit3 | #":"S16O","Minus | _":"S16I","Period | >":"T16","KeyB | b":"D16","KeyP | p":"S8O","KeyC | C":"S8I","Digit8 | *":"T8","KeyK | k":"D8","Backslash | \\":"S11O","Digit5 | 5":"S11I","Digit7 | 7":"T11","KeyT | T":"D11","KeyL | L":"S14O","Digit0 | 0":"S14I","Digit6 | 6":"T14","KeyS | s":"D14","KeyG | g":"S9O","KeyF | F":"S9I","KeyE | E":"T9","Semicolon | :":"D9","Quote | '":"S12O","KeyN | n":"S12I","KeyP | P":"T12","KeyX | X":"D12","Digit9 | (":"S5O","BracketRight | ]":"S5I","KeyJ | j":"T5","Digit1 | !":"D5","KeyG | G":"OB","KeyO | o":"IB"};
 let board200sEnabled=true,board200sLastKey='',board200sLastAt=0;
 function board200sStatus(message){const el=$('board200sStatus');if(el)el.textContent=message}
+function board200sStart(){if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}}
+function board200sChange(){if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}}
 function board200sInput(e){
  if(!board200sEnabled)return false;
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
- if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
- if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');board200sStart();return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');board200sChange();return true}
  if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
  const zone=board200sMap[k];if(!zone)return false;const segment=zone.startsWith('S')?zone.slice(0,-1):zone;
  e.preventDefault();
@@ -1561,7 +1570,99 @@ function setupCloud(){
  $('cloudSync').onclick=()=>cloudSync();
  $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。未同期の記録はこの端末に残り、他の端末では見られません。共有端末ではブラウザのデータ管理にも注意してください。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
+/* ===== PHONE LINK (スマホ連携) =====
+   The Android app "投擲ウォッチャー" watches the 200S keys while the official app is played and writes each throw to
+   Firestore links/{CODE}/throws/{id} = {seg,t,n}. This page creates links/{CODE} = {v,createdAt} and listens.
+   No login: the random 8-char code is the shared secret (see firestore.rules). Live throws are fed into PLAY through
+   the same path as a directly connected 200S; throws that arrived while this page was closed are logged only. */
+const PHONE_KEY='dtl-phone-v1',PHONE_ABC='23456789ABCDEFGHJKMNPQRSTUVWXYZ',PHONE_LOG_MAX=3000;
+const PHONE_SEGS=new Set(['START','CHANGE','OB','IB',...Object.values(board200sMap)]);
+let phone={code:'',toPlay:true,lastT:0,log:[]},phoneRt={api:null,unsub:null,state:'OFF',synced:false,seen:new Set(),saveTimer:null};
+try{const x=JSON.parse(localStorage.getItem(PHONE_KEY));if(x&&typeof x==='object'){if(validPhoneCode(x.code))phone.code=x.code;phone.toPlay=x.toPlay!==false;phone.lastT=Number(x.lastT)||0;if(Array.isArray(x.log))phone.log=x.log.filter(e=>e&&PHONE_SEGS.has(e.seg)).slice(-PHONE_LOG_MAX)}}catch(_){}
+phone.log.forEach(e=>phoneRt.seen.add(e.id));
+function validPhoneCode(c){return typeof c==='string'&&/^[2-9A-HJ-NP-Z]{8}$/.test(c)}
+function phoneFmt(c){return c?c.slice(0,4)+'-'+c.slice(4):'----'}
+function phoneNewCode(){const r=new Uint32Array(8);crypto.getRandomValues(r);return [...r].map(x=>PHONE_ABC[x%PHONE_ABC.length]).join('')}
+function phoneSaveNow(){clearTimeout(phoneRt.saveTimer);phoneRt.saveTimer=null;try{localStorage.setItem(PHONE_KEY,JSON.stringify(phone))}catch(_){}}
+function phoneSave(){clearTimeout(phoneRt.saveTimer);phoneRt.saveTimer=setTimeout(phoneSaveNow,300)}
+window.addEventListener('pagehide',()=>{if(phoneRt.saveTimer)phoneSaveNow()});
+function phoneSegLabel(s){return s==='START'||s==='CHANGE'?s:s.startsWith('S')?label(s.slice(0,-1))+(s.endsWith('I')?' IN':' OUT'):label(s)}
+async function phoneLoadApi(){
+ if(window.__DTL_PHONE_FAKE)return window.__DTL_PHONE_FAKE;
+ const [a,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-firestore.js')]);
+ const app=a.getApps().find(x=>x.name==='phone-link')||a.initializeApp(CLOUD_CFG,'phone-link'),db=fs.getFirestore(app);
+ if(window.__DTL_FS_EMU&&!phoneRt.emu){phoneRt.emu=1;fs.connectFirestoreEmulator(db,'127.0.0.1',window.__DTL_FS_EMU)}
+ return{
+  createLink(code){return fs.setDoc(fs.doc(db,'links',code),{v:1,createdAt:Date.now()})},
+  listen(code,since,onBatch,onErr){const q=fs.query(fs.collection(db,'links',code,'throws'),fs.where('t','>',since),fs.orderBy('t'));
+   return fs.onSnapshot(q,{includeMetadataChanges:true},snap=>onBatch(snap.docChanges().filter(c=>c.type==='added').map(c=>Object.assign({id:c.doc.id},c.doc.data())),!snap.metadata.fromCache),onErr)}
+ }}
+function phoneUi(){
+ const on=!!phone.code,live=phoneRt.state==='LIVE';
+ const chip=$('phoneChip');if(chip){chip.textContent=live?'PHONE ●':'PHONE';chip.classList.toggle('on',live)}
+ if(!$('phoneCode'))return;
+ $('phoneCode').textContent=phoneFmt(phone.code);$('phoneCode').classList.toggle('muted',!on);
+ $('phoneStart').textContent=on?'新しいコードにする':'連携コードを発行';
+ $('phoneStop').classList.toggle('hidden',!on);
+ $('phoneToPlay').checked=phone.toPlay;
+ const n=phone.log.length,last=phone.log[n-1];
+ $('phoneStatus').textContent=phoneRt.state+(on?' · 受信 '+n+'件':'');
+ $('phoneLast').textContent=last?phoneSegLabel(last.seg):'—';
+ $('phoneLog').textContent=n?phone.log.slice(-12).reverse().map(e=>new Date(e.at).toTimeString().slice(0,8)+'  '+phoneSegLabel(e.seg).padEnd(10)+(e.play?'  → PLAY':'')).join('\n'):'まだ届いていません'}
+function phoneSetState(s){phoneRt.state=s;phoneUi()}
+/* One throw from the phone into PLAY. The phone is the source of truth, so a round break or a finished game never drops a dart. */
+function phoneApply(seg){
+ if(seg==='START'){board200sStart();return}
+ if(seg==='CHANGE'){board200sChange();return}
+ const segment=seg.startsWith('S')?seg.slice(0,-1):seg;
+ if(roundBreakUntil>Date.now())finishRoundBreak();
+ if(achievementDelayTimer!==null)cancelAchievementDelay();
+ if(store.active.darts.length>=24)confirmResult();
+ if(store.active.darts.length>=24)return;
+ if(!$('play').classList.contains('active'))changeTab('play');
+ add(segment,'phone',seg);
+ board200sStatus('PHONE：'+label(segment)+' / '+points(segment)+'点')}
+function phoneReceive(list,live){
+ const fresh=list.filter(d=>d&&typeof d.id==='string'&&!phoneRt.seen.has(d.id)&&PHONE_SEGS.has(d.seg)&&Number.isFinite(d.t)).sort((a,b)=>a.t-b.t||(a.n||0)-(b.n||0));
+ for(const d of fresh){
+  phoneRt.seen.add(d.id);
+  const e={id:d.id,seg:d.seg,t:d.t,at:Date.now(),play:false};
+  if(live&&phone.toPlay){try{phoneApply(d.seg);e.play=true}catch(err){recordError('phone',err)}}
+  phone.log.push(e);phone.lastT=Math.max(phone.lastT,d.t)}
+ if(phone.log.length>PHONE_LOG_MAX)phone.log=phone.log.slice(-PHONE_LOG_MAX);
+ if(fresh.length){phoneSave();if(!live)toast('PHONE：未受信の '+fresh.length+'件を記録（PLAYには反映しません）')}
+ phoneUi()}
+function phoneStopListen(){if(phoneRt.unsub){try{phoneRt.unsub()}catch(_){}}phoneRt.unsub=null;phoneRt.synced=false}
+async function phoneListen(){
+ phoneStopListen();if(!phone.code)return;
+ phoneSetState('CONNECTING…');
+ try{
+  const api=phoneRt.api||(phoneRt.api=await phoneLoadApi()),code=phone.code;
+  if(code!==phone.code)return;
+  phoneRt.unsub=api.listen(code,phone.lastT,(list,fromServer)=>{
+   if(code!==phone.code)return;
+   const live=phoneRt.synced;
+   if(fromServer&&!phoneRt.synced){phoneRt.synced=true;phoneSetState('LIVE')}
+   phoneReceive(list,live)
+  },err=>{phoneRt.synced=false;phoneSetState('ERROR · '+String(err&&(err.code||err.message)||err).slice(0,60))});
+ }catch(e){phoneSetState('ERROR · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+async function phoneNewLink(){
+ if(phone.code&&!confirm('新しいコードにします。スマホ側にも新しいコードを入力し直してください。'))return;
+ phoneStopListen();phoneSetState('CREATING…');
+ try{
+  const api=phoneRt.api||(phoneRt.api=await phoneLoadApi()),code=phoneNewCode();
+  await api.createLink(code);
+  phone.code=code;phone.lastT=0;phoneSaveNow();phoneListen()
+ }catch(e){phoneSetState('ERROR · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+function setupPhone(){
+ const chip=$('phoneChip');if(chip)chip.onclick=()=>{openSheet('phoneSheet');phoneUi()};
+ if(!$('phoneStart'))return;
+ $('phoneToPlay').onchange=e=>{phone.toPlay=e.target.checked;phoneSaveNow();phoneUi()};
+ if(location.protocol==='file:'&&!window.__DTL_PHONE_FAKE){$('phoneStart').disabled=true;phoneSetState('公開URL(https)で使えます');return}
+ $('phoneStart').onclick=()=>phoneNewLink();
+ $('phoneStop').onclick=()=>{if(!confirm('連携を止めます。受信した記録はこのブラウザに残ります。'))return;phoneStopListen();phone.code='';phoneSaveNow();phoneSetState('OFF')};
+ phoneUi();if(phone.code)phoneListen()}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
-setupMyDarts();loadCatalog();setupCloud();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
+setupMyDarts();loadCatalog();setupCloud();setupPhone();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();
 </script></body></html>

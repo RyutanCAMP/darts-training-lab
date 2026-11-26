@@ -26,6 +26,31 @@ service cloud.firestore {
         && request.resource.data.updatedAt is number;
     }
 
+    // PHONE LINK (no login). The random 8-char code is the shared secret: whoever knows it can add throws and
+    // read them. Codes cannot be listed; a link is created once and never changed; throws are append-only.
+    // links/{code} = { v: 1, createdAt: number(ms) }
+    match /links/{code} {
+      allow get: if code.matches('^[2-9A-HJ-NP-Z]{8}$');
+      allow create: if code.matches('^[2-9A-HJ-NP-Z]{8}$')
+        && request.resource.data.keys().hasOnly(['v', 'createdAt'])
+        && request.resource.data.v == 1
+        && request.resource.data.createdAt is int;
+      allow list, update, delete: if false;
+
+      // links/{code}/throws/{tid} = { seg: 'T20' | 'S20I' | 'START' ..., t: int(ms), n: int }
+      match /throws/{tid} {
+        allow read: if code.matches('^[2-9A-HJ-NP-Z]{8}$');
+        allow create: if tid.size() <= 48
+          && exists(/databases/$(database)/documents/links/$(code))
+          && request.resource.data.keys().hasOnly(['seg', 't', 'n'])
+          && request.resource.data.seg is string
+          && request.resource.data.seg.matches('^(START|CHANGE|OB|IB|[SDT](1[0-9]|20|[1-9])|S(1[0-9]|20|[1-9])[IO])$')
+          && request.resource.data.t is int
+          && request.resource.data.n is int;
+        allow update, delete: if false;
+      }
+    }
+
     // Everything else is closed.
     match /{document=**} {
       allow read, write: if false;

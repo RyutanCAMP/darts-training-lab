@@ -442,6 +442,13 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .page .play-chips button.chip-set:not(.primary):not(.warn){color:#8dd9e6;border-color:#2f6c78;background:#10252b}
 .page .play-chips button.chip-auth:not(.primary):not(.warn){color:#a8b9c5;border-color:#31414B;background:#15212B}
 .page .play-chips button.chip-auth.on:not(.primary):not(.warn){color:#b4ed38;border-color:#5f8a2a;background:#17240f}
+.page .play-chips button.chip-phone:not(.primary):not(.warn){color:#a8b9c5;border-color:#31414B;background:#15212B}
+.page .play-chips button.chip-phone.on:not(.primary):not(.warn){color:#ffd166;border-color:#8a6d2a;background:#2a2110}
+.phone-code{font-family:"Press Start 2P",monospace;font-size:clamp(26px,8vw,40px);letter-spacing:.08em;color:#ffd166;text-align:center;margin:14px 0 8px;user-select:all}
+.phone-code.muted{color:#4a5a66}
+.phone-toggle{display:block;margin:12px 0 4px}
+.phone-last{font-family:"Press Start 2P",monospace;font-size:20px;color:#b4ed38;text-align:center;margin:10px 0}
+#phoneLog{max-height:180px;overflow:auto}
 .sheet{position:fixed;inset:0;z-index:95;display:flex;align-items:flex-end;justify-content:center;background:#000b}
 .sheet.hidden{display:none}
 .sheet-box{width:min(100%,520px);max-height:80vh;overflow:auto;padding:16px 16px 22px;border:1px solid #31414B;border-radius:16px 16px 0 0;background:#15212B}

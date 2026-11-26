@@ -100,3 +100,11 @@ This is a public repository. Do not commit user practice exports, credentials, p
 ## Navigation (v0.5.41)
 - Bottom tabs: PLAY / 分析 / 履歴 / セット (MY DARTS lives in the セット tab, `#setups`). ⚙ settings only holds 効果音, ラウンド間の待ち時間, データ管理, 200S (collapsed `#s200Group`), データ保護・復旧.
 - PLAY chips open bottom sheets in place instead of jumping to settings: `AIM` → `#aimSheet` (aim select, closes on change), `SET` → `#setSheet` (switch set; "MY DARTSを編集する" → セット tab), `GUEST`/name → `#accountSheet` (nickname + CLOUD SYNC). `openSheet(id)` / `closeSheets()`; backdrop, 閉じる and Esc close; `changeTab()` closes sheets. The sheets live inside `#play` so `.page` styles apply.
+
+## PHONE LINK / スマホ連携 (v0.5.42)
+- Android app **投擲ウォッチャー** (repo RyutanCAMP/darts-throw-watcher) watches the 200S keys via an accessibility service while the official DARTSLIVE app is played, and writes each throw to Firestore `links/{CODE}/throws/{id}` = `{seg,t,n}` (`seg` = 200S zone like `T20`/`S20I`/`IB` or `START`/`CHANGE`; `t` = phone epoch ms; `n` = per-phone sequence). REST API, no login.
+- PC: PLAY chip `PHONE` → `#phoneSheet`. 「連携コードを発行」 creates `links/{CODE}` = `{v:1,createdAt}`; the 8-char code (alphabet without 0/1/I/O/L) is the shared secret. Listener: `where('t','>',lastT)`, `orderBy('t')`.
+- Throws in the first **server** snapshot (sent while the page was closed) are logged only; later ones are fed through `phoneApply()` (same path as the 200S keyboard: `board200sStart()` / `board200sChange()` / `add(segment,'phone',zone)`). The phone is the source of truth: a dart during a round break ends the break, a dart after 24 auto-confirms the game. Toggle `#phoneToPlay` (「PLAYに反映」) for games other than COUNT-UP.
+- Local state `dtl-phone-v1` = `{code,toPlay,lastT,log[]}` (log capped at 3000). New dart field value `inputSource:'phone'`.
+- Rules: `links` block in `firestore.rules` (get only with valid code, no list/update/delete; throws append-only with shape check). **Must be pasted into the Firebase console by hand.**
+- Tests: `tools/tests/test_phone.py` (fake backend, CI; also covers 200S keyboard START/CHANGE). `tools/emulator/` = manual end-to-end with the real SDK, rules and the Android REST client.
