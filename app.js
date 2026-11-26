@@ -932,13 +932,15 @@ $('specialExport').onclick=()=>download(JSON.stringify(specialData,null,2),'200s
 const board200sMap={"KeyA | A":"S20O","KeyW | W":"S20I","Digit7 | &":"T20","KeyY | Y":"D20","KeyQ | Q":"S1O","KeyH | h":"S1I","Minus | -":"T1","KeyJ | J":"D1","KeyZ | Z":"S18O","KeyR | r":"S18I","Quote | \"":"T18","KeyT | t":"D18","Slash | /":"S4O","KeyM | M":"S4I","Digit2 | @":"T4","KeyK | K":"D4","Digit2 | 2":"S13O","Digit5 | %":"S13I","KeyQ | q":"T13","Digit6 | ^":"D13","Period | .":"S6O","KeyU | U":"S6I","Digit4 | 4":"T6","KeyV | V":"D6","Equal | =":"S10O","KeyM | m":"S10I","KeyA | a":"T10","KeyL | l":"D10","KeyH | H":"S15O","Digit4 | $":"S15I","KeyE | e":"T15","BracketLeft | [":"D15","KeyR | R":"S2O","Comma | <":"S2I","KeyD | d":"T2","Digit9 | 9":"D2","KeyI | I":"S17O","KeyF | f":"S17I","Digit1 | 1":"T17","Comma | ,":"D17","KeyD | D":"S3O","KeyI | i":"S3I","Semicolon | ;":"T3","KeyS | S":"D3","Digit8 | 8":"S19O","KeyC | c":"S19I","Equal | +":"T19","KeyB | B":"D19","KeyO | O":"S7O","KeyN | N":"S7I","Slash | ?":"T7","Digit3 | 3":"D7","Digit3 | #":"S16O","Minus | _":"S16I","Period | >":"T16","KeyB | b":"D16","KeyP | p":"S8O","KeyC | C":"S8I","Digit8 | *":"T8","KeyK | k":"D8","Backslash | \\":"S11O","Digit5 | 5":"S11I","Digit7 | 7":"T11","KeyT | T":"D11","KeyL | L":"S14O","Digit0 | 0":"S14I","Digit6 | 6":"T14","KeyS | s":"D14","KeyG | g":"S9O","KeyF | F":"S9I","KeyE | E":"T9","Semicolon | :":"D9","Quote | '":"S12O","KeyN | n":"S12I","KeyP | P":"T12","KeyX | X":"D12","Digit9 | (":"S5O","BracketRight | ]":"S5I","KeyJ | j":"T5","Digit1 | !":"D5","KeyG | G":"OB","KeyO | o":"IB"};
 let board200sEnabled=true,board200sLastKey='',board200sLastAt=0;
 function board200sStatus(message){const el=$('board200sStatus');if(el)el.textContent=message}
+function board200sStart(){if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}}
+function board200sChange(){if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}}
 function board200sInput(e){
  if(!board200sEnabled)return false;
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
- if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}return true}
- if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}return true}
+ if(e.code==='Tab'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');board200sStart();return true}
+ if(e.code==='Enter'&&!e.shiftKey){e.preventDefault();if(!$('play').classList.contains('active'))changeTab('play');board200sChange();return true}
  if(['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return false;
  const zone=board200sMap[k];if(!zone)return false;const segment=zone.startsWith('S')?zone.slice(0,-1):zone;
  e.preventDefault();
@@ -1059,6 +1061,99 @@ function setupCloud(){
  $('cloudSync').onclick=()=>cloudSync();
  $('cloudLogout').onclick=async()=>{if(!confirm('ログアウトします。未同期の記録はこの端末に残り、他の端末では見られません。共有端末ではブラウザのデータ管理にも注意してください。'))return;try{if(cloud.api)await cloud.api.logout();cloud.user=null;syncMeta.on=false;syncMetaSave();cloudStatus('OFF');cloudUi()}catch(e){cloudStatus('LOGOUT FAILED')}};
  cloudStatus('OFF');if(syncMeta.on)cloudConnect().catch(e=>cloudStatus('OFFLINE'))}
+/* ===== PHONE LINK (スマホ連携) =====
+   The Android app "投擲ウォッチャー" watches the 200S keys while the official app is played and writes each throw to
+   Firestore links/{CODE}/throws/{id} = {seg,t,n}. This page creates links/{CODE} = {v,createdAt} and listens.
+   No login: the random 8-char code is the shared secret (see firestore.rules). Live throws are fed into PLAY through
+   the same path as a directly connected 200S; throws that arrived while this page was closed are logged only. */
+const PHONE_KEY='dtl-phone-v1',PHONE_ABC='23456789ABCDEFGHJKMNPQRSTUVWXYZ',PHONE_LOG_MAX=3000,PHONE_OVERLAP=3600000;
+const PHONE_SEGS=new Set(['START','CHANGE','OB','IB',...Object.values(board200sMap)]);
+let phone={code:'',toPlay:true,lastT:0,log:[]},phoneRt={api:null,unsub:null,state:'OFF',synced:false,seen:new Set(),saveTimer:null};
+try{const x=JSON.parse(localStorage.getItem(PHONE_KEY));if(x&&typeof x==='object'){if(validPhoneCode(x.code))phone.code=x.code;phone.toPlay=x.toPlay!==false;phone.lastT=Number(x.lastT)||0;if(Array.isArray(x.log))phone.log=x.log.filter(e=>e&&PHONE_SEGS.has(e.seg)).slice(-PHONE_LOG_MAX)}}catch(_){}
+phone.log.forEach(e=>phoneRt.seen.add(e.id));
+function validPhoneCode(c){return typeof c==='string'&&/^[2-9A-HJ-NP-Z]{8}$/.test(c)}
+function phoneFmt(c){return c?c.slice(0,4)+'-'+c.slice(4):'----'}
+function phoneNewCode(){const r=new Uint32Array(8);crypto.getRandomValues(r);return [...r].map(x=>PHONE_ABC[x%PHONE_ABC.length]).join('')}
+function phoneSaveNow(){clearTimeout(phoneRt.saveTimer);phoneRt.saveTimer=null;try{localStorage.setItem(PHONE_KEY,JSON.stringify(phone))}catch(_){}}
+function phoneSave(){clearTimeout(phoneRt.saveTimer);phoneRt.saveTimer=setTimeout(phoneSaveNow,300)}
+window.addEventListener('pagehide',()=>{if(phoneRt.saveTimer)phoneSaveNow()});
+function phoneSegLabel(s){return s==='START'||s==='CHANGE'?s:s.startsWith('S')?label(s.slice(0,-1))+(s.endsWith('I')?' IN':' OUT'):label(s)}
+async function phoneLoadApi(){
+ if(window.__DTL_PHONE_FAKE)return window.__DTL_PHONE_FAKE;
+ const [a,fs]=await Promise.all([import(FB_BASE+'firebase-app.js'),import(FB_BASE+'firebase-firestore.js')]);
+ const app=a.getApps().find(x=>x.name==='phone-link')||a.initializeApp(CLOUD_CFG,'phone-link'),db=fs.getFirestore(app);
+ if(window.__DTL_FS_EMU&&!phoneRt.emu){phoneRt.emu=1;fs.connectFirestoreEmulator(db,'127.0.0.1',window.__DTL_FS_EMU)}
+ return{
+  createLink(code){return fs.setDoc(fs.doc(db,'links',code),{v:1,createdAt:Date.now()})},
+  listen(code,since,onBatch,onErr){const q=fs.query(fs.collection(db,'links',code,'throws'),fs.where('t','>',since),fs.orderBy('t'));
+   return fs.onSnapshot(q,{includeMetadataChanges:true},snap=>onBatch(snap.docChanges().filter(c=>c.type==='added').map(c=>Object.assign({id:c.doc.id},c.doc.data())),!snap.metadata.fromCache),onErr)}
+ }}
+function phoneUi(){
+ const on=!!phone.code,live=phoneRt.state==='LIVE';
+ const chip=$('phoneChip');if(chip){chip.textContent=live?'PHONE ●':'PHONE';chip.classList.toggle('on',live)}
+ if(!$('phoneCode'))return;
+ $('phoneCode').textContent=phoneFmt(phone.code);$('phoneCode').classList.toggle('muted',!on);
+ $('phoneStart').textContent=on?'新しいコードにする':'連携コードを発行';
+ $('phoneStop').classList.toggle('hidden',!on);
+ $('phoneToPlay').checked=phone.toPlay;
+ const n=phone.log.length,last=phone.log[n-1];
+ $('phoneStatus').textContent=phoneRt.state+(on?' · 受信 '+n+'件':'');
+ $('phoneLast').textContent=last?phoneSegLabel(last.seg):'—';
+ $('phoneLog').textContent=n?phone.log.slice(-12).reverse().map(e=>new Date(e.at).toTimeString().slice(0,8)+'  '+phoneSegLabel(e.seg).padEnd(10)+(e.play?'  → PLAY':'')).join('\n'):'まだ届いていません'}
+function phoneSetState(s){phoneRt.state=s;phoneUi()}
+/* One throw from the phone into PLAY. The phone is the source of truth, so a round break or a finished game never drops a dart. */
+function phoneApply(seg){
+ if(seg==='START'){board200sStart();return}
+ if(seg==='CHANGE'){board200sChange();return}
+ const segment=seg.startsWith('S')?seg.slice(0,-1):seg;
+ if(roundBreakUntil>Date.now())finishRoundBreak();
+ if(achievementDelayTimer!==null)cancelAchievementDelay();
+ if(store.active.darts.length>=24)confirmResult();
+ if(store.active.darts.length>=24)return;
+ if(!$('play').classList.contains('active'))changeTab('play');
+ add(segment,'phone',seg);
+ board200sStatus('PHONE：'+label(segment)+' / '+points(segment)+'点')}
+function phoneReceive(list,live){
+ const fresh=list.filter(d=>d&&typeof d.id==='string'&&!phoneRt.seen.has(d.id)&&PHONE_SEGS.has(d.seg)&&Number.isFinite(d.t)).sort((a,b)=>a.t-b.t||(a.n||0)-(b.n||0));
+ for(const d of fresh){
+  phoneRt.seen.add(d.id);
+  const e={id:d.id,seg:d.seg,t:d.t,at:Date.now(),play:false};
+  if(live&&phone.toPlay){try{phoneApply(d.seg);e.play=true}catch(err){recordError('phone',err)}}
+  phone.log.push(e);phone.lastT=Math.max(phone.lastT,d.t)}
+ if(phone.log.length>PHONE_LOG_MAX)phone.log=phone.log.slice(-PHONE_LOG_MAX);
+ if(fresh.length){phoneSave();if(!live)toast('PHONE：未受信の '+fresh.length+'件を記録（PLAYには反映しません）')}
+ phoneUi()}
+function phoneStopListen(){if(phoneRt.unsub){try{phoneRt.unsub()}catch(_){}}phoneRt.unsub=null;phoneRt.synced=false}
+async function phoneListen(){
+ phoneStopListen();if(!phone.code)return;
+ phoneSetState('CONNECTING…');
+ try{
+  const api=phoneRt.api||(phoneRt.api=await phoneLoadApi()),code=phone.code;
+  if(code!==phone.code)return;
+  // resume 1h before the newest throw seen: same-millisecond or out-of-order throws are not skipped; ids already seen are dropped
+  phoneRt.unsub=api.listen(code,Math.max(0,phone.lastT-PHONE_OVERLAP),(list,fromServer)=>{
+   if(code!==phone.code)return;
+   const live=phoneRt.synced;
+   if(fromServer&&!phoneRt.synced){phoneRt.synced=true;phoneSetState('LIVE')}
+   phoneReceive(list,live)
+  },err=>{phoneRt.synced=false;phoneSetState('ERROR · '+String(err&&(err.code||err.message)||err).slice(0,60))});
+ }catch(e){phoneSetState('ERROR · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+async function phoneNewLink(){
+ if(phone.code&&!confirm('新しいコードにします。スマホ側にも新しいコードを入力し直してください。'))return;
+ phoneStopListen();phoneSetState('CREATING…');
+ try{
+  const api=phoneRt.api||(phoneRt.api=await phoneLoadApi()),code=phoneNewCode();
+  await api.createLink(code);
+  phone.code=code;phone.lastT=0;phoneSaveNow();phoneListen()
+ }catch(e){phoneSetState('ERROR · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+function setupPhone(){
+ const chip=$('phoneChip');if(chip)chip.onclick=()=>{openSheet('phoneSheet');phoneUi()};
+ if(!$('phoneStart'))return;
+ $('phoneToPlay').onchange=e=>{phone.toPlay=e.target.checked;phoneSaveNow();phoneUi()};
+ if(location.protocol==='file:'&&!window.__DTL_PHONE_FAKE){$('phoneStart').disabled=true;phoneSetState('公開URL(https)で使えます');return}
+ $('phoneStart').onclick=()=>phoneNewLink();
+ $('phoneStop').onclick=()=>{if(!confirm('連携を止めます。受信した記録はこのブラウザに残ります。'))return;phoneStopListen();phone.code='';phoneSaveNow();phoneSetState('OFF')};
+ phoneUi();if(phone.code)phoneListen()}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
-setupMyDarts();loadCatalog();setupCloud();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
+setupMyDarts();loadCatalog();setupCloud();setupPhone();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();

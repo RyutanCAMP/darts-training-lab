@@ -17,6 +17,7 @@ A retro arcade-style COUNT-UP practice and analytics app for darts, including DA
 - AIM TARGET (settings): BULL / T1–T20 / D1–D20 is recorded per dart; analysis is shown per aim. Older records count as BULL.
 - Per-card "?" help and a rule-based COACH REPORT (not an AI model) on the Analysis screen.
 - INSIGHT facts, per-dart drift, 95% ranges (REF = fewer than 20 throws), round score curve, score breakdown, goal gap, practice log.
+- PHONE LINK (v0.5.42): play on the official app with the Android helper "投擲ウォッチャー"; throws arrive here live (PLAY chip `PHONE`, 8-char link code). Needs the `links` rules from `firestore.rules` in the Firebase console.
 
 ## Source files
 - `index.html`: markup
