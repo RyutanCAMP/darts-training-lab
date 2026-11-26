@@ -25,8 +25,10 @@ with sync_playwright() as p:
     b=p.chromium.launch()
     for f in ['index.html','preview.html']:
         c,pg=boot(b,f)
-        chk(pg.inner_text('#phoneChip')=='PHONE',f+' chip idle')
+        chk(pg.inner_text('#phoneChip')=='INPUT BT',f+' default input = Bluetooth')
         pg.click('#phoneChip');chk(pg.is_visible('#phoneSheet'),f+' sheet opens')
+        chk(pg.is_visible('#btBody') and pg.is_hidden('#phoneBody'),f+' BT mode hides phone panel')
+        pg.click('#inputPhone');chk(pg.is_visible('#phoneBody') and pg.inner_text('#phoneChip')=='PHONE',f+' switch to PHONE mode')
         chk(pg.inner_text('#phoneCode')=='----' and pg.is_hidden('#phoneStop'),f+' no code yet')
         pg.click('#phoneStart');pg.wait_for_function('window.__cb!==null')
         code=pg.evaluate('window.__links[0]')
@@ -64,9 +66,23 @@ with sync_playwright() as p:
         st=pg.evaluate("JSON.parse(localStorage.getItem('dtl-phone-v1'))")
         chk(st['toPlay'] is False and st['log'][-1]['seg']=='T19' and st['log'][-1]['play'] is False,f+' toggle saved, throw logged')
         chk('T19' not in pg.inner_text('#phoneLog') and 'TRIPLE 19' in pg.inner_text('#phoneLog'),f+' log readable')
+        # PHONE mode: 200S keyboard on this PC is ignored
+        pg.click('#phoneSheet [data-close-sheet]');n=len(darts(pg));pg.keyboard.press('o');pg.wait_for_timeout(100)
+        chk(len(darts(pg))==n,f+' PHONE mode ignores 200S keys')
+        # back to Bluetooth: listener stops, keys work, mode remembered
+        pg.click('#phoneChip');pg.click('#inputBt')
+        chk(pg.evaluate('window.__cb')==None and pg.inner_text('#phoneChip')=='INPUT BT',f+' BT mode stops listening')
+        pg.click('#phoneSheet [data-close-sheet]');pg.keyboard.press('o');pg.wait_for_timeout(100)
+        chk(len(darts(pg))==n+1,f+' BT mode accepts 200S keys')
+        chk(pg.evaluate("JSON.parse(localStorage.getItem('dtl-phone-v1')).mode")=='bt',f+' mode saved')
+        pg.reload();pg.wait_for_timeout(300)
+        chk(pg.evaluate('window.__cb')==None and pg.inner_text('#phoneChip')=='INPUT BT',f+' after reload: still BT, not listening')
+        pg.evaluate("document.getElementById('startupFx')&&(document.getElementById('startupFx').style.display='none')")
+        pg.click('#phoneChip');pg.click('#inputPhone');pg.wait_for_function('window.__cb!==null')
+        chk(pg.evaluate('window.__links.length')==0 and pg.inner_text('#phoneCode').replace('-','')==code,f+' back to PHONE: same code resumes, no new link')
         # stop
         pg.click('#phoneStop')
-        chk(pg.inner_text('#phoneCode')=='----' and pg.inner_text('#phoneChip')=='PHONE',f+' stop clears code')
+        chk(pg.inner_text('#phoneCode')=='----' and pg.inner_text('#phoneChip')=='PHONE',f+' stop clears code (mode stays PHONE)')
         chk(not pg.errs,f+' no page errors '+str(pg.errs))
         c.close()
     # resume after reload: saved code listens from lastT, without creating a new link
@@ -95,7 +111,7 @@ with sync_playwright() as p:
     c.close()
     # bad saved data does not break the page
     c,pg=boot(b,'index.html',{'code':'bad!','log':'x'})
-    chk(pg.inner_text('#phoneChip')=='PHONE' and not pg.errs,'corrupt phone state ignored '+str(pg.errs))
+    chk(pg.inner_text('#phoneChip')=='INPUT BT' and not pg.errs,'corrupt phone state ignored '+str(pg.errs))
     c.close()
     b.close()
 print('ALL PASS' if fails==0 else 'FAILURES %d'%fails)

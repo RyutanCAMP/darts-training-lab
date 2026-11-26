@@ -935,7 +935,7 @@ function board200sStatus(message){const el=$('board200sStatus');if(el)el.textCon
 function board200sStart(){if(store.active.darts.length===24){board200sStatus('START：結果確定');confirmResult()}else if(store.active.darts.length===0){board200sStatus('START：投球待機');toast('READY TO THROW')}else{board200sStatus('START：ゲーム進行中（リセットなし）')}}
 function board200sChange(){if(roundBreakUntil>Date.now()){finishRoundBreak();board200sStatus('CHANGE：次のラウンドへ');toast('NEXT ROUND — READY')}else if(store.active.darts.length===24){board200sStatus('CHANGE：ゲーム終了（結果確認）');toast('GAME COMPLETE — 結果を確認してください')}else if(store.active.darts.length%3===0&&store.active.darts.length>0){board200sStatus('CHANGE：次のラウンド待機中');toast('NEXT ROUND — READY')}else{board200sStatus('CHANGE：3投完了後に使用できます')}}
 function board200sInput(e){
- if(!board200sEnabled)return false;
+ if(!board200sEnabled||phone.mode==='phone')return false;
  if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return false;
  if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return false;
  const k=keyName(e),now=Date.now();
@@ -956,7 +956,7 @@ function board200sInput(e){
 }
 
 
-function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(board200sInput(e))return;if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
+function keyName(e){return e.code+' | '+e.key}document.addEventListener('keydown',e=>{if(specialMode){e.preventDefault();specialReceive(e);return}if(rawRunning){e.preventDefault();rawReceive(e);return}if(board200sInput(e))return;if(e.ctrlKey||e.altKey||e.metaKey||e.repeat)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(e.target?.closest?.('button')&&(e.key==='Enter'||e.key===' '))return;if(['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(e.code))return;let k=keyName(e);if(calibrationActive){e.preventDefault();receiveCalibration(k);return}lastKey=k;$('lastkey').textContent=k;keyLog.unshift(new Date().toLocaleTimeString('ja-JP')+'  '+k);keyLog=keyLog.slice(0,30);$('keylog').textContent=keyLog.join('\n');if(store.bindings[k]&&phone.mode!=='phone'&&document.getElementById('play').classList.contains('active')){e.preventDefault();let now=Date.now();if(now-lastBoardEvent<250){toast('重複入力を防止しました');return}lastBoardEvent=now;add(store.bindings[k],'board')}});
 document.querySelectorAll('[data-delay]').forEach(b=>b.onclick=()=>{store.roundDelay=Number(b.dataset.delay);persist();render()});$('soundToggle').onclick=()=>{store.soundEnabled=store.soundEnabled===false;persist();render();if(store.soundEnabled)playSound('bull')};document.querySelectorAll('[data-sound-volume]').forEach(input=>{const k=input.dataset.soundVolume;input.value=Math.round(soundLevel(k)*100);const out=$(k+'VolumeValue');if(out)out.textContent=input.value+'%';input.oninput=()=>{store.soundVolumes={...(store.soundVolumes||{}),[k]:Number(input.value)};if(out)out.textContent=input.value+'%';persist()}});
 async function testAudio(kind){const status=$('soundStatus');if(store.soundEnabled===false){status.textContent='効果音がOFFです。ONにしてください';return}try{const ctx=audioReady();if(!ctx){status.textContent='このブラウザは音声機能に対応していません';return}if(ctx.state!=='running')await ctx.resume();if(ctx.state!=='running'){status.textContent='音声がブロックされています。プレビューではなく通常のHTTPSページで開いてください';return}if(kind==='cooldown')await preloadCooldownAudio();playSound(kind);status.textContent='再生中：'+kind+'（聞こえない場合は音量・消音モード・ページの音声許可を確認）'}catch(e){status.textContent='音声を開始できません：'+e.message}}
 document.querySelectorAll('[data-sound-test]').forEach(b=>b.onclick=()=>testAudio(b.dataset.soundTest));
@@ -1068,8 +1068,8 @@ function setupCloud(){
    the same path as a directly connected 200S; throws that arrived while this page was closed are logged only. */
 const PHONE_KEY='dtl-phone-v1',PHONE_ABC='23456789ABCDEFGHJKMNPQRSTUVWXYZ',PHONE_LOG_MAX=3000,PHONE_OVERLAP=3600000;
 const PHONE_SEGS=new Set(['START','CHANGE','OB','IB',...Object.values(board200sMap)]);
-let phone={code:'',toPlay:true,lastT:0,log:[]},phoneRt={api:null,unsub:null,state:'OFF',synced:false,seen:new Set(),saveTimer:null};
-try{const x=JSON.parse(localStorage.getItem(PHONE_KEY));if(x&&typeof x==='object'){if(validPhoneCode(x.code))phone.code=x.code;phone.toPlay=x.toPlay!==false;phone.lastT=Number(x.lastT)||0;if(Array.isArray(x.log))phone.log=x.log.filter(e=>e&&PHONE_SEGS.has(e.seg)).slice(-PHONE_LOG_MAX)}}catch(_){}
+let phone={mode:'bt',code:'',toPlay:true,lastT:0,log:[]},phoneRt={api:null,unsub:null,state:'OFF',synced:false,seen:new Set(),saveTimer:null};
+try{const x=JSON.parse(localStorage.getItem(PHONE_KEY));if(x&&typeof x==='object'){if(validPhoneCode(x.code))phone.code=x.code;phone.mode=x.mode==='phone'||x.mode==='bt'?x.mode:(phone.code?'phone':'bt');phone.toPlay=x.toPlay!==false;phone.lastT=Number(x.lastT)||0;if(Array.isArray(x.log))phone.log=x.log.filter(e=>e&&PHONE_SEGS.has(e.seg)).slice(-PHONE_LOG_MAX)}}catch(_){}
 phone.log.forEach(e=>phoneRt.seen.add(e.id));
 function validPhoneCode(c){return typeof c==='string'&&/^[2-9A-HJ-NP-Z]{8}$/.test(c)}
 function phoneFmt(c){return c?c.slice(0,4)+'-'+c.slice(4):'----'}
@@ -1089,9 +1089,12 @@ async function phoneLoadApi(){
    return fs.onSnapshot(q,{includeMetadataChanges:true},snap=>onBatch(snap.docChanges().filter(c=>c.type==='added').map(c=>Object.assign({id:c.doc.id},c.doc.data())),!snap.metadata.fromCache),onErr)}
  }}
 function phoneUi(){
- const on=!!phone.code,live=phoneRt.state==='LIVE';
- const chip=$('phoneChip');if(chip){chip.textContent=live?'PHONE ●':'PHONE';chip.classList.toggle('on',live)}
+ const on=!!phone.code,isPhone=phone.mode==='phone',live=isPhone&&phoneRt.state==='LIVE';
+ const chip=$('phoneChip');if(chip){chip.textContent=isPhone?(live?'PHONE ●':'PHONE'):'INPUT BT';chip.classList.toggle('on',live)}
  if(!$('phoneCode'))return;
+ $('inputBt').classList.toggle('selected',!isPhone);$('inputBt').setAttribute('aria-pressed',String(!isPhone));
+ $('inputPhone').classList.toggle('selected',isPhone);$('inputPhone').setAttribute('aria-pressed',String(isPhone));
+ $('phoneBody').classList.toggle('hidden',!isPhone);$('btBody').classList.toggle('hidden',isPhone);
  $('phoneCode').textContent=phoneFmt(phone.code);$('phoneCode').classList.toggle('muted',!on);
  $('phoneStart').textContent=on?'新しいコードにする':'連携コードを発行';
  $('phoneStop').classList.toggle('hidden',!on);
@@ -1146,14 +1149,22 @@ async function phoneNewLink(){
   await api.createLink(code);
   phone.code=code;phone.lastT=0;phoneSaveNow();phoneListen()
  }catch(e){phoneSetState('ERROR · '+String(e&&(e.code||e.message)||e).slice(0,60))}}
+/* Input method: 'bt' = 200S connected to this PC by Bluetooth (keyboard input) / 'phone' = PHONE LINK only (200S keys ignored here). Saved in dtl-phone-v1. */
+function phoneSetMode(m){
+ if(m!=='bt'&&m!=='phone'||m===phone.mode){phoneUi();return}
+ phone.mode=m;phoneSaveNow();
+ if(m==='bt'){phoneStopListen();phoneRt.state='OFF';board200sStatus('200S 入力待機中')}
+ else{board200sStatus('スマホ連携中：このPCの200S入力はOFF');if(phone.code&&location.protocol!=='file:'||phone.code&&window.__DTL_PHONE_FAKE)phoneListen()}
+ phoneUi()}
 function setupPhone(){
  const chip=$('phoneChip');if(chip)chip.onclick=()=>{openSheet('phoneSheet');phoneUi()};
  if(!$('phoneStart'))return;
+ $('inputBt').onclick=()=>phoneSetMode('bt');$('inputPhone').onclick=()=>phoneSetMode('phone');
  $('phoneToPlay').onchange=e=>{phone.toPlay=e.target.checked;phoneSaveNow();phoneUi()};
  if(location.protocol==='file:'&&!window.__DTL_PHONE_FAKE){$('phoneStart').disabled=true;phoneSetState('公開URL(https)で使えます');return}
  $('phoneStart').onclick=()=>phoneNewLink();
  $('phoneStop').onclick=()=>{if(!confirm('連携を止めます。受信した記録はこのブラウザに残ります。'))return;phoneStopListen();phone.code='';phoneSaveNow();phoneSetState('OFF')};
- phoneUi();if(phone.code)phoneListen()}
+ phoneUi();if(phone.code&&phone.mode==='phone')phoneListen()}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(_){}
 setupMyDarts();loadCatalog();setupCloud();setupPhone();setupRecovery();drawBoard();render();renderCalibration();rawRender();specialRender();
 })();

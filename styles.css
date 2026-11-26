@@ -471,3 +471,7 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .page details.s200-group[open]>summary{margin-bottom:12px}
 .tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 @media(max-width:560px){.tabs button{padding:9px 4px!important;font-size:12px!important}}
+
+.input-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 8px}
+.page .input-mode button:not(.primary):not(.warn){margin:0;color:#a8b9c5;border-color:#31414B;background:#15212B}
+.page .input-mode button.selected:not(.primary):not(.warn){color:#ffd166;border-color:#c9a03a;background:#2a2110;box-shadow:0 0 0 1px #c9a03a inset}
