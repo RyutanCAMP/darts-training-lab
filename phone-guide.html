@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>スマホ連携ガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: one narrow column of numbered steps (a real sequence), each tagged with the device you hold. Single dark arcade look, same world as DARTS TRAINING LAB. */
+:root{
+  --bg:#0c1519; --panel:#14222a; --line:#2a3c46; --fg:#e4ecef; --muted:#93a8b2;
+  --gold:#ffd166; --lime:#b4ed38; --cyan:#7fd8e6; --warn:#ff9a6b;
+  --pixel:"DotGothic16","Noto Sans JP",system-ui,sans-serif;
+  --body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.75 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.wrap{max-width:640px;margin:0 auto;display:grid;gap:18px}
+header{display:grid;gap:8px;padding-bottom:6px}
+.eyebrow{font:13px/1 var(--pixel);letter-spacing:.14em;color:var(--cyan)}
+h1{font:clamp(30px,8vw,42px)/1.2 var(--pixel);margin:0;color:var(--gold);text-wrap:balance}
+.lead{margin:0;color:var(--fg);font-size:17px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font:14px/1.4 var(--pixel);color:var(--muted)}
+.flow b{color:var(--fg);font-weight:400;border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:var(--panel)}
+.need{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.need li{font-size:14px;border:1px solid var(--line);border-radius:999px;padding:3px 12px;color:var(--muted)}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+.step-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.num{font:22px/1 var(--pixel);color:var(--bg);background:var(--gold);border-radius:8px;width:40px;height:40px;display:grid;place-items:center;flex:none}
+.step h2{font:20px/1.3 var(--pixel);margin:0;flex:1;min-width:0}
+.dev{font:12px/1 var(--pixel);letter-spacing:.1em;padding:5px 9px;border-radius:6px;border:1px solid}
+.dev.sp{color:var(--lime);border-color:#4d6b22}
+.dev.pc{color:var(--cyan);border-color:#2f6c78}
+ol.do{margin:0;padding-left:1.4em;display:grid;gap:6px}
+ol.do li::marker{color:var(--muted)}
+.btn{display:inline-block;font-weight:700;border:1px solid var(--line);background:#1d2f38;border-radius:6px;padding:0 7px;white-space:nowrap}
+.ok{display:flex;gap:10px;align-items:flex-start;background:#17240f;border:1px solid #3f5d1d;border-radius:10px;padding:10px 12px;font-size:15px}
+.ok::before{content:"OK";font:13px/1.6 var(--pixel);color:var(--lime);flex:none}
+.note{font-size:14px;color:var(--muted);margin:0}
+.note strong{color:var(--warn);font-weight:500}
+.qr-row{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.qr{width:168px;max-width:100%;background:#fff;border-radius:10px;padding:8px}
+.qr svg{display:block;width:100%;height:auto}
+.url{font:13px/1.5 ui-monospace,Menlo,monospace;word-break:break-all;color:var(--muted);user-select:all;min-width:0}
+.copy{font:13px/1 var(--pixel);color:var(--fg);background:#1d2f38;border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer;margin-top:8px}
+.copy:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+a{color:var(--cyan)}
+.screen{background:#0a1216;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;display:grid;gap:4px}
+.screen .code{font:30px/1.2 var(--pixel);color:var(--gold);letter-spacing:.08em}
+.screen .live{font-size:13px;color:var(--muted)}
+.screen .linked{font-weight:700;color:#5fd36a;text-align:left}
+.after{display:grid;gap:10px}
+.after h2,.faq h2{font:18px/1.3 var(--pixel);margin:4px 0 0;color:var(--gold)}
+.pair{display:grid;grid-template-columns:7.5em 1fr;gap:4px 12px;margin:0}
+.pair dt{color:var(--muted);font-size:14px;padding-top:2px}
+.pair dd{margin:0}
+.faq{display:grid;gap:8px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+summary{cursor:pointer;font-weight:500}
+details p,details ol{margin:8px 0 2px;font-size:15px}
+@media (max-width:460px){.qr-row{grid-template-columns:1fr;justify-items:center}.qr{width:200px}.pair{grid-template-columns:1fr}.pair dt{padding-top:6px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.back{justify-self:start;font:14px/1 var(--pixel);color:var(--cyan);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--panel)}
+html{background:var(--bg)}
+body{margin:0}
+</style>
+
+</head>
+<body>
+<main class="wrap">
+<a class="back" href="./" id="guideBack">← DARTS TRAINING LAB</a>
+<header>
+  <div class="eyebrow">DARTS TRAINING LAB × 投擲ウォッチャー</div>
+  <h1>スマホ連携ガイド</h1>
+  <p class="lead">公式アプリで投げた場所が、PCのDARTS TRAINING LABに自動で届きます。</p>
+  <div class="flow" aria-label="しくみ"><b>200S</b>→<b>スマホ（公式アプリ）</b>→<b>PC</b></div>
+  <ul class="need" aria-label="用意するもの"><li>Androidスマホ／タブレット</li><li>DARTSLIVE-200S</li><li>PC（ブラウザ）</li><li>所要 約5分</li></ul>
+</header>
+
+<section class="step" aria-labelledby="s1">
+  <div class="step-head"><span class="num">1</span><h2 id="s1">アプリを入れる</h2><span class="dev sp">スマホ</span></div>
+  <div class="qr-row">
+    <div class="qr" role="img" aria-label="投擲ウォッチャーのダウンロード用QRコード"><svg viewBox="0 0 45 45" class="segno"><path fill="#fff" d="M0 0h45v45h-45z"/><path class="qrline" stroke="#0b1418" d="M2 2.5h7m6 0h2m2 0h5m1 0h2m5 0h3m1 0h7m-41 1h1m5 0h1m3 0h2m1 0h1m1 0h1m1 0h1m3 0h1m2 0h1m1 0h2m1 0h2m1 0h1m1 0h1m5 0h1m-41 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m1 0h3m1 0h2m5 0h2m1 0h3m1 0h1m1 0h3m1 0h1m-41 1h1m1 0h3m1 0h1m1 0h1m1 0h4m6 0h2m2 0h2m1 0h4m3 0h1m1 0h3m1 0h1m-41 1h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h1m2 0h3m2 0h1m4 0h1m1 0h2m2 0h1m1 0h3m1 0h1m-41 1h1m5 0h1m1 0h1m2 0h5m2 0h1m1 0h1m1 0h1m1 0h2m1 0h3m2 0h1m1 0h1m5 0h1m-41 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-33 1h3m2 0h1m1 0h2m2 0h4m5 0h1m2 0h1m-32 1h1m1 0h5m5 0h1m2 0h3m1 0h1m1 0h2m1 0h2m3 0h1m4 0h5m-39 1h3m2 0h1m4 0h1m4 0h1m2 0h7m3 0h7m1 0h1m1 0h3m-39 1h2m2 0h1m3 0h1m1 0h1m1 0h2m1 0h2m6 0h4m3 0h1m2 0h1m3 0h1m-40 1h2m2 0h2m1 0h1m1 0h2m1 0h1m5 0h1m1 0h3m3 0h3m2 0h3m2 0h2m2 0h1m-41 1h4m1 0h4m2 0h5m1 0h1m2 0h1m1 0h4m1 0h3m1 0h2m4 0h2m-39 1h1m1 0h3m2 0h1m3 0h2m2 0h1m1 0h2m5 0h2m2 0h2m1 0h10m-39 1h1m1 0h1m1 0h5m2 0h3m2 0h1m1 0h3m2 0h5m2 0h2m2 0h2m-38 1h1m2 0h3m4 0h1m1 0h2m1 0h2m1 0h1m2 0h4m1 0h1m3 0h1m1 0h1m1 0h4m-37 1h4m1 0h1m1 0h2m4 0h1m2 0h1m2 0h1m1 0h2m1 0h3m1 0h1m2 0h2m1 0h1m1 0h1m-37 1h1m3 0h1m1 0h1m2 0h1m1 0h2m5 0h2m1 0h2m1 0h2m1 0h5m1 0h3m2 0h1m-39 1h6m1 0h3m3 0h3m1 0h1m1 0h1m1 0h1m2 0h4m3 0h2m2 0h2m-37 1h1m1 0h1m1 0h1m3 0h2m5 0h1m2 0h2m2 0h2m2 0h1m3 0h2m3 0h2m-37 1h1m2 0h3m3 0h1m1 0h1m5 0h2m1 0h2m2 0h3m1 0h1m1 0h2m2 0h1m1 0h3m-40 1h1m1 0h2m3 0h2m4 0h5m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m1 0h2m1 0h7m-41 1h4m1 0h3m4 0h2m1 0h3m7 0h3m2 0h1m3 0h4m-38 1h1m2 0h2m8 0h4m1 0h2m1 0h1m2 0h1m7 0h1m1 0h1m1 0h2m1 0h2m-41 1h2m1 0h4m1 0h2m1 0h1m1 0h1m2 0h1m3 0h1m1 0h1m1 0h6m5 0h1m1 0h3m-40 1h1m1 0h3m2 0h1m1 0h1m1 0h3m1 0h2m1 0h3m1 0h2m1 0h1m2 0h1m2 0h1m1 0h5m2 0h1m-41 1h5m1 0h1m2 0h1m1 0h1m3 0h2m3 0h2m4 0h2m4 0h2m1 0h2m-37 1h2m6 0h1m6 0h1m4 0h2m1 0h1m2 0h2m2 0h3m1 0h4m2 0h1m-40 1h3m1 0h2m2 0h2m1 0h1m1 0h2m1 0h1m4 0h5m1 0h2m1 0h1m5 0h2m1 0h1m-41 1h1m2 0h3m4 0h2m3 0h2m1 0h1m1 0h2m1 0h1m2 0h1m1 0h9m2 0h2m-41 1h1m4 0h2m2 0h1m1 0h1m2 0h2m1 0h3m1 0h1m2 0h1m1 0h3m4 0h3m-36 1h1m4 0h1m1 0h1m2 0h1m5 0h1m1 0h4m2 0h1m2 0h2m1 0h1m2 0h3m3 0h1m-40 1h1m1 0h1m3 0h5m1 0h2m3 0h1m1 0h1m2 0h1m2 0h3m1 0h1m1 0h6m1 0h1m1 0h1m-33 1h2m2 0h2m1 0h5m1 0h3m4 0h1m1 0h1m1 0h1m3 0h1m2 0h1m-40 1h7m4 0h1m3 0h3m3 0h1m5 0h2m2 0h2m1 0h1m1 0h3m-39 1h1m5 0h1m1 0h1m7 0h4m1 0h2m3 0h1m1 0h1m1 0h3m3 0h2m2 0h1m-41 1h1m1 0h3m1 0h1m1 0h1m3 0h2m1 0h2m3 0h2m2 0h3m1 0h2m2 0h5m1 0h2m-40 1h1m1 0h3m1 0h1m1 0h2m5 0h2m1 0h3m1 0h2m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h2m-41 1h1m1 0h3m1 0h1m1 0h4m1 0h1m1 0h1m1 0h1m2 0h2m3 0h1m1 0h1m3 0h1m1 0h6m-39 1h1m5 0h1m6 0h3m4 0h4m2 0h2m2 0h4m2 0h2m1 0h1m-40 1h7m1 0h2m1 0h1m2 0h1m1 0h2m2 0h1m1 0h1m1 0h3m2 0h1m1 0h1m1 0h4m1 0h1"/></svg></div>
+    <div style="min-width:0">
+      <ol class="do">
+        <li>スマホのカメラでQRを読む</li>
+        <li>ダウンロードしたファイルを開いて<span class="btn">インストール</span></li>
+      </ol>
+      <p class="note" style="margin-top:8px">「この提供元のアプリを許可」と出たら許可してください。</p>
+    </div>
+  </div>
+  <div>
+    <div class="url" id="apkUrl">https://github.com/RyutanCAMP/darts-throw-watcher/releases/download/test-pr/throw-watcher-test.apk</div>
+    <button class="copy" id="copyApk" type="button">URLをコピー</button>
+  </div>
+  <p class="note"><strong>前の版が入っている場合は、先にアンインストール</strong>してから入れてください（上書きできません）。</p>
+</section>
+
+<section class="step" aria-labelledby="s2">
+  <div class="step-head"><span class="num">2</span><h2 id="s2">ユーザー補助をONにする</h2><span class="dev sp">スマホ</span></div>
+  <ol class="do">
+    <li>「投擲ウォッチャー」を開いて<span class="btn">ユーザー補助の設定を開く</span></li>
+    <li>ダウンロード済みのアプリ →「投擲ウォッチャー」を<b>ON</b></li>
+  </ol>
+  <div class="ok">アプリ画面に「● サービス：ON」と出ればOK</div>
+  <p class="note">ONにできないとき：設定 → アプリ → 投擲ウォッチャー → 右上の︙ →「制限付き設定を許可」→ もう一度ON</p>
+</section>
+
+<section class="step" aria-labelledby="s3">
+  <div class="step-head"><span class="num">3</span><h2 id="s3">連携コードを出す</h2><span class="dev pc">PC</span></div>
+  <ol class="do">
+    <li><a href="https://darts-training-lab.web.app" target="_blank" rel="noopener">darts-training-lab.web.app</a> を開く</li>
+    <li>PLAY画面の<span class="btn">PHONE</span>（または<span class="btn">INPUT BT</span>→<span class="btn">PHONE</span>）を押す</li>
+    <li><span class="btn">連携コードを発行</span>を押す</li>
+  </ol>
+  <div class="screen" aria-label="PCの表示例"><div class="code">AB12-CD34</div><div class="live">LIVE · 受信 0件</div></div>
+  <div class="ok">8文字のコードと「LIVE」が出ればOK（コードは例です）</div>
+</section>
+
+<section class="step" aria-labelledby="s4">
+  <div class="step-head"><span class="num">4</span><h2 id="s4">コードを入れる</h2><span class="dev sp">スマホ</span></div>
+  <ol class="do">
+    <li>「投擲ウォッチャー」の<b>PC連携</b>の欄に、PCのコードを入力</li>
+    <li><span class="btn">連携</span>を押す</li>
+  </ol>
+  <div class="screen" aria-label="スマホの表示例"><div class="linked">● 連携中：AB12-CD34<br><span class="live">送信 0 件 ／ 未送信 0 件</span></div></div>
+  <div class="ok">「● 連携中」と出ればつながりました</div>
+</section>
+
+<section class="step" aria-labelledby="s5">
+  <div class="step-head"><span class="num">5</span><h2 id="s5">いつも通り投げる</h2><span class="dev sp">スマホ</span></div>
+  <ol class="do">
+    <li>公式アプリで COUNT-UP をプレイ</li>
+    <li>刺さった場所が1投ずつPCのPLAYに入る</li>
+  </ol>
+  <p class="note">COUNT-UP以外を投げるときは、PCのPHONE画面で「届いた投擲をPLAYに反映」をOFFにしてください（記録だけ残ります）。</p>
+</section>
+
+<section class="after" aria-labelledby="after">
+  <h2 id="after">2回目からは</h2>
+  <dl class="pair">
+    <dt>ふだん</dt><dd>何もしなくてOK。PCを開けば自動で「LIVE」、スマホも連携したまま。</dd>
+    <dt>30日ごと</dt><dd>コードの期限が切れます。PCで<span class="btn">新しいコードにする</span>→ 手順4をもう一度。</dd>
+    <dt>PCに200S直結</dt><dd>PLAYのPHONE →<span class="btn">BLUETOOTH</span>に切り替え。</dd>
+  </dl>
+</section>
+
+<section class="faq" aria-labelledby="faq">
+  <h2 id="faq">困ったとき</h2>
+  <details><summary>「連携」を押しても「連携中」にならない</summary><p>コードの打ち間違い（0とO、1とIは使っていません）か、PCで別のコードを出し直した可能性があります。PCに表示中のコードを入れ直してください。</p></details>
+  <details><summary>投げてもPCに届かない</summary><ol><li>スマホ：「● サービス：ON」と「● 連携中」になっているか</li><li>PC：PHONE画面が「LIVE」か（ERRORならページを再読み込み）</li><li>スマホ画面に赤い文字が出ていれば、その内容を確認</li></ol></details>
+  <details><summary>スマホに「送信を断られました」と出る</summary><p>コードの期限（30日）切れです。PCで「新しいコードにする」→ スマホに入れ直してください。</p></details>
+  <details><summary>Wi-Fiが切れた・アプリを閉じた</summary><p>スマホに貯めておき、つながったら自動で送ります。PCのページを閉じていた間に届いた分は記録だけ残り、PLAYには入りません。</p></details>
+  <details><summary>何が送られるの？</summary><p>刺さった区画（例：T20）と時刻だけです。名前やアカウント、ほかのキー入力は送りません。ログインもいりません。</p></details>
+</section>
+</main>
+<script>
+(function(){
+  var back=document.getElementById('guideBack');back.addEventListener('click',function(e){if(window.opener){e.preventDefault();window.close();}});
+})();
+(function(){
+  var b=document.getElementById('copyApk'),u=document.getElementById('apkUrl');
+  b.addEventListener('click',function(){
+    var t=u.textContent.trim();
+    function sel(){var r=document.createRange();r.selectNodeContents(u);var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='選択しました。長押しでコピー';}
+    try{navigator.clipboard.writeText(t).then(function(){b.textContent='コピーしました';},sel);}catch(e){sel();}
+  });
+})();
+</script>
+
+</body>
+</html>

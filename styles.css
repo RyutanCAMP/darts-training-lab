@@ -475,3 +475,5 @@ body .page .my-slot button.my-slot-main:not(.primary):not(.warn){border:0!import
 .input-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 8px}
 .page .input-mode button:not(.primary):not(.warn){margin:0;color:#a8b9c5;border-color:#31414B;background:#15212B}
 .page .input-mode button.selected:not(.primary):not(.warn){color:#ffd166;border-color:#c9a03a;background:#2a2110;box-shadow:0 0 0 1px #c9a03a inset}
+.page a.guide-link{display:block;margin:2px 0 6px;padding:10px 12px;border:1px dashed #2f6c78;border-radius:10px;color:#8dd9e6;text-decoration:none;font-size:14px;text-align:center}
+.page a.guide-link:hover,.page a.guide-link:focus-visible{background:#10252b}

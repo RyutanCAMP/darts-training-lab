@@ -109,6 +109,18 @@ with sync_playwright() as p:
     chk(darts(pg)[-1:]==['IB'] and len(darts(pg))==4,'dart after CHANGE accepted')
     chk(not pg.errs,'no page errors '+str(pg.errs))
     c.close()
+    # connection guide: linked from the INPUT sheet (both modes), opens as its own page, fits a phone screen
+    c,pg=boot(b,'index.html')
+    pg.click('#phoneChip')
+    chk(pg.is_visible('#phoneGuide') and pg.get_attribute('#phoneGuide','href')=='phone-guide.html','guide link visible in BT mode')
+    pg.click('#inputPhone');chk(pg.is_visible('#phoneGuide'),'guide link visible in PHONE mode')
+    with c.expect_page() as gp: pg.click('#phoneGuide')
+    g=gp.value;g.errs=[];g.on('pageerror',lambda e:g.errs.append(str(e)));g.wait_for_load_state()
+    chk(g.title()=='スマホ連携ガイド' and g.locator('.step').count()==5 and g.locator('.qr svg').count()==1,'guide page: title, 5 steps, QR')
+    chk(not g.evaluate('document.documentElement.scrollWidth>innerWidth'),'guide fits phone width')
+    chk('releases/download/' in g.inner_text('#apkUrl'),'guide shows APK url')
+    chk(not g.errs and not pg.errs,'no page errors '+str(g.errs+pg.errs))
+    c.close()
     # bad saved data does not break the page
     c,pg=boot(b,'index.html',{'code':'bad!','log':'x'})
     chk(pg.inner_text('#phoneChip')=='INPUT BT' and not pg.errs,'corrupt phone state ignored '+str(pg.errs))
